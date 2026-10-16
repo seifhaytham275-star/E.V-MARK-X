@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build-ai:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,23 +17,18 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Verify and unpack projects
-        shell: bash
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Verify and unpack AI project
         run: |
           set -e
-          mkdir -p build-input
           unzip -t EV-AI-Assistant.zip
+          mkdir -p build-input/ai
           unzip -o EV-AI-Assistant.zip -d build-input/ai
-          echo "AI project archive verified"
-          unzip -t EV-Wallet.zip || true
-          unzip -t EV-Calories.zip || true
-          echo "Wallet and Calories archives are present but will be checked before build."
       - name: Build AI Assistant APK
-        run: |
-          cd build-input/ai
-          gradle --no-daemon assembleDebug
-      - name: Upload AI APK
-        uses: actions/upload-artifact@v4
+        run: gradle --no-daemon -p build-input/ai assembleDebug
+      - uses: actions/upload-artifact@v4
         with:
           name: EV-AI-Assistant-APK
           path: build-input/ai/app/build/outputs/apk/debug/*.apk
