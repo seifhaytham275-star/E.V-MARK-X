@@ -149,7 +149,7 @@ public class MainActivity extends Activity {
     }
 
     private void showAI() {
-        base("E.V INTELLIGENCE  /  GEMINI STUDIO", "Your AI command center.", "One workspace. Ten Gemini choices. Built for your next big idea.");
+        base("E.V INTELLIGENCE  /  GEMINI STUDIO", "Your AI command center.", "Free-tier Gemini models, saved chats, one workspace.");
         LinearLayout loginCard = cardBox();
         loginCard.addView(label("ACCOUNT & SYNC", 11, cyan, true));
         authStatus = label(getAuthStatusText(), 12, muted, false);
