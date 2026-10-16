@@ -698,10 +698,11 @@ public class MainActivity extends Activity {
             if (!h.isEmpty()) context += "User provided height " + h + " cm. ";
             context += "Food preferences and schedule: " + preferences.getText().toString().trim() + ". ";
             context += "Give balanced sample meals and snacks without calorie counts, no calorie deficit, no target weight, no fasting, and no supplements. Include hydration, sleep, and a beginner-friendly weekly movement schedule. For a teen, suggest enjoyable daily activity and strength/bone-strengthening activity about three days a week when appropriate; start gradually, use good form and adult/coach supervision in a gym. Explain that food needs vary during growth and a parent/guardian plus pediatric healthcare professional should help with weight or growth concerns. Do not diagnose or claim medical precision. Use short headings and bullets.";
+            final String planPrompt = context;
             build.setEnabled(false);
             build.setText("BUILDING YOUR PLAN…");
             new Thread(() -> {
-                String answer = askGemini(key, context, "gemini-2.5-flash");
+                String answer = askGemini(key, planPrompt, "gemini-2.5-flash");
                 runOnUiThread(() -> {
                     build.setEnabled(true);
                     build.setText("✦  BUILD MY WELLNESS PLAN");
