@@ -2,99 +2,67 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#080d1c">
-<meta name="description" content="E.V-MARK-X — مساحة ذكاء اصطناعي من مشروع مستقل. استخدم مفتاح Gemini API الخاص بك.">
-<title>E.V-MARK-X — AI Workspace</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#070b16">
+<meta name="description" content="E.V-MARK-X مساحة ذكاء اصطناعي عربية لتجربة موديلات Gemini، التعلّم، التخطيط، وصناعة الأفكار من المتصفح.">
+<meta property="og:title" content="E.V-MARK-X — مساحة ذكاء اصطناعي">
+<meta property="og:description" content="جرّب مساحة AI عربية بواجهة مستقبلية واختر من موديلات Gemini المتاحة لمفتاحك.">
+<title>E.V-MARK-X — مساحة ذكاء اصطناعي</title>
 <style>
-:root{color-scheme:dark;--bg:#080d1c;--panel:#10182b;--panel2:#0c1324;--line:#27334d;--text:#f4f7ff;--muted:#9aa9c4;--blue:#56a8ff;--red:#ff5368;--green:#55e0b0}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#14264a 0,transparent 42%),radial-gradient(ellipse at 0% 45%,#321322 0,transparent 34%),var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;min-height:100vh}button,input,textarea,select{font:inherit}button,a{ -webkit-tap-highlight-color:transparent}a{color:#8bc5ff}.wrap{max-width:1050px;margin:auto;padding:22px 16px 30px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 20px}.brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#ff3c5b,#287eff);box-shadow:0 0 32px #276bd955;font-weight:900;font-size:18px}.brand h1{font-size:18px;margin:0;letter-spacing:.5px}.brand p{font-size:12px;color:var(--muted);margin:4px 0 0}.status{font-size:12px;color:var(--green);border:1px solid #55e0b044;background:#55e0b00e;border-radius:99px;padding:8px 11px;white-space:nowrap}.hero{border:1px solid #334464;border-radius:25px;padding:26px 22px;background:linear-gradient(125deg,#131e35eF,#0b1121f2);position:relative;overflow:hidden;box-shadow:0 18px 70px #0003}.hero:after{content:"";position:absolute;width:230px;height:230px;border:1px solid #4e91ff35;border-radius:50%;left:-65px;top:-90px;box-shadow:0 0 0 24px #4e91ff09,0 0 0 50px #4e91ff07;pointer-events:none}.eyebrow{color:#86bfff;font-size:12px;letter-spacing:2px;font-weight:700}.hero h2{font-size:clamp(27px,5vw,44px);line-height:1.2;margin:12px 0}.hero h2 span{background:linear-gradient(90deg,#67b8ff,#ff647c);background-clip:text;color:transparent}.hero p{color:#b4c2d9;max-width:650px;line-height:1.9;margin:0}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.chip{border:1px solid #344460;color:#c6d7ef;background:#ffffff05;border-radius:99px;padding:7px 10px;font-size:12px}.layout{display:grid;grid-template-columns:290px 1fr;gap:16px;margin-top:16px}.panel{background:#0e1628eF;border:1px solid var(--line);border-radius:20px;padding:18px;min-width:0}.panel h3{font-size:16px;margin:0 0 14px}.field{display:flex;flex-direction:column;gap:8px;margin:12px 0}.field label{font-size:13px;color:#c3d0e5}.input,select,textarea{width:100%;border:1px solid #35425d;background:#080f1e;color:var(--text);border-radius:12px;padding:12px;outline:none}.input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px #56a8ff18}.small{font-size:12px;line-height:1.7;color:var(--muted)}.btn{border:0;border-radius:12px;padding:11px 14px;cursor:pointer;font-weight:750;transition:transform .15s,opacity .15s}.btn:active{transform:scale(.98)}.primary{background:linear-gradient(100deg,#247cf0,#3da7ff);color:white}.secondary{background:#1a2740;border:1px solid #354666;color:#e4edff}.danger{background:#311a2a;border:1px solid #653246;color:#ffb4c0}.btn:disabled{opacity:.45;cursor:not-allowed}.full{width:100%}.steps{list-style:none;margin:0;padding:0;display:grid;gap:14px}.steps li{display:flex;gap:10px;align-items:flex-start;color:#d2dcef;font-size:13px;line-height:1.7}.num{flex:0 0 25px;height:25px;border-radius:9px;background:#1b3a62;color:#9dd0ff;display:grid;place-items:center;font-weight:800}.chat-panel{display:flex;flex-direction:column;min-height:460px}.chat-head{display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:13px}.chat-head h3{margin:0}.messages{display:flex;flex-direction:column;gap:12px;padding:16px 0;flex:1;min-height:230px}.msg{max-width:92%;padding:12px 14px;border-radius:15px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;font-size:14px}.msg.ai{background:#151f34;border:1px solid #293955;align-self:flex-start}.msg.user{background:linear-gradient(135deg,#174b8a,#25345e);align-self:flex-end}.msg .role{font-size:10px;color:#94c7ff;margin-bottom:4px}.composer{border-top:1px solid var(--line);padding-top:14px}.composer textarea{resize:vertical;min-height:80px;max-height:220px}.compose-row{display:flex;gap:10px;align-items:center;margin-top:10px}.compose-row .small{flex:1}.notice{display:none;border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.7;margin-top:10px}.notice.show{display:block}.notice.err{background:#3b1824;border:1px solid #733043;color:#ffc3cc}.notice.ok{background:#102c2b;border:1px solid #245e53;color:#a6f3d7}.footer{text-align:center;color:#71819f;font-size:12px;padding:22px 0 4px}.footer a{text-decoration:none}.keyrow{display:flex;gap:8px}.keyrow input{min-width:0}.quick{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.quick button{font-size:12px;padding:8px 10px}.hidden{display:none!important}.callout{border:1px solid #66502b;background:#302515;color:#ffe0a0;border-radius:12px;padding:11px;font-size:12px;line-height:1.7;margin-top:13px}.model-line{display:flex;align-items:center;justify-content:space-between;gap:8px}.model-line .small{overflow-wrap:anywhere}
-@media(max-width:760px){.layout{grid-template-columns:1fr}.hero{padding:22px 17px}.panel{padding:15px}.chat-panel{min-height:430px}.top{align-items:flex-start}.status{font-size:11px}.wrap{padding:14px 12px 24px}}
+:root{color-scheme:dark;--bg:#070b16;--panel:#0d1527;--line:#263552;--text:#f1f5ff;--muted:#a7b6d1;--blue:#51a8ff;--cyan:#64e5f3;--purple:#8c7cff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#16305a66,transparent 38%),radial-gradient(ellipse at 10% 30%,#42246b44,transparent 35%),var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.75}
+a{color:inherit}.wrap{width:min(1120px,calc(100% - 32px));margin:auto}.nav{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:22px 0}.brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.4px}.logo{width:45px;height:45px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(135deg,#257cf3,#5a4ed8 65%,#63e3f4);box-shadow:0 0 34px #418cff42;font-weight:950}.navlinks{display:flex;gap:20px;color:var(--muted);font-size:14px}.navlinks a{text-decoration:none}.navlinks a:hover{color:white}
+.hero{position:relative;overflow:hidden;padding:76px 0 66px;display:grid;grid-template-columns:1.2fr .8fr;align-items:center;gap:36px}.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid #365b8b;border-radius:99px;color:#b9dcff;background:#14274788;font-size:12px;font-weight:800}.dot{width:7px;height:7px;border-radius:50%;background:#63f1bd;box-shadow:0 0 13px #63f1bd}.hero h1{font-size:clamp(38px,6vw,68px);line-height:1.13;letter-spacing:-1.6px;margin:22px 0 18px}.gradient{background:linear-gradient(95deg,#77dff7,#65a9ff 48%,#a99aff);color:transparent;background-clip:text;-webkit-background-clip:text}.hero p{font-size:clamp(16px,2vw,19px);color:var(--muted);max-width:640px;margin:0}.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}.btn{display:inline-flex;justify-content:center;align-items:center;gap:9px;text-decoration:none;padding:13px 20px;border-radius:13px;font-weight:850;border:1px solid transparent;transition:transform .2s,box-shadow .2s}.btn:hover{transform:translateY(-2px)}.primary{background:linear-gradient(110deg,#247cf0,#5b7bff);box-shadow:0 12px 34px #2563eb35}.secondary{background:#101a2d;border-color:#30405f;color:#e5eeff}.small{font-size:12px;color:#8496b7;margin-top:15px}
+.orbit{min-height:350px;display:grid;place-items:center;position:relative}.core{width:min(270px,70vw);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;position:relative;background:radial-gradient(circle,#142e55 0,#0c1930 48%,#0a1020 68%);border:1px solid #3d75b5;box-shadow:0 0 35px #258dff2b,inset 0 0 40px #2975d51c}.core:before,.core:after{content:"";position:absolute;inset:-22px;border:1px solid #55b4ff60;border-radius:50%;transform:rotateX(64deg) rotateZ(-22deg)}.core:after{inset:-42px;border-color:#9c8bff44;transform:rotateX(68deg) rotateZ(43deg)}.core-inner{width:58%;aspect-ratio:1;border-radius:32%;display:grid;place-items:center;background:linear-gradient(140deg,#2369b6,#302d7b);box-shadow:0 0 42px #408eff6a,inset 0 0 25px #8ae5ff2b;font-size:35px;font-weight:950;letter-spacing:-2px}.orbit-label{position:absolute;padding:8px 12px;border:1px solid #34496e;background:#0d1728dd;border-radius:12px;color:#dceaff;font-size:12px;box-shadow:0 8px 30px #0003}.label1{top:12%;right:2%}.label2{bottom:10%;left:0}.label3{top:24%;left:0}
+.section{padding:36px 0 52px}.section-head{text-align:center;max-width:700px;margin:0 auto 26px}.section-head h2{font-size:clamp(25px,4vw,38px);line-height:1.25;margin:0 0 10px}.section-head p{margin:0;color:var(--muted)}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{padding:22px;border:1px solid var(--line);background:linear-gradient(155deg,#111c31eF,#0b1221f2);border-radius:20px;min-width:0}.icon{width:43px;height:43px;display:grid;place-items:center;border-radius:14px;background:#1a3153;color:#9dd8ff;font-size:22px;margin-bottom:16px}.card h3{margin:0 0 8px;font-size:17px}.card p{margin:0;color:var(--muted);font-size:14px}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;counter-reset:step}.step{padding:19px;border:1px solid var(--line);background:#0d1526bd;border-radius:18px}.num{display:grid;place-items:center;width:33px;height:33px;border-radius:11px;background:#193b65;color:#a8d7ff;font-weight:900;margin-bottom:12px}.step h3{font-size:15px;margin:0 0 6px}.step p{font-size:13px;color:var(--muted);margin:0}.privacy{border:1px solid #4a3f29;background:linear-gradient(110deg,#251f15,#141726);padding:20px 22px;border-radius:18px;display:flex;gap:14px;align-items:flex-start;margin-top:22px}.privacy .icon{flex-shrink:0;background:#47361d;color:#ffe2a2;margin:0}.privacy h3{margin:0 0 5px;font-size:15px}.privacy p{margin:0;color:#c7c3b5;font-size:13px}.final-cta{margin:10px 0 65px;padding:32px;text-align:center;border:1px solid #2f4e7c;border-radius:24px;background:radial-gradient(ellipse at 50% 0%,#244b8b77,transparent 65%),#0c1527}.final-cta h2{font-size:clamp(24px,4vw,36px);margin:0 0 8px}.final-cta p{color:var(--muted);margin:0}.final-cta .actions{justify-content:center}.footer{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;padding:22px 0 30px;border-top:1px solid #202d45;color:#8190ac;font-size:12px}.footer a{color:#b8d9ff;text-decoration:none}
+@media(max-width:780px){.hero{grid-template-columns:1fr;padding:46px 0 35px;gap:10px}.orbit{min-height:300px;order:-1}.core{width:210px}.navlinks{gap:10px}.cards,.steps{grid-template-columns:1fr}.card{padding:18px}.section{padding:28px 0 35px}.final-cta{padding:24px 16px;margin-bottom:42px}.label1{right:4%}.label3{left:2%}}
+@media(max-width:420px){.navlinks a:nth-child(2){display:none}.wrap{width:min(100% - 24px,1120px)}.hero h1{font-size:39px}.orbit{min-height:260px}.core{width:180px}.core:after{inset:-30px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header class="top"><div class="brand"><div class="logo">EV</div><div><h1>E.V-MARK-X</h1><p>Independent AI Workspace</p></div></div><div class="status" id="status">● جاهز للبدء</div></header>
-<section class="hero"><div class="eyebrow">YOUR INTELLIGENCE. YOUR CONTROL.</div><h2>فكّر أبعد مع <span>E.V-MARK-X</span></h2><p>مساحة ذكاء اصطناعي بسيطة للمحادثة والتعلّم وصناعة الأفكار. ابدأ بمفتاح Gemini API الخاص بك، واختر الموديل المتاح لحسابك.</p><div class="chips"><span class="chip">Gemini AI</span><span class="chip">نماذج متعددة</span><span class="chip">واجهة عربية</span><span class="chip">تجربة من المتصفح</span></div></section>
-<div class="layout">
-<aside class="panel">
-<h3>ابدأ في دقيقتين</h3>
-<ol class="steps">
-<li><span class="num">1</span><span>افتح <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a> وسجّل دخولك بحساب Google.</span></li>
-<li><span class="num">2</span><span>اضغط <b>Create API key</b> وأنشئ مفتاحًا لمشروعك.</span></li>
-<li><span class="num">3</span><span>انسخ المفتاح والصقه في الخانة هنا، ثم اضغط «اتصال وجلب الموديلات».</span></li>
-<li><span class="num">4</span><span>اختر موديل Gemini وابدأ المحادثة من الجهة الثانية.</span></li>
-</ol>
-<div class="field"><label for="apiKey">Gemini API key</label><div class="keyrow"><input id="apiKey" class="input" type="password" autocomplete="off" placeholder="الصق المفتاح هنا"><button id="toggleKey" class="btn secondary" type="button" aria-label="إظهار المفتاح">إظهار</button></div></div>
-<button id="connect" class="btn primary full" type="button">اتصال وجلب الموديلات</button>
-<div class="field"><label for="model">موديل الذكاء الاصطناعي</label><select id="model" disabled><option>اتصل أولًا لجلب الموديلات</option></select></div>
-<div id="notice" class="notice" role="status"></div>
-<div class="callout"><b>مهم لحماية مفتاحك:</b> لا تنشر المفتاح في منشور أو صورة، ولا ترسله لأي شخص. هذه نسخة تجريبية تعمل من المتصفح وترسل طلباتك مباشرة إلى Google؛ استخدم مفتاحًا مخصصًا وراقب حصته واستهلاكه. لا تستخدمها لتخزين أسرار أو بيانات حساسة.</div>
-<p class="small">المفتاح لا يُحفظ في قاعدة بيانات الموقع ولا في التخزين المحلي؛ يُستخدم داخل جلسة الصفحة الحالية فقط. عند إغلاق الصفحة ستحتاج إدخاله مجددًا.</p>
-<button id="clear" class="btn secondary full" type="button">مسح المفتاح والمحادثة</button>
-</aside>
-<main class="panel chat-panel">
-<div class="chat-head"><div><h3>المحادثة الذكية</h3><div class="small" id="chatSub">أدخل المفتاح لجلب الموديلات والبدء.</div></div><button id="newChat" class="btn secondary" type="button">محادثة جديدة</button></div>
-<div class="messages" id="messages"><div class="msg ai"><div class="role">E.V-MARK-X</div>أهلًا بيك! 👋<br>علشان تبدأ، هات Gemini API key من Google AI Studio، والصقه في الخانة اللي على الشمال. بعد الاتصال هتقدر تختار موديل وتكلمني من هنا.</div></div>
-<div class="composer"><div class="quick"><button class="btn secondary" data-prompt="اشرح لي الفكرة دي ببساطة مع مثال." type="button">اشرح ببساطة</button><button class="btn secondary" data-prompt="ساعدني أرتب خطة عملية خطوة بخطوة." type="button">خطط معايا</button><button class="btn secondary" data-prompt="اقترح أفكارًا جديدة ومميزة لمشروعي." type="button">اقترح أفكار</button></div><textarea id="prompt" placeholder="اكتب رسالتك هنا..." disabled></textarea><div class="compose-row"><span class="small">راجع ردود الذكاء الاصطناعي قبل الاعتماد عليها.</span><button id="send" class="btn primary" type="button" disabled>إرسال ↵</button></div></div>
+<header class="nav">
+ <a class="brand" href="index.html" style="text-decoration:none"><span class="logo">EV</span><span>E.V-MARK-X</span></a>
+ <nav class="navlinks" aria-label="التنقل"><a href="#features">المميزات</a><a href="#how">طريقة الاستخدام</a><a href="app.html">تجربة الشات</a><a href="https://github.com/seifhaytham275-star/E.V-MARK-X" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav>
+</header>
+<main>
+<section class="hero">
+ <div>
+  <span class="eyebrow"><span class="dot"></span> مساحة ذكاء اصطناعي مستقلة</span>
+  <h1>أفكارك تستحق<br><span class="gradient">مساحة أذكى.</span></h1>
+  <p>E.V-MARK-X مساحة عربية لتجربة الذكاء الاصطناعي، وفهم الموضوعات، وتنظيم الأفكار، والتخطيط للمشروعات — مباشرة من المتصفح وبواجهة مستقبلية بسيطة.</p>
+  <div class="actions"><a class="btn primary" href="app.html">ابدأ التجربة <span aria-hidden="true">←</span></a><a class="btn secondary" href="#how">اعرف طريقة الاستخدام</a></div>
+  <div class="small">لا تحتاج إلى تثبيت تطبيق. يلزم مفتاح Gemini API شخصي لاستخدام المحادثة.</div>
+ </div>
+ <div class="orbit" aria-label="تصميم بصري تقني">
+  <span class="orbit-label label1">GEMINI MODELS</span><span class="orbit-label label2">ARABIC-FIRST UI</span><span class="orbit-label label3">YOUR WORKSPACE</span>
+  <div class="core"><div class="core-inner">EV</div></div>
+ </div>
+</section>
+<section class="section" id="features">
+ <div class="section-head"><h2>مساحة واحدة لأفكار متعددة</h2><p>ابدأ بسؤال، حوّل الفكرة لخطة، وجرّب الموديل المناسب من الموديلات المتاحة لمفتاحك.</p></div>
+ <div class="cards">
+  <article class="card"><div class="icon">✦</div><h3>اختيار موديلات Gemini</h3><p>اجلب قائمة الموديلات المتاحة لحسابك مباشرة من Google، مع ترتيب الموديلات السريعة أولًا لتسهيل الاختيار.</p></article>
+  <article class="card"><div class="icon">◈</div><h3>محادثة عربية سهلة</h3><p>واجهة من اليمين إلى اليسار، واقتراحات جاهزة للتعلّم والتخطيط والعصف الذهني.</p></article>
+  <article class="card"><div class="icon">⌘</div><h3>من المتصفح مباشرة</h3><p>افتح الموقع من الهاتف أو الكمبيوتر، بدون تثبيت. يمكنك مشاركة الرابط مع الآخرين لتجربة الواجهة.</p></article>
+ </div>
+</section>
+<section class="section" id="how">
+ <div class="section-head"><h2>ابدأ في 3 خطوات</h2><p>كل مستخدم يربط مفتاحه بنفسه؛ لا ترسل مفتاحك لأي شخص.</p></div>
+ <div class="steps">
+  <article class="step"><div class="num">1</div><h3>أنشئ مفتاحك</h3><p>افتح Google AI Studio وسجّل الدخول، ثم أنشئ Gemini API key من حسابك.</p></article>
+  <article class="step"><div class="num">2</div><h3>اتصل بالموديلات</h3><p>افتح مساحة المحادثة، والصق مفتاحك، واضغط «اتصال وجلب الموديلات».</p></article>
+  <article class="step"><div class="num">3</div><h3>ابدأ المحادثة</h3><p>اختر موديلًا متاحًا، واكتب سؤالك، وراجع الإجابة قبل الاعتماد عليها.</p></article>
+ </div>
+ <div class="privacy"><div class="icon">!</div><div><h3>الخصوصية والأمان — اقرأ قبل الاستخدام</h3><p>هذه نسخة تجريبية ثابتة على GitHub Pages، لذا تستخدم مفتاحك الشخصي من المتصفح. المفتاح لا يُحفظ في الموقع، لكن أي مفتاح يُستخدم من المتصفح يمكن لصاحب الجهاز رؤيته؛ لذلك لا تستخدم مفتاحًا مشتركًا أو بيانات حساسة، وراقب حصتك وتكلفتك. إرسال المفتاح في ترويسة الطلب يقلل ظهوره في عنوان الرابط لكنه لا يجعله سرًا على المتصفح. الحماية المركزية الحقيقية تتطلب خادمًا وسيطًا مع حدود استخدام ومراقبة للتكلفة.</p></div></div>
+</section>
+<section class="final-cta">
+ <h2>جاهز تجرّب E.V-MARK-X؟</h2><p>افتح مساحة المحادثة وابدأ بمفتاحك الخاص.</p>
+ <div class="actions"><a class="btn primary" href="app.html">افتح مساحة الذكاء الاصطناعي ↗</a><a class="btn secondary" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">الحصول على Gemini API Key</a></div>
+</section>
 </main>
+<footer class="footer"><span>© 2026 E.V-MARK-X · مشروع مستقل قيد التطوير</span><span><a href="about.html">عن المشروع والخصوصية</a> · <a href="https://github.com/seifhaytham275-star/E.V-MARK-X" target="_blank" rel="noopener noreferrer">مستودع GitHub</a></span></footer>
 </div>
-<footer class="footer">E.V-MARK-X · مشروع مستقل · <a href="https://github.com/seifhaytham275-star/E.V-MARK-X" target="_blank" rel="noopener noreferrer">مستودع المشروع على GitHub</a></footer>
-</div>
-<script>
-(() => {
- const $ = id => document.getElementById(id);
- let apiKey = '';
- let busy = false;
- let history = [];
- const setStatus = (text, good=false) => { $('status').textContent = (good?'● ':'● ') + text; $('status').style.color = good ? 'var(--green)' : '#a9bad4'; };
- const notice = (text, type='err') => { const el=$('notice'); el.textContent=text; el.className='notice show '+type; };
- const clearNotice = () => { $('notice').className='notice'; $('notice').textContent=''; };
- function addMessage(role, text) {
-   const box=document.createElement('div'); box.className='msg '+(role==='user'?'user':'ai');
-   const label=document.createElement('div'); label.className='role'; label.textContent=role==='user'?'أنت':'E.V-MARK-X';
-   const body=document.createElement('div'); body.textContent=text;
-   box.append(label,body); $('messages').appendChild(box); $('messages').scrollTop=$('messages').scrollHeight;
- }
- function enableChat(on) { $('prompt').disabled=!on; $('send').disabled=!on; }
- async function connect() {
-   clearNotice(); const key=$('apiKey').value.trim();
-   if(!key){notice('الصق Gemini API key الأول. لو ما عندكش واحد، افتح Google AI Studio من الرابط الموجود فوق.');return;}
-   $('connect').disabled=true; $('connect').textContent='جاري الاتصال...'; setStatus('جاري الاتصال');
-   try {
-     const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models?key='+encodeURIComponent(key));
-     const data=await res.json();
-     if(!res.ok) throw new Error(data.error?.message || 'تعذّر الاتصال. راجع المفتاح والصلاحيات.');
-     const models=(data.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes('generateContent') && /gemini/i.test(m.name||''));
-     if(!models.length) throw new Error('تم الاتصال لكن لم تظهر موديلات Gemini تدعم generateContent لهذا المفتاح.');
-     apiKey=key; const select=$('model'); select.innerHTML='';
-     models.sort((a,b)=>a.name.localeCompare(b.name)).forEach(m=>{const op=document.createElement('option');op.value=m.name.replace(/^models\//,'');op.textContent=(m.displayName||m.name)+' · '+m.name.replace(/^models\//,'');select.appendChild(op);});
-     select.disabled=false; enableChat(true); $('chatSub').textContent='متصل — اختر موديل Gemini المتاح لحسابك.'; notice('تم الاتصال بنجاح! اختار موديل وابدأ المحادثة.','ok'); setStatus('متصل بـ Gemini',true);
-   } catch(e) { apiKey=''; enableChat(false); setStatus('محتاج مراجعة'); notice(e.message || 'حصل خطأ غير متوقع.'); }
-   finally { $('connect').disabled=false; $('connect').textContent='اتصال وجلب الموديلات'; }
- }
- async function send() {
-   const text=$('prompt').value.trim(); if(!text||!apiKey||busy)return;
-   busy=true; $('send').disabled=true; $('prompt').disabled=true; addMessage('user',text); $('prompt').value=''; setStatus('جاري التفكير');
-   const pending=document.createElement('div'); pending.className='msg ai'; pending.textContent='بفكّر...'; $('messages').appendChild(pending);
-   try {
-     const contents=[...history,{role:'user',parts:[{text}]}];
-     const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent($('model').value)+':generateContent?key='+encodeURIComponent(apiKey),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents,generationConfig:{temperature:0.7,maxOutputTokens:2048}})});
-     const data=await res.json(); if(!res.ok) throw new Error(data.error?.message || 'تعذّر الحصول على رد من Gemini.');
-     const answer=(data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('\n').trim();
-     if(!answer) throw new Error('الموديل لم يرجع نصًا. جرّب موديلًا آخر أو رسالة مختلفة.');
-     pending.remove(); addMessage('ai',answer); history.push({role:'user',parts:[{text}]},{role:'model',parts:[{text:answer}]}); setStatus('متصل بـ Gemini',true);
-   } catch(e) { pending.remove(); addMessage('ai','حصل خطأ: '+(e.message||'تعذّر إرسال الرسالة')+'\nراجع المفتاح أو جرّب موديلًا آخر.'); setStatus('فيه خطأ'); }
-   finally { busy=false; $('send').disabled=false; $('prompt').disabled=false; $('prompt').focus(); }
- }
- $('connect').addEventListener('click',connect);
- $('toggleKey').addEventListener('click',()=>{const k=$('apiKey');k.type=k.type==='password'?'text':'password';$('toggleKey').textContent=k.type==='password'?'إظهار':'إخفاء';});
- $('send').addEventListener('click',send);
- $('prompt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
- $('newChat').addEventListener('click',()=>{history=[];$('messages').innerHTML='';addMessage('ai','بدأنا محادثة جديدة. اسألني اللي تحبه!');});
- $('clear').addEventListener('click',()=>{apiKey='';$('apiKey').value='';$('model').innerHTML='<option>اتصل أولًا لجلب الموديلات</option>';$('model').disabled=true;history=[];$('messages').innerHTML='';addMessage('ai','تم مسح المفتاح والمحادثة من الصفحة. أدخل مفتاحك للبدء من جديد.');enableChat(false);clearNotice();setStatus('جاهز للبدء');$('chatSub').textContent='أدخل المفتاح لجلب الموديلات والبدء.';});
- document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>{if(!$('prompt').disabled){$('prompt').value=b.dataset.prompt;$('prompt').focus();}}));
-})();
-</script>
 </body>
 </html>
