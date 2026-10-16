@@ -106,7 +106,7 @@ public class MainActivity extends Activity {
         LinearLayout hero = new LinearLayout(this);
         hero.setOrientation(LinearLayout.VERTICAL);
         hero.setPadding(dp(18), dp(18), dp(18), dp(18));
-        hero.setBackground(background(panel, dp(20), Color.rgb(38, 53, 91)));
+        hero.setBackground(heroBackground());
         TextView eyebrow = label(protocol, 10, cyan, true);
         hero.addView(eyebrow);
         TextView heading = label(title, 27, Color.WHITE, true);
@@ -119,7 +119,7 @@ public class MainActivity extends Activity {
     }
 
     private void showAI() {
-        base("PROTOCOL 01  /  INTELLIGENCE", "Your AI, your way.", "Choose a Gemini model for the task at hand.");
+        base("E.V INTELLIGENCE  /  GEMINI STUDIO", "Your AI command center.", "One workspace. Ten Gemini choices. Built for your next big idea.");
         LinearLayout keyCard = cardBox();
         keyCard.addView(label("GEMINI CONNECTION", 11, cyan, true));
         apiKey = field("Paste your Gemini API key", false);
@@ -139,14 +139,21 @@ public class MainActivity extends Activity {
         modelPicker.setPadding(dp(6), dp(6), dp(6), dp(6));
         modelPicker.setBackground(background(panel2, dp(12), Color.TRANSPARENT));
         modelIds.clear();
-        modelIds.add("gemini-2.5-flash");
+        modelIds.add("gemini-3.8-flash");
+        modelIds.add("gemini-3.7-flash");
+        modelIds.add("gemini-3.6-flash");
+        modelIds.add("gemini-3.5-flash");
+        modelIds.add("gemini-3.5-flash-lite");
+        modelIds.add("gemini-3.1-flash-lite");
+        modelIds.add("gemini-3.1-pro-preview");
+        modelIds.add("gemini-3-flash-preview");
         modelIds.add("gemini-2.5-pro");
-        modelIds.add("gemini-2.0-flash");
+        modelIds.add("gemini-2.5-flash");
         refreshModelPicker(prefs.getString("selected_model", "gemini-2.5-flash"));
         LinearLayout.LayoutParams sp = params();
         sp.topMargin = dp(8);
         modelCard.addView(modelPicker, sp);
-        modelStatus = label("Enter your API key, then tap Refresh models to load the models available to your key.", 11, muted, false);
+        modelStatus = label("10 curated Gemini models are listed. Add your API key and refresh to show the exact models enabled for your account.", 11, muted, false);
         modelStatus.setPadding(0, dp(8), 0, dp(8));
         modelCard.addView(modelStatus);
         Button refresh = button("↻  REFRESH AVAILABLE MODELS", panel2);
@@ -404,6 +411,16 @@ public class MainActivity extends Activity {
         c.addView(label(desc, 12, muted, false));
         LinearLayout.LayoutParams p = params(); p.bottomMargin = dp(14);
         body.addView(c, p);
+    }
+
+    private GradientDrawable heroBackground() {
+        GradientDrawable d = new GradientDrawable(
+            GradientDrawable.Orientation.TL_BR,
+            new int[]{Color.rgb(28, 42, 82), Color.rgb(42, 31, 88), Color.rgb(14, 61, 83)}
+        );
+        d.setCornerRadius(dp(20));
+        d.setStroke(dp(1), Color.rgb(64, 86, 145));
+        return d;
     }
 
     private GradientDrawable background(int color, int radius, int stroke) {
