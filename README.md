@@ -8,6 +8,8 @@ E.V-MARK-X brings these areas together in one Android app:
 
 - **Gemini AI chat** — send questions to a model available to your own API key.
 - **Model discovery** — refresh the model list from Google's API and choose a model available to your key.
+- **Remember my API key** — save the Gemini key locally using Android Keystore-backed AES-GCM encryption; the app reloads it on next launch and lets you remove it. This protects local storage but does not make a client-side key safe to distribute publicly.
+- **Spider-tech interface** — custom red/blue gradients and original web-inspired artwork, rather than an unlicensed movie still.
 - **Saved chat history** — revisit recent conversations stored on the device; cloud sync depends on Firebase setup.
 - **Quick Prompt Library** — one-tap starters for planning a day, explaining a topic simply, and improving a message.
 - **Share Conversation** — share the current chat as plain text through Android's standard share sheet.
@@ -44,12 +46,12 @@ If there is no published release yet, the Releases page may be empty. Open the l
 ## Gemini setup and API costs
 
 1. Create your own Gemini API key in Google AI Studio.
-2. Enter the key in EV AI Core.
+2. Enter the key in EV AI Core and tap **Save API Key**. It will be remembered on this device until you remove it or uninstall the app.
 3. Use **Refresh Available Models** to discover models available to your key.
 
 Model access, quotas, pricing, and free-tier eligibility depend on Google's current policies and your account. Do not assume every model is free.
 
-**Security note:** a mobile client cannot fully protect a secret while using it. Do not put a private API key in source code or commit it to this repository. Before broad public distribution, the app needs a carefully secured server-side proxy, rate limits, cost controls, and a clear privacy notice. Never share your API key with other users.
+**Security note:** the saved key is encrypted locally with an Android Keystore-managed key. A mobile client still cannot fully protect a secret while using it. Do not put a private API key in source code or commit it to this repository. Before broad public distribution, the app needs a carefully secured server-side proxy, rate limits, cost controls, and a clear privacy notice. Never share your API key with other users.
 
 ## Firebase features
 
