@@ -43,6 +43,7 @@ public class MainActivity extends Activity {
     private final int muted = Color.rgb(164, 179, 207);
     private LinearLayout root, body;
     private EditText apiKey, question;
+    private String sessionApiKey = "";
     private Spinner modelPicker;
     private TextView modelStatus;
     private android.content.SharedPreferences prefs;
@@ -125,6 +126,7 @@ public class MainActivity extends Activity {
         p.setMargins(dp(3), 0, dp(3), 0);
         nav.addView(b, p);
         b.setOnClickListener(v -> {
+            if (apiKey != null) sessionApiKey = apiKey.getText().toString().trim();
             if (page == 0) showAI();
             else if (page == 1) showWallet();
             else showCalories();
@@ -166,6 +168,7 @@ public class MainActivity extends Activity {
         keyCard.addView(label("GEMINI CONNECTION", 11, cyan, true));
         apiKey = field("Paste your Gemini API key", false);
         apiKey.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        apiKey.setText(sessionApiKey);
         LinearLayout.LayoutParams fp = params();
         fp.topMargin = dp(10);
         keyCard.addView(apiKey, fp);
@@ -657,6 +660,7 @@ public class MainActivity extends Activity {
         coach.addView(label("Build a balanced meal routine and beginner-friendly weekly movement plan with Gemini 2.5 Flash. No calorie-deficit targets or restrictive dieting.", 12, muted, false));
         EditText api = field("Gemini API key (not saved)", false);
         api.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        api.setText(sessionApiKey);
         LinearLayout.LayoutParams ak = params();
         ak.topMargin = dp(10);
         coach.addView(api, ak);
@@ -677,6 +681,7 @@ public class MainActivity extends Activity {
         coach.addView(plan, planP);
         build.setOnClickListener(v -> {
             String key = api.getText().toString().trim();
+            sessionApiKey = key;
             String ageText = age.getText().toString().trim();
             if (key.isEmpty()) { toast("Enter your Gemini API key to generate a plan."); return; }
             int years;
