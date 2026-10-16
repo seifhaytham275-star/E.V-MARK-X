@@ -1,19 +1,17 @@
-# E.V MARK X
+# EV AI System
 
-Workspace for three independent Android apps planned for this repository:
+A single Android app with three sections:
+- **EV AI Core** — connects to Google's Gemini API using a key entered for the current session.
+- **EV Wallet** — simple local income and expense totals in EGP.
+- **EV Calories** — simple food calorie counter with servings and a local total.
 
-- **EV-AI-Assistant** — AI assistant for news and data analysis. Requires your own Gemini API key.
-- **EV-Wallet** — local income and expense tracker in EGP.
-- **EV-Calories** — local food and calorie log; calorie values are estimates.
+## Build with GitHub Actions
+Open the **Actions** tab and run **Build EV AI System APK**, or push a commit to `main`. Download `EV-AI-System-debug-APK` from the successful workflow run's Artifacts section.
 
-## Upload status
+## Gemini API
+Create a Gemini API key from Google AI Studio and enter it in EV AI Core. The app does not persist the key. A client-side app cannot fully protect an API key while it is being used; for public production distribution, use a server-side proxy and keep the secret on the server. Never commit API keys.
 
-The project source folders and build workflows still need to be added to this repository. Once uploaded, each app should live in its own folder and keep its own Gradle configuration and GitHub Actions workflow.
-
-## APK builds
-
-After the project files are uploaded, run the corresponding workflow from **Actions** and download the generated debug APK artifact. Debug APKs are not signed Play Store release builds.
-
-## Privacy
-
-Wallet and calorie entries are intended to be stored locally by the apps. Do not commit API keys or personal information.
+## Notes
+- Wallet and calorie totals are stored locally on the device.
+- Calories are estimates, not medical advice.
+- This is a debug APK build configuration; verify the app on a device before release.
