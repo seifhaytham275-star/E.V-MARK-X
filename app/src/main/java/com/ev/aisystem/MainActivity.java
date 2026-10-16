@@ -181,15 +181,16 @@ public class MainActivity extends Activity {
         modelPicker.setPadding(dp(6), dp(6), dp(6), dp(6));
         modelPicker.setBackground(background(panel2, dp(12), Color.TRANSPARENT));
         modelIds.clear();
-        modelIds.add("gemini-3.8-flash");
-        modelIds.add("gemini-3.6-flash");
-        modelIds.add("gemini-3.5-flash-lite");
-        modelIds.add("gemini-3.1-flash-lite");
+        modelIds.add("gemini-2.5-flash");
+        modelIds.add("gemini-2.5-flash-lite");
+        modelIds.add("gemini-2.5-pro");
+        modelIds.add("gemini-2.0-flash");
+        modelIds.add("gemini-2.0-flash-lite");
         refreshModelPicker(prefs.getString("selected_model", "gemini-2.5-flash"));
         LinearLayout.LayoutParams sp = params();
         sp.topMargin = dp(8);
         modelCard.addView(modelPicker, sp);
-        modelStatus = label("Free-tier model candidates. Refresh checks which of these models your API key can access; quotas and availability may vary.", 11, muted, false);
+        modelStatus = label("Gemini models supported by your API key. API access does not guarantee free-tier access; check current Google quotas.", 11, muted, false);
         modelStatus.setPadding(0, dp(8), 0, dp(8));
         modelCard.addView(modelStatus);
         Button refresh = button("↻  REFRESH AVAILABLE MODELS", panel2);
@@ -205,13 +206,13 @@ public class MainActivity extends Activity {
                 runOnUiThread(() -> {
                     refresh.setEnabled(true);
                     if (available.isEmpty()) {
-                        modelStatus.setText("Could not load free-tier model availability. Check your API key and connection; the fallback list remains.");
+                        modelStatus.setText("Could not load models. Check your API key and connection; common model options remain.");
                     } else {
                         String selected = modelPicker.getSelectedItem() == null ? "gemini-2.5-flash" : modelPicker.getSelectedItem().toString();
                         modelIds.clear();
                         modelIds.addAll(available);
                         refreshModelPicker(selected);
-                        modelStatus.setText(available.size() + " free-tier candidate models available for this API key.");
+                        modelStatus.setText(available.size() + " models supporting text generation found for this API key.");
                     }
                 });
             }).start();
@@ -535,20 +536,13 @@ public class MainActivity extends Activity {
                 String name = item.optString("name", "");
                 if (supports && name.startsWith("models/")) {
                     String id = name.substring("models/".length());
-                    if (isFreeTierCandidate(id)) found.add(id);
+                    found.add(id);
                 }
             }
             java.util.Collections.sort(found);
         } catch (Exception ignored) {
         } finally { if (c != null) c.disconnect(); }
         return found;
-    }
-
-    private boolean isFreeTierCandidate(String id) {
-        return "gemini-3.8-flash".equals(id)
-            || "gemini-3.6-flash".equals(id)
-            || "gemini-3.5-flash-lite".equals(id)
-            || "gemini-3.1-flash-lite".equals(id);
     }
 
     private String askGemini(String key, String prompt, String model) {
@@ -563,7 +557,7 @@ public class MainActivity extends Activity {
             c.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
             c.setRequestProperty("x-goog-api-key", key);
             JSONObject part = new JSONObject();
-            part.put("text", "You are EV AI Core, a helpful assistant. Answer clearly and safely. User: " + prompt);
+            part.put("text", "You are EV AI Core, a helpful assistant. Answer clearly and safely. The user may be a minor. For minors, do not prescribe calorie deficits, weight-loss calorie targets, restrictive diets, fasting, supplements, or weight-loss programs. Encourage a parent/guardian and pediatric healthcare professional for weight or growth concerns. You may offer balanced meal ideas, hydration, sleep, enjoyable age-appropriate activity, and non-extreme strength training with supervision. User: " + prompt);
             JSONArray parts = new JSONArray(); parts.put(part);
             JSONObject content = new JSONObject(); content.put("parts", parts);
             JSONArray contents = new JSONArray(); contents.put(content);
