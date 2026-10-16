@@ -32,6 +32,11 @@ public class MainActivity extends Activity {
     private TextView modelStatus;
     private android.content.SharedPreferences prefs;
     private ArrayList<String> modelIds = new ArrayList<>();
+    private LinearLayout historyList;
+    private TextView conversationView;
+    private String currentChatId = "";
+    private String currentTranscript = "";
+    private String currentChatTitle = "New chat";
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -84,6 +89,10 @@ public class MainActivity extends Activity {
         int screenDp = (int)(getResources().getDisplayMetrics().widthPixels / getResources().getDisplayMetrics().density);
         int contentWidth = screenDp >= 760 ? dp(700) : -1;
         scroll.addView(body, new ScrollView.LayoutParams(contentWidth, -2));
+        currentChatId = prefs.getString("current_chat_id", "");
+        currentTranscript = prefs.getString("current_chat_transcript", "");
+        currentChatTitle = prefs.getString("current_chat_title", "New chat");
+        if (currentChatId.isEmpty()) startNewChat();
         showAI();
     }
 
@@ -183,6 +192,24 @@ public class MainActivity extends Activity {
         body.addView(modelCard, params());
         space(12);
 
+        LinearLayout historyCard = cardBox();
+        LinearLayout historyHeader = new LinearLayout(this);
+        historyHeader.setGravity(Gravity.CENTER_VERTICAL);
+        TextView historyTitle = label("CHAT HISTORY", 11, cyan, true);
+        historyHeader.addView(historyTitle, new LinearLayout.LayoutParams(0, -2, 1));
+        Button newChat = button("＋ NEW CHAT", panel2);
+        newChat.setAllCaps(false);
+        historyHeader.addView(newChat, new LinearLayout.LayoutParams(-2, dp(40)));
+        historyCard.addView(historyHeader);
+        historyList = new LinearLayout(this);
+        historyList.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams hlp = params(); hlp.topMargin = dp(8);
+        historyCard.addView(historyList, hlp);
+        body.addView(historyCard, params());
+        space(12);
+        newChat.setOnClickListener(v -> { startNewChat(); showAI(); });
+        renderHistory();
+
         LinearLayout chatCard = cardBox();
         chatCard.addView(label("MESSAGE", 11, cyan, true));
         question = field("What would you like to explore?", true);
@@ -193,12 +220,13 @@ public class MainActivity extends Activity {
         Button ask = button("✦  SEND TO GEMINI", accent);
         ask.setAllCaps(false);
         chatCard.addView(ask, params());
-        TextView answer = label("Your response will appear here.", 14, Color.WHITE, false);
-        answer.setPadding(dp(14), dp(14), dp(14), dp(14));
-        answer.setBackground(background(panel2, dp(14), Color.TRANSPARENT));
+        conversationView = label(currentTranscript.isEmpty() ? "Your response will appear here." : currentTranscript, 14, Color.WHITE, false);
+        conversationView.setPadding(dp(14), dp(14), dp(14), dp(14));
+        conversationView.setBackground(background(panel2, dp(14), Color.TRANSPARENT));
+        conversationView.setTextIsSelectable(true);
         LinearLayout.LayoutParams ap = params();
         ap.topMargin = dp(12);
-        chatCard.addView(answer, ap);
+        chatCard.addView(conversationView, ap);
         body.addView(chatCard, params());
 
         ask.setOnClickListener(v -> {
@@ -207,13 +235,106 @@ public class MainActivity extends Activity {
             String model = modelPicker.getSelectedItem() == null ? "gemini-2.5-flash" : modelPicker.getSelectedItem().toString();
             if (key.isEmpty() || q.isEmpty()) { toast("Enter your API key and a message."); return; }
             prefs.edit().putString("selected_model", model).apply();
+            if (currentChatId.isEmpty()) startNewChat();
+            if (currentChatTitle.equals("New chat")) {
+                currentChatTitle = q.length() > 34 ? q.substring(0, 34) + "…" : q;
+            }
+            currentTranscript = (currentTranscript.isEmpty() ? "" : currentTranscript + "\n\n") + "You: " + q + "\n\nEV: Thinking with " + model + "…";
+            conversationView.setText(currentTranscript);
+            question.setText("");
             ask.setEnabled(false);
-            answer.setText("Connecting to " + model + "…");
+            saveCurrentChat();
             new Thread(() -> {
                 String result = askGemini(key, q, model);
-                runOnUiThread(() -> { answer.setText(result); ask.setEnabled(true); });
+                runOnUiThread(() -> {
+                    int marker = currentTranscript.lastIndexOf("EV: Thinking with ");
+                    if (marker >= 0) currentTranscript = currentTranscript.substring(0, marker) + "EV: " + result;
+                    else currentTranscript += "\n\nEV: " + result;
+                    conversationView.setText(currentTranscript);
+                    ask.setEnabled(true);
+                    saveCurrentChat();
+                    renderHistory();
+                });
             }).start();
         });
+    }
+
+
+    private void startNewChat() {
+        currentChatId = String.valueOf(System.currentTimeMillis());
+        currentTranscript = "";
+        currentChatTitle = "New chat";
+        prefs.edit().putString("current_chat_id", currentChatId)
+            .putString("current_chat_transcript", "")
+            .putString("current_chat_title", currentChatTitle).apply();
+    }
+
+    private JSONArray readChatSessions() {
+        try { return new JSONArray(prefs.getString("chat_sessions", "[]")); }
+        catch (Exception e) { return new JSONArray(); }
+    }
+
+    private void saveCurrentChat() {
+        if (currentChatId == null || currentChatId.isEmpty() || currentTranscript.isEmpty()) return;
+        JSONArray old = readChatSessions();
+        JSONArray next = new JSONArray();
+        JSONObject current = new JSONObject();
+        try {
+            current.put("id", currentChatId);
+            current.put("title", currentChatTitle);
+            current.put("transcript", currentTranscript);
+            current.put("updated", System.currentTimeMillis());
+            boolean replaced = false;
+            for (int i = 0; i < old.length(); i++) {
+                JSONObject item = old.optJSONObject(i);
+                if (item == null) continue;
+                if (currentChatId.equals(item.optString("id"))) {
+                    if (!replaced) { next.put(current); replaced = true; }
+                } else next.put(item);
+            }
+            if (!replaced) next.put(current);
+            JSONArray limited = new JSONArray();
+            int start = Math.max(0, next.length() - 50);
+            for (int i = next.length() - 1; i >= start; i--) limited.put(next.optJSONObject(i));
+            JSONArray ordered = new JSONArray();
+            for (int i = limited.length() - 1; i >= 0; i--) ordered.put(limited.optJSONObject(i));
+            prefs.edit().putString("chat_sessions", ordered.toString())
+                .putString("current_chat_id", currentChatId)
+                .putString("current_chat_transcript", currentTranscript)
+                .putString("current_chat_title", currentChatTitle).apply();
+        } catch (Exception ignored) { }
+    }
+
+    private void renderHistory() {
+        if (historyList == null) return;
+        historyList.removeAllViews();
+        JSONArray sessions = readChatSessions();
+        int count = 0;
+        for (int i = sessions.length() - 1; i >= 0; i--) {
+            JSONObject item = sessions.optJSONObject(i);
+            if (item == null) continue;
+            String id = item.optString("id", "");
+            String title = item.optString("title", "Saved chat");
+            if (id.isEmpty()) continue;
+            Button entry = button((id.equals(currentChatId) ? "●  " : "  ") + title, id.equals(currentChatId) ? accent : panel2);
+            entry.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+            entry.setPadding(dp(12), 0, dp(8), 0);
+            entry.setAllCaps(false);
+            LinearLayout.LayoutParams ep = params(); ep.topMargin = dp(5);
+            historyList.addView(entry, ep);
+            entry.setOnClickListener(v -> {
+                currentChatId = id;
+                currentChatTitle = title;
+                currentTranscript = item.optString("transcript", "");
+                prefs.edit().putString("current_chat_id", currentChatId)
+                    .putString("current_chat_title", currentChatTitle)
+                    .putString("current_chat_transcript", currentTranscript).apply();
+                showAI();
+            });
+            count++;
+            if (count >= 12) break;
+        }
+        if (count == 0) historyList.addView(label("Your saved conversations will appear here.", 12, muted, false));
     }
 
     private void refreshModelPicker(String preferred) {
