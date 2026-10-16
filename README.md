@@ -4,9 +4,26 @@
 
 E.V-MARK-X brings these areas together in one Android app:
 
-- **EV AI Core** — Gemini-powered chat, model discovery for the API key you provide, and saved conversations.
+### Available features
+
+- **Gemini AI chat** — send questions to a model available to your own API key.
+- **Model discovery** — refresh the model list from Google's API and choose a model available to your key.
+- **Saved chat history** — revisit recent conversations stored on the device; cloud sync depends on Firebase setup.
+- **Quick Prompt Library** — one-tap starters for planning a day, explaining a topic simply, and improving a message.
+- **Share Conversation** — share the current chat as plain text through Android's standard share sheet.
+- **New Chat shortcut** — start a clean conversation without manually clearing the previous transcript.
 - **EV Wallet** — local income and expense totals in EGP.
-- **EV Calories** — a basic food log and estimated calorie totals.
+- **EV Calories / Wellness** — a basic food log and estimated calorie totals with wellness-planning UI.
+
+### Planned improvements (not yet implemented)
+
+- Voice input and spoken responses.
+- Image and document understanding.
+- Reminders and calendar integration.
+- More accessible onboarding and language options.
+- A secure server-side API proxy with rate limits and cost controls.
+
+Planned improvements above are ideas for future versions and are **not included in the current APK**.
 
 > **Project status: beta / under active development.** Test the app before relying on it. Features that require Firebase will not work until the project owner configures their own Firebase and OAuth settings.
 
