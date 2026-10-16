@@ -628,41 +628,135 @@ public class MainActivity extends Activity {
     }
 
     private void showCalories() {
-        base("PROTOCOL 03  /  NUTRITION", "EV Calories", "A simple food calorie counter · kcal");
+        base("EV WELLNESS  /  NUTRITION + MOVEMENT", "Your daily wellness", "Balanced meals, movement, hydration and recovery — all in one place.");
+
+        LinearLayout profile = cardBox();
+        profile.addView(label("YOUR PROFILE", 11, cyan, true));
+        TextView note = label("For teens, calorie needs depend on growth and individual health. This app will not set a weight-loss calorie target or restrictive diet. If you are worried about weight or growth, talk with a parent/guardian and a pediatric healthcare professional.", 12, muted, false);
+        note.setPadding(0, dp(8), 0, dp(12));
+        profile.addView(note);
+        EditText age = field("Age in years (e.g. 15)", false);
+        age.setInputType(InputType.TYPE_CLASS_NUMBER);
+        EditText weight = field("Weight in kg (optional)", false);
+        weight.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        EditText height = field("Height in cm (optional)", false);
+        height.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        age.setText(prefs.getString("wellness_age", "15"));
+        weight.setText(prefs.getString("wellness_weight", ""));
+        height.setText(prefs.getString("wellness_height", ""));
+        for (EditText e : new EditText[]{age, weight, height}) {
+            LinearLayout.LayoutParams p = params();
+            p.topMargin = dp(8);
+            profile.addView(e, p);
+        }
+        body.addView(profile, params());
+        space(12);
+
+        LinearLayout coach = cardBox();
+        coach.addView(label("GEMINI WELLNESS COACH", 11, cyan, true));
+        coach.addView(label("Build a balanced meal routine and beginner-friendly weekly movement plan with Gemini 2.5 Flash. No calorie-deficit targets or restrictive dieting.", 12, muted, false));
+        EditText api = field("Gemini API key (not saved)", false);
+        api.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        LinearLayout.LayoutParams ak = params();
+        ak.topMargin = dp(10);
+        coach.addView(api, ak);
+        EditText preferences = field("Food preferences, allergies, schedule, gym access (optional)", true);
+        LinearLayout.LayoutParams pp = params();
+        pp.topMargin = dp(8);
+        coach.addView(preferences, pp);
+        Button build = button("✦  BUILD MY WELLNESS PLAN", accent);
+        build.setAllCaps(false);
+        LinearLayout.LayoutParams bp = params();
+        bp.topMargin = dp(12);
+        coach.addView(build, bp);
+        TextView plan = label(prefs.getString("wellness_plan", "Your plan will appear here. Add preferences and tap Build My Wellness Plan."), 13, Color.WHITE, false);
+        plan.setPadding(dp(14), dp(14), dp(14), dp(14));
+        plan.setBackground(background(panel2, dp(14), Color.TRANSPARENT));
+        LinearLayout.LayoutParams planP = params();
+        planP.topMargin = dp(10);
+        coach.addView(plan, planP);
+        build.setOnClickListener(v -> {
+            String key = api.getText().toString().trim();
+            String ageText = age.getText().toString().trim();
+            if (key.isEmpty()) { toast("Enter your Gemini API key to generate a plan."); return; }
+            int years;
+            try {
+                years = Integer.parseInt(ageText);
+                if (years < 1 || years > 100) throw new NumberFormatException();
+            } catch (Exception ex) { toast("Enter a valid age."); return; }
+            String w = weight.getText().toString().trim();
+            String h = height.getText().toString().trim();
+            prefs.edit().putString("wellness_age", ageText).putString("wellness_weight", w)
+                .putString("wellness_height", h).apply();
+            String context = "Create a practical, non-restrictive wellbeing routine for a " + years + "-year-old user. ";
+            if (!w.isEmpty()) context += "User provided weight " + w + " kg. ";
+            if (!h.isEmpty()) context += "User provided height " + h + " cm. ";
+            context += "Food preferences and schedule: " + preferences.getText().toString().trim() + ". ";
+            context += "Give balanced sample meals and snacks without calorie counts, no calorie deficit, no target weight, no fasting, and no supplements. Include hydration, sleep, and a beginner-friendly weekly movement schedule. For a teen, suggest enjoyable daily activity and strength/bone-strengthening activity about three days a week when appropriate; start gradually, use good form and adult/coach supervision in a gym. Explain that food needs vary during growth and a parent/guardian plus pediatric healthcare professional should help with weight or growth concerns. Do not diagnose or claim medical precision. Use short headings and bullets.";
+            build.setEnabled(false);
+            build.setText("BUILDING YOUR PLAN…");
+            new Thread(() -> {
+                String answer = askGemini(key, context, "gemini-2.5-flash");
+                runOnUiThread(() -> {
+                    build.setEnabled(true);
+                    build.setText("✦  BUILD MY WELLNESS PLAN");
+                    plan.setText(answer);
+                    prefs.edit().putString("wellness_plan", answer).apply();
+                });
+            }).start();
+        });
+        body.addView(coach, params());
+        space(12);
+
         int total = prefs.getInt("calorie_total", 0);
-        card("TODAY'S TOTAL", total + " kcal", "Total entered on this device");
-        LinearLayout box = cardBox();
-        box.addView(label("ADD FOOD", 11, cyan, true));
-        EditText food = field("Food name (e.g. apple)", false);
-        EditText calories = field("Calories per serving", false);
+        LinearLayout tracker = cardBox();
+        tracker.addView(label("OPTIONAL FOOD LOG", 11, cyan, true));
+        TextView totalText = label(total + " kcal logged", 22, Color.WHITE, true);
+        totalText.setPadding(0, dp(5), 0, dp(4));
+        tracker.addView(totalText);
+        tracker.addView(label("This is a record of foods you choose to log, not a daily target or a judgement of how much you should eat.", 11, muted, false));
+        EditText food = field("Food name", false);
+        EditText calories = field("Calories on food label (optional)", false);
         calories.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        EditText servings = field("Number of servings", false);
+        EditText servings = field("Servings (defaults to 1)", false);
         servings.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         for (EditText e : new EditText[]{food, calories, servings}) {
-            LinearLayout.LayoutParams p = params(); p.topMargin = dp(8); box.addView(e, p);
+            LinearLayout.LayoutParams p = params();
+            p.topMargin = dp(8);
+            tracker.addView(e, p);
         }
-        Button add = button("＋  ADD FOOD", accent); add.setAllCaps(false);
-        LinearLayout.LayoutParams bp = params(); bp.topMargin = dp(10); box.addView(add, bp);
-        body.addView(box, params());
+        Button add = button("＋  LOG FOOD", panel2);
+        add.setAllCaps(false);
+        LinearLayout.LayoutParams addP = params();
+        addP.topMargin = dp(10);
+        tracker.addView(add, addP);
         add.setOnClickListener(v -> {
             try {
                 String name = food.getText().toString().trim();
-                double per = Double.parseDouble(calories.getText().toString().trim());
-                double count = Double.parseDouble(servings.getText().toString().trim());
-                if (name.isEmpty() || per < 0 || count <= 0) throw new NumberFormatException();
-                int added = (int)Math.round(per * count);
+                String calorieText = calories.getText().toString().trim();
+                String servingText = servings.getText().toString().trim();
+                if (name.isEmpty()) throw new NumberFormatException();
+                int added = 0;
+                if (!calorieText.isEmpty()) {
+                    double per = Double.parseDouble(calorieText);
+                    double count = servingText.isEmpty() ? 1 : Double.parseDouble(servingText);
+                    if (per < 0 || count <= 0) throw new NumberFormatException();
+                    added = (int)Math.round(per * count);
+                }
                 prefs.edit().putInt("calorie_total", prefs.getInt("calorie_total", 0) + added)
                     .putString("last_food", name).putInt("last_food_calories", added).apply();
-                showCalories(); toast("Added " + added + " kcal");
-            } catch (Exception e) { toast("Enter food, calories, and servings correctly."); }
+                showCalories();
+                toast("Food logged");
+            } catch (Exception ex) { toast("Enter a food name and valid optional label values."); }
         });
-        space(10);
-        String last = prefs.getString("last_food", "");
-        if (!last.isEmpty()) card("LAST FOOD", last, prefs.getInt("last_food_calories", 0) + " kcal");
-        Button reset = button("RESET CALORIE TOTAL", panel2); body.addView(reset, params());
-        reset.setOnClickListener(v -> { prefs.edit().putInt("calorie_total", 0).remove("last_food").remove("last_food_calories").apply(); showCalories(); });
+        body.addView(tracker, params());
         space(8);
-        body.addView(label("Values are estimates. Use food labels when available.", 11, muted, false));
+        Button reset = button("RESET FOOD LOG", panel2);
+        body.addView(reset, params());
+        reset.setOnClickListener(v -> {
+            prefs.edit().putInt("calorie_total", 0).remove("last_food").remove("last_food_calories").apply();
+            showCalories();
+        });
     }
 
     private LinearLayout cardBox() {
