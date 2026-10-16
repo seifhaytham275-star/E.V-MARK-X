@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080d1c">
+<meta name="description" content="E.V-MARK-X — مساحة ذكاء اصطناعي من مشروع مستقل. استخدم مفتاح Gemini API الخاص بك.">
+<title>E.V-MARK-X — AI Workspace</title>
+<style>
+:root{color-scheme:dark;--bg:#080d1c;--panel:#10182b;--panel2:#0c1324;--line:#27334d;--text:#f4f7ff;--muted:#9aa9c4;--blue:#56a8ff;--red:#ff5368;--green:#55e0b0}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#14264a 0,transparent 42%),radial-gradient(ellipse at 0% 45%,#321322 0,transparent 34%),var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;min-height:100vh}button,input,textarea,select{font:inherit}button,a{ -webkit-tap-highlight-color:transparent}a{color:#8bc5ff}.wrap{max-width:1050px;margin:auto;padding:22px 16px 30px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 20px}.brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#ff3c5b,#287eff);box-shadow:0 0 32px #276bd955;font-weight:900;font-size:18px}.brand h1{font-size:18px;margin:0;letter-spacing:.5px}.brand p{font-size:12px;color:var(--muted);margin:4px 0 0}.status{font-size:12px;color:var(--green);border:1px solid #55e0b044;background:#55e0b00e;border-radius:99px;padding:8px 11px;white-space:nowrap}.hero{border:1px solid #334464;border-radius:25px;padding:26px 22px;background:linear-gradient(125deg,#131e35eF,#0b1121f2);position:relative;overflow:hidden;box-shadow:0 18px 70px #0003}.hero:after{content:"";position:absolute;width:230px;height:230px;border:1px solid #4e91ff35;border-radius:50%;left:-65px;top:-90px;box-shadow:0 0 0 24px #4e91ff09,0 0 0 50px #4e91ff07;pointer-events:none}.eyebrow{color:#86bfff;font-size:12px;letter-spacing:2px;font-weight:700}.hero h2{font-size:clamp(27px,5vw,44px);line-height:1.2;margin:12px 0}.hero h2 span{background:linear-gradient(90deg,#67b8ff,#ff647c);background-clip:text;color:transparent}.hero p{color:#b4c2d9;max-width:650px;line-height:1.9;margin:0}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.chip{border:1px solid #344460;color:#c6d7ef;background:#ffffff05;border-radius:99px;padding:7px 10px;font-size:12px}.layout{display:grid;grid-template-columns:290px 1fr;gap:16px;margin-top:16px}.panel{background:#0e1628eF;border:1px solid var(--line);border-radius:20px;padding:18px;min-width:0}.panel h3{font-size:16px;margin:0 0 14px}.field{display:flex;flex-direction:column;gap:8px;margin:12px 0}.field label{font-size:13px;color:#c3d0e5}.input,select,textarea{width:100%;border:1px solid #35425d;background:#080f1e;color:var(--text);border-radius:12px;padding:12px;outline:none}.input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px #56a8ff18}.small{font-size:12px;line-height:1.7;color:var(--muted)}.btn{border:0;border-radius:12px;padding:11px 14px;cursor:pointer;font-weight:750;transition:transform .15s,opacity .15s}.btn:active{transform:scale(.98)}.primary{background:linear-gradient(100deg,#247cf0,#3da7ff);color:white}.secondary{background:#1a2740;border:1px solid #354666;color:#e4edff}.danger{background:#311a2a;border:1px solid #653246;color:#ffb4c0}.btn:disabled{opacity:.45;cursor:not-allowed}.full{width:100%}.steps{list-style:none;margin:0;padding:0;display:grid;gap:14px}.steps li{display:flex;gap:10px;align-items:flex-start;color:#d2dcef;font-size:13px;line-height:1.7}.num{flex:0 0 25px;height:25px;border-radius:9px;background:#1b3a62;color:#9dd0ff;display:grid;place-items:center;font-weight:800}.chat-panel{display:flex;flex-direction:column;min-height:460px}.chat-head{display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:13px}.chat-head h3{margin:0}.messages{display:flex;flex-direction:column;gap:12px;padding:16px 0;flex:1;min-height:230px}.msg{max-width:92%;padding:12px 14px;border-radius:15px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;font-size:14px}.msg.ai{background:#151f34;border:1px solid #293955;align-self:flex-start}.msg.user{background:linear-gradient(135deg,#174b8a,#25345e);align-self:flex-end}.msg .role{font-size:10px;color:#94c7ff;margin-bottom:4px}.composer{border-top:1px solid var(--line);padding-top:14px}.composer textarea{resize:vertical;min-height:80px;max-height:220px}.compose-row{display:flex;gap:10px;align-items:center;margin-top:10px}.compose-row .small{flex:1}.notice{display:none;border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.7;margin-top:10px}.notice.show{display:block}.notice.err{background:#3b1824;border:1px solid #733043;color:#ffc3cc}.notice.ok{background:#102c2b;border:1px solid #245e53;color:#a6f3d7}.footer{text-align:center;color:#71819f;font-size:12px;padding:22px 0 4px}.footer a{text-decoration:none}.keyrow{display:flex;gap:8px}.keyrow input{min-width:0}.quick{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.quick button{font-size:12px;padding:8px 10px}.hidden{display:none!important}.callout{border:1px solid #66502b;background:#302515;color:#ffe0a0;border-radius:12px;padding:11px;font-size:12px;line-height:1.7;margin-top:13px}.model-line{display:flex;align-items:center;justify-content:space-between;gap:8px}.model-line .small{overflow-wrap:anywhere}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.hero{padding:22px 17px}.panel{padding:15px}.chat-panel{min-height:430px}.top{align-items:flex-start}.status{font-size:11px}.wrap{padding:14px 12px 24px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><div class="brand"><div class="logo">EV</div><div><h1>E.V-MARK-X</h1><p>Independent AI Workspace</p></div></div><div class="status" id="status">● جاهز للبدء</div></header>
+<section class="hero"><div class="eyebrow">YOUR INTELLIGENCE. YOUR CONTROL.</div><h2>فكّر أبعد مع <span>E.V-MARK-X</span></h2><p>مساحة ذكاء اصطناعي بسيطة للمحادثة والتعلّم وصناعة الأفكار. ابدأ بمفتاح Gemini API الخاص بك، واختر الموديل المتاح لحسابك.</p><div class="chips"><span class="chip">Gemini AI</span><span class="chip">نماذج متعددة</span><span class="chip">واجهة عربية</span><span class="chip">تجربة من المتصفح</span></div></section>
+<div class="layout">
+<aside class="panel">
+<h3>ابدأ في دقيقتين</h3>
+<ol class="steps">
+<li><span class="num">1</span><span>افتح <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a> وسجّل دخولك بحساب Google.</span></li>
+<li><span class="num">2</span><span>اضغط <b>Create API key</b> وأنشئ مفتاحًا لمشروعك.</span></li>
+<li><span class="num">3</span><span>انسخ المفتاح والصقه في الخانة هنا، ثم اضغط «اتصال وجلب الموديلات».</span></li>
+<li><span class="num">4</span><span>اختر موديل Gemini وابدأ المحادثة من الجهة الثانية.</span></li>
+</ol>
+<div class="field"><label for="apiKey">Gemini API key</label><div class="keyrow"><input id="apiKey" class="input" type="password" autocomplete="off" placeholder="الصق المفتاح هنا"><button id="toggleKey" class="btn secondary" type="button" aria-label="إظهار المفتاح">إظهار</button></div></div>
+<button id="connect" class="btn primary full" type="button">اتصال وجلب الموديلات</button>
+<div class="field"><label for="model">موديل الذكاء الاصطناعي</label><select id="model" disabled><option>اتصل أولًا لجلب الموديلات</option></select></div>
+<div id="notice" class="notice" role="status"></div>
+<div class="callout"><b>مهم لحماية مفتاحك:</b> لا تنشر المفتاح في منشور أو صورة، ولا ترسله لأي شخص. هذه نسخة تجريبية تعمل من المتصفح وترسل طلباتك مباشرة إلى Google؛ استخدم مفتاحًا مخصصًا وراقب حصته واستهلاكه. لا تستخدمها لتخزين أسرار أو بيانات حساسة.</div>
+<p class="small">المفتاح لا يُحفظ في قاعدة بيانات الموقع ولا في التخزين المحلي؛ يُستخدم داخل جلسة الصفحة الحالية فقط. عند إغلاق الصفحة ستحتاج إدخاله مجددًا.</p>
+<button id="clear" class="btn secondary full" type="button">مسح المفتاح والمحادثة</button>
+</aside>
+<main class="panel chat-panel">
+<div class="chat-head"><div><h3>المحادثة الذكية</h3><div class="small" id="chatSub">أدخل المفتاح لجلب الموديلات والبدء.</div></div><button id="newChat" class="btn secondary" type="button">محادثة جديدة</button></div>
+<div class="messages" id="messages"><div class="msg ai"><div class="role">E.V-MARK-X</div>أهلًا بيك! 👋<br>علشان تبدأ، هات Gemini API key من Google AI Studio، والصقه في الخانة اللي على الشمال. بعد الاتصال هتقدر تختار موديل وتكلمني من هنا.</div></div>
+<div class="composer"><div class="quick"><button class="btn secondary" data-prompt="اشرح لي الفكرة دي ببساطة مع مثال." type="button">اشرح ببساطة</button><button class="btn secondary" data-prompt="ساعدني أرتب خطة عملية خطوة بخطوة." type="button">خطط معايا</button><button class="btn secondary" data-prompt="اقترح أفكارًا جديدة ومميزة لمشروعي." type="button">اقترح أفكار</button></div><textarea id="prompt" placeholder="اكتب رسالتك هنا..." disabled></textarea><div class="compose-row"><span class="small">راجع ردود الذكاء الاصطناعي قبل الاعتماد عليها.</span><button id="send" class="btn primary" type="button" disabled>إرسال ↵</button></div></div>
+</main>
+</div>
+<footer class="footer">E.V-MARK-X · مشروع مستقل · <a href="https://github.com/seifhaytham275-star/E.V-MARK-X" target="_blank" rel="noopener noreferrer">مستودع المشروع على GitHub</a></footer>
+</div>
+<script>
+(() => {
+ const $ = id => document.getElementById(id);
+ let apiKey = '';
+ let busy = false;
+ let history = [];
+ const setStatus = (text, good=false) => { $('status').textContent = (good?'● ':'● ') + text; $('status').style.color = good ? 'var(--green)' : '#a9bad4'; };
+ const notice = (text, type='err') => { const el=$('notice'); el.textContent=text; el.className='notice show '+type; };
+ const clearNotice = () => { $('notice').className='notice'; $('notice').textContent=''; };
+ function addMessage(role, text) {
+   const box=document.createElement('div'); box.className='msg '+(role==='user'?'user':'ai');
+   const label=document.createElement('div'); label.className='role'; label.textContent=role==='user'?'أنت':'E.V-MARK-X';
+   const body=document.createElement('div'); body.textContent=text;
+   box.append(label,body); $('messages').appendChild(box); $('messages').scrollTop=$('messages').scrollHeight;
+ }
+ function enableChat(on) { $('prompt').disabled=!on; $('send').disabled=!on; }
+ async function connect() {
+   clearNotice(); const key=$('apiKey').value.trim();
+   if(!key){notice('الصق Gemini API key الأول. لو ما عندكش واحد، افتح Google AI Studio من الرابط الموجود فوق.');return;}
+   $('connect').disabled=true; $('connect').textContent='جاري الاتصال...'; setStatus('جاري الاتصال');
+   try {
+     const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models?key='+encodeURIComponent(key));
+     const data=await res.json();
+     if(!res.ok) throw new Error(data.error?.message || 'تعذّر الاتصال. راجع المفتاح والصلاحيات.');
+     const models=(data.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes('generateContent') && /gemini/i.test(m.name||''));
+     if(!models.length) throw new Error('تم الاتصال لكن لم تظهر موديلات Gemini تدعم generateContent لهذا المفتاح.');
+     apiKey=key; const select=$('model'); select.innerHTML='';
+     models.sort((a,b)=>a.name.localeCompare(b.name)).forEach(m=>{const op=document.createElement('option');op.value=m.name.replace(/^models\//,'');op.textContent=(m.displayName||m.name)+' · '+m.name.replace(/^models\//,'');select.appendChild(op);});
+     select.disabled=false; enableChat(true); $('chatSub').textContent='متصل — اختر موديل Gemini المتاح لحسابك.'; notice('تم الاتصال بنجاح! اختار موديل وابدأ المحادثة.','ok'); setStatus('متصل بـ Gemini',true);
+   } catch(e) { apiKey=''; enableChat(false); setStatus('محتاج مراجعة'); notice(e.message || 'حصل خطأ غير متوقع.'); }
+   finally { $('connect').disabled=false; $('connect').textContent='اتصال وجلب الموديلات'; }
+ }
+ async function send() {
+   const text=$('prompt').value.trim(); if(!text||!apiKey||busy)return;
+   busy=true; $('send').disabled=true; $('prompt').disabled=true; addMessage('user',text); $('prompt').value=''; setStatus('جاري التفكير');
+   const pending=document.createElement('div'); pending.className='msg ai'; pending.textContent='بفكّر...'; $('messages').appendChild(pending);
+   try {
+     const contents=[...history,{role:'user',parts:[{text}]}];
+     const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent($('model').value)+':generateContent?key='+encodeURIComponent(apiKey),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents,generationConfig:{temperature:0.7,maxOutputTokens:2048}})});
+     const data=await res.json(); if(!res.ok) throw new Error(data.error?.message || 'تعذّر الحصول على رد من Gemini.');
+     const answer=(data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('\n').trim();
+     if(!answer) throw new Error('الموديل لم يرجع نصًا. جرّب موديلًا آخر أو رسالة مختلفة.');
+     pending.remove(); addMessage('ai',answer); history.push({role:'user',parts:[{text}]},{role:'model',parts:[{text:answer}]}); setStatus('متصل بـ Gemini',true);
+   } catch(e) { pending.remove(); addMessage('ai','حصل خطأ: '+(e.message||'تعذّر إرسال الرسالة')+'\nراجع المفتاح أو جرّب موديلًا آخر.'); setStatus('فيه خطأ'); }
+   finally { busy=false; $('send').disabled=false; $('prompt').disabled=false; $('prompt').focus(); }
+ }
+ $('connect').addEventListener('click',connect);
+ $('toggleKey').addEventListener('click',()=>{const k=$('apiKey');k.type=k.type==='password'?'text':'password';$('toggleKey').textContent=k.type==='password'?'إظهار':'إخفاء';});
+ $('send').addEventListener('click',send);
+ $('prompt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
+ $('newChat').addEventListener('click',()=>{history=[];$('messages').innerHTML='';addMessage('ai','بدأنا محادثة جديدة. اسألني اللي تحبه!');});
+ $('clear').addEventListener('click',()=>{apiKey='';$('apiKey').value='';$('model').innerHTML='<option>اتصل أولًا لجلب الموديلات</option>';$('model').disabled=true;history=[];$('messages').innerHTML='';addMessage('ai','تم مسح المفتاح والمحادثة من الصفحة. أدخل مفتاحك للبدء من جديد.');enableChat(false);clearNotice();setStatus('جاهز للبدء');$('chatSub').textContent='أدخل المفتاح لجلب الموديلات والبدء.';});
+ document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>{if(!$('prompt').disabled){$('prompt').value=b.dataset.prompt;$('prompt').focus();}}));
+})();
+</script>
+</body>
+</html>
