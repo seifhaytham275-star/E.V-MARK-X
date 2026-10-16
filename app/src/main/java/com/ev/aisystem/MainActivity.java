@@ -11,6 +11,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import android.text.InputType;
+import android.util.Base64;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
+import java.security.KeyStore;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.*;
@@ -35,15 +43,17 @@ import com.google.firebase.firestore.Query;
 
 public class MainActivity extends Activity {
     private final int bg = Color.rgb(7, 11, 24);
-    private final int panel = Color.rgb(17, 25, 46);
-    private final int panel2 = Color.rgb(23, 34, 60);
-    private final int accent = Color.rgb(99, 117, 255);
-    private final int cyan = Color.rgb(56, 211, 232);
-    private final int red = Color.rgb(255, 91, 119);
+    private final int panel = Color.rgb(19, 22, 35);
+    private final int panel2 = Color.rgb(28, 34, 52);
+    private final int accent = Color.rgb(220, 42, 67);
+    private final int cyan = Color.rgb(61, 169, 255);
+    private final int red = Color.rgb(255, 63, 83);
     private final int muted = Color.rgb(164, 179, 207);
     private LinearLayout root, body;
     private EditText apiKey, question;
     private String sessionApiKey = "";
+    private static final String API_KEY_PREF = "gemini_api_key_encrypted";
+    private static final String API_KEY_ALIAS = "ev_gemini_api_key";
     private Spinner modelPicker;
     private TextView modelStatus;
     private android.content.SharedPreferences prefs;
@@ -61,6 +71,7 @@ public class MainActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         prefs = getSharedPreferences("ev_system", MODE_PRIVATE);
+        sessionApiKey = loadSavedApiKey();
         initializeFirebase();
         getWindow().setStatusBarColor(bg);
         getWindow().setNavigationBarColor(bg);
@@ -126,7 +137,10 @@ public class MainActivity extends Activity {
         p.setMargins(dp(3), 0, dp(3), 0);
         nav.addView(b, p);
         b.setOnClickListener(v -> {
-            if (apiKey != null) sessionApiKey = apiKey.getText().toString().trim();
+            if (apiKey != null) {
+                String entered = apiKey.getText().toString().trim();
+                if (!entered.isEmpty() && !entered.equals(sessionApiKey) && saveApiKey(entered)) sessionApiKey = entered;
+            }
             if (page == 0) showAI();
             else if (page == 1) showWallet();
             else showCalories();
@@ -172,9 +186,42 @@ public class MainActivity extends Activity {
         LinearLayout.LayoutParams fp = params();
         fp.topMargin = dp(10);
         keyCard.addView(apiKey, fp);
-        TextView hint = label("Key is used for requests and is not saved by this app.", 11, muted, false);
-        hint.setPadding(0, dp(6), 0, 0);
+        TextView hint = label(sessionApiKey.isEmpty()
+            ? "Your key is not saved yet. Save it on this device to reuse it next time."
+            : "API key saved on this device. It will be reused when you reopen the app.", 11, muted, false);
+        hint.setPadding(0, dp(6), 0, dp(8));
         keyCard.addView(hint);
+        LinearLayout keyActions = new LinearLayout(this);
+        keyActions.setOrientation(LinearLayout.HORIZONTAL);
+        Button saveKey = button("✓  SAVE API KEY", accent);
+        saveKey.setAllCaps(false);
+        Button clearKey = button("REMOVE KEY", panel2);
+        clearKey.setAllCaps(false);
+        LinearLayout.LayoutParams keyActionParams = new LinearLayout.LayoutParams(0, dp(44), 1);
+        keyActionParams.setMargins(0, dp(4), dp(5), 0);
+        keyActions.addView(saveKey, keyActionParams);
+        LinearLayout.LayoutParams clearKeyParams = new LinearLayout.LayoutParams(0, dp(44), 1);
+        clearKeyParams.setMargins(dp(5), dp(4), 0, 0);
+        keyActions.addView(clearKey, clearKeyParams);
+        keyCard.addView(keyActions);
+        saveKey.setOnClickListener(v -> {
+            String entered = apiKey.getText().toString().trim();
+            if (entered.isEmpty()) { toast("Paste your Gemini API key first."); return; }
+            if (saveApiKey(entered)) {
+                sessionApiKey = entered;
+                hint.setText("API key saved securely on this device. You won't need to enter it again here.");
+                toast("Gemini API key saved.");
+            } else {
+                toast("Could not protect the key on this device. Please try again.");
+            }
+        });
+        clearKey.setOnClickListener(v -> {
+            clearSavedApiKey();
+            sessionApiKey = "";
+            apiKey.setText("");
+            hint.setText("API key removed from this device.");
+            toast("Saved API key removed.");
+        });
         body.addView(keyCard, params());
         space(12);
 
@@ -203,11 +250,13 @@ public class MainActivity extends Activity {
         modelCard.addView(refresh, params());
         refresh.setOnClickListener(v -> {
             String key = apiKey.getText().toString().trim();
+            if (key.isEmpty()) key = sessionApiKey;
             if (key.isEmpty()) { toast("Enter your Gemini API key first."); return; }
+            final String modelLookupKey = key;
             refresh.setEnabled(false);
             modelStatus.setText("Loading models from Google…");
             new Thread(() -> {
-                ArrayList<String> available = fetchModels(key);
+                ArrayList<String> available = fetchModels(modelLookupKey);
                 runOnUiThread(() -> {
                     refresh.setEnabled(true);
                     if (available.isEmpty()) {
@@ -325,7 +374,11 @@ public class MainActivity extends Activity {
         body.addView(chatCard, params());
 
         ask.setOnClickListener(v -> {
-            String key = apiKey.getText().toString().trim();
+            String enteredKey = apiKey.getText().toString().trim();
+            final String key = enteredKey.isEmpty() ? sessionApiKey : enteredKey;
+            if (!key.isEmpty() && !key.equals(sessionApiKey)) {
+                if (saveApiKey(key)) sessionApiKey = key;
+            }
             String q = question.getText().toString().trim();
             String model = modelPicker.getSelectedItem() == null ? "gemini-2.5-flash" : modelPicker.getSelectedItem().toString();
             if (key.isEmpty() || q.isEmpty()) { toast("Enter your API key and a message."); return; }
@@ -355,6 +408,67 @@ public class MainActivity extends Activity {
     }
 
 
+
+    private String loadSavedApiKey() {
+        String encrypted = prefs.getString(API_KEY_PREF, "");
+        if (encrypted.isEmpty()) return "";
+        try {
+            byte[] packed = Base64.decode(encrypted, Base64.NO_WRAP);
+            if (packed.length <= 12) return "";
+            byte[] iv = new byte[12];
+            byte[] ciphertext = new byte[packed.length - 12];
+            System.arraycopy(packed, 0, iv, 0, 12);
+            System.arraycopy(packed, 12, ciphertext, 0, ciphertext.length);
+            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyStore.load(null);
+            SecretKey secretKey = (SecretKey) keyStore.getKey(API_KEY_ALIAS, null);
+            if (secretKey == null) return "";
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, new GCMParameterSpec(128, iv));
+            return new String(cipher.doFinal(ciphertext), StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private boolean saveApiKey(String key) {
+        if (key == null || key.trim().isEmpty()) return false;
+        try {
+            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyStore.load(null);
+            if (!keyStore.containsAlias(API_KEY_ALIAS)) {
+                KeyGenerator generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+                generator.init(new KeyGenParameterSpec.Builder(API_KEY_ALIAS,
+                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                    .setRandomizedEncryptionRequired(true)
+                    .build());
+                generator.generateKey();
+            }
+            SecretKey secretKey = (SecretKey) keyStore.getKey(API_KEY_ALIAS, null);
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            byte[] iv = cipher.getIV();
+            byte[] encrypted = cipher.doFinal(key.trim().getBytes(StandardCharsets.UTF_8));
+            byte[] packed = new byte[iv.length + encrypted.length];
+            System.arraycopy(iv, 0, packed, 0, iv.length);
+            System.arraycopy(encrypted, 0, packed, iv.length, encrypted.length);
+            prefs.edit().putString(API_KEY_PREF, Base64.encodeToString(packed, Base64.NO_WRAP)).apply();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void clearSavedApiKey() {
+        prefs.edit().remove(API_KEY_PREF).apply();
+        try {
+            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyStore.load(null);
+            if (keyStore.containsAlias(API_KEY_ALIAS)) keyStore.deleteEntry(API_KEY_ALIAS);
+        } catch (Exception ignored) { }
+    }
 
     private void initializeFirebase() {
         try {
@@ -844,10 +958,10 @@ public class MainActivity extends Activity {
     private GradientDrawable heroBackground() {
         GradientDrawable d = new GradientDrawable(
             GradientDrawable.Orientation.TL_BR,
-            new int[]{Color.rgb(28, 42, 82), Color.rgb(42, 31, 88), Color.rgb(14, 61, 83)}
+            new int[]{Color.rgb(88, 13, 31), Color.rgb(19, 27, 48), Color.rgb(10, 57, 92)}
         );
         d.setCornerRadius(dp(20));
-        d.setStroke(dp(1), Color.rgb(64, 86, 145));
+        d.setStroke(dp(1), Color.rgb(199, 47, 74));
         return d;
     }
 
