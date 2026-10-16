@@ -1,5 +1,9 @@
 # E.V-MARK-X — EV AI System
 
+**Live web demo:** https://seifhaytham275-star.github.io/E.V-MARK-X/  
+**AI workspace:** https://seifhaytham275-star.github.io/E.V-MARK-X/app.html  
+**About & privacy:** https://seifhaytham275-star.github.io/E.V-MARK-X/about.html
+
 **An Android AI assistant project with tools for chat, everyday planning, and simple personal tracking.**
 
 E.V-MARK-X brings these areas together in one Android app:
@@ -42,6 +46,10 @@ If there is no published release yet, the Releases page may be empty. Open the l
 2. Open it on your Android device and follow Android's installation prompts.
 3. Install only if you trust the source and understand that this is a beta/debug build.
 4. If installation fails or the app crashes, report the Android version and the steps that caused the issue—never include passwords or API keys in a report.
+
+## Public web demo and API-key safety
+
+The GitHub Pages website has a public landing page (`index.html`), AI workspace (`app.html`), and about/privacy page (`about.html`). The workspace discovers Gemini models available to the visitor's own API key and sends the key in the `x-goog-api-key` request header rather than placing it in the request URL. The key is held in page memory only and is not stored in local storage. **This does not make a browser-side key secret**: the device owner can inspect browser requests. Visitors must use their own keys and should never paste a shared/private service key into the public page. A shared-key service requires a separate backend with server-side secrets, per-user rate limits, abuse controls, and cost monitoring; GitHub Pages alone cannot provide that backend.
 
 ## Gemini setup and API costs
 
