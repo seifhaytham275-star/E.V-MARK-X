@@ -2,6 +2,7 @@ package com.ev.aisystem;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -17,6 +18,20 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 public class MainActivity extends Activity {
     private final int bg = Color.rgb(7, 11, 24);
@@ -37,10 +52,15 @@ public class MainActivity extends Activity {
     private String currentChatId = "";
     private String currentTranscript = "";
     private String currentChatTitle = "New chat";
+    private FirebaseAuth firebaseAuth;
+    private FirebaseFirestore firestore;
+    private TextView authStatus;
+    private static final int RC_GOOGLE_SIGN_IN = 701;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         prefs = getSharedPreferences("ev_system", MODE_PRIVATE);
+        initializeFirebase();
         getWindow().setStatusBarColor(bg);
         getWindow().setNavigationBarColor(bg);
         getWindow().getDecorView().setSystemUiVisibility(0);
@@ -94,6 +114,7 @@ public class MainActivity extends Activity {
         currentChatTitle = prefs.getString("current_chat_title", "New chat");
         if (currentChatId.isEmpty()) startNewChat();
         showAI();
+        if (firebaseAuth != null && firebaseAuth.getCurrentUser() != null) loadCloudHistory();
     }
 
     private void addNav(LinearLayout nav, String title, int page) {
@@ -129,6 +150,18 @@ public class MainActivity extends Activity {
 
     private void showAI() {
         base("E.V INTELLIGENCE  /  GEMINI STUDIO", "Your AI command center.", "One workspace. Ten Gemini choices. Built for your next big idea.");
+        LinearLayout loginCard = cardBox();
+        loginCard.addView(label("ACCOUNT & SYNC", 11, cyan, true));
+        authStatus = label(getAuthStatusText(), 12, muted, false);
+        authStatus.setPadding(0, dp(7), 0, dp(9));
+        loginCard.addView(authStatus);
+        Button googleButton = button("G  CONTINUE WITH GOOGLE", panel2);
+        googleButton.setAllCaps(false);
+        loginCard.addView(googleButton, params());
+        googleButton.setOnClickListener(v -> beginGoogleSignIn());
+        body.addView(loginCard, params());
+        space(12);
+
         LinearLayout keyCard = cardBox();
         keyCard.addView(label("GEMINI CONNECTION", 11, cyan, true));
         apiKey = field("Paste your Gemini API key", false);
@@ -148,21 +181,16 @@ public class MainActivity extends Activity {
         modelPicker.setPadding(dp(6), dp(6), dp(6), dp(6));
         modelPicker.setBackground(background(panel2, dp(12), Color.TRANSPARENT));
         modelIds.clear();
-        modelIds.add("gemini-3.8-flash");
-        modelIds.add("gemini-3.7-flash");
-        modelIds.add("gemini-3.6-flash");
-        modelIds.add("gemini-3.5-flash");
-        modelIds.add("gemini-3.5-flash-lite");
-        modelIds.add("gemini-3.1-flash-lite");
-        modelIds.add("gemini-3.1-pro-preview");
-        modelIds.add("gemini-3-flash-preview");
-        modelIds.add("gemini-2.5-pro");
         modelIds.add("gemini-2.5-flash");
+        modelIds.add("gemini-2.5-flash-lite");
+        modelIds.add("gemini-2.5-pro");
+        modelIds.add("gemini-2.0-flash");
+        modelIds.add("gemini-2.0-flash-lite");
         refreshModelPicker(prefs.getString("selected_model", "gemini-2.5-flash"));
         LinearLayout.LayoutParams sp = params();
         sp.topMargin = dp(8);
         modelCard.addView(modelPicker, sp);
-        modelStatus = label("10 curated Gemini models are listed. Add your API key and refresh to show the exact models enabled for your account.", 11, muted, false);
+        modelStatus = label("Fallback examples only. Refresh to load models enabled for your API key; free-tier access and limits depend on Google's current offering.", 11, muted, false);
         modelStatus.setPadding(0, dp(8), 0, dp(8));
         modelCard.addView(modelStatus);
         Button refresh = button("↻  REFRESH AVAILABLE MODELS", panel2);
@@ -260,6 +288,109 @@ public class MainActivity extends Activity {
     }
 
 
+
+    private void initializeFirebase() {
+        try {
+            String apiKey = getString(R.string.firebase_api_key);
+            String appId = getString(R.string.firebase_app_id);
+            String projectId = getString(R.string.firebase_project_id);
+            String webClientId = getString(R.string.default_web_client_id);
+            if (apiKey.startsWith("REPLACE_") || appId.startsWith("REPLACE_") ||
+                projectId.startsWith("REPLACE_") || webClientId.startsWith("REPLACE_")) return;
+            if (FirebaseApp.getApps(this).isEmpty()) {
+                FirebaseOptions options = new FirebaseOptions.Builder()
+                    .setApiKey(apiKey).setApplicationId(appId).setProjectId(projectId).build();
+                FirebaseApp.initializeApp(this, options);
+            }
+            firebaseAuth = FirebaseAuth.getInstance();
+            firestore = FirebaseFirestore.getInstance();
+        } catch (Exception ignored) {
+            firebaseAuth = null;
+            firestore = null;
+        }
+    }
+
+    private String getAuthStatusText() {
+        if (firebaseAuth == null) return "Google sign-in needs the Firebase project values configured. See SETUP.md.";
+        if (firebaseAuth.getCurrentUser() == null) return "Sign in once; Google keeps your session on this device.";
+        String name = firebaseAuth.getCurrentUser().getDisplayName();
+        return "Signed in" + (name == null || name.isEmpty() ? "" : " as " + name) + " · chat sync enabled";
+    }
+
+    private void beginGoogleSignIn() {
+        if (firebaseAuth == null) {
+            toast("Google sign-in setup is required. Open SETUP.md in the repository.");
+            return;
+        }
+        try {
+            GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail().requestIdToken(getString(R.string.default_web_client_id)).build();
+            GoogleSignInClient client = GoogleSignIn.getClient(this, options);
+            startActivityForResult(client.getSignInIntent(), RC_GOOGLE_SIGN_IN);
+        } catch (Exception e) {
+            toast("Could not start Google sign-in. Check Firebase and OAuth setup.");
+        }
+    }
+
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != RC_GOOGLE_SIGN_IN) return;
+        try {
+            GoogleSignInAccount account = GoogleSignIn.getSignedInAccountFromIntent(data).getResult(ApiException.class);
+            if (account == null || account.getIdToken() == null || firebaseAuth == null) {
+                toast("Google sign-in returned no token. Check the Web client ID.");
+                return;
+            }
+            AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+            firebaseAuth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
+                if (task.isSuccessful()) {
+                    if (authStatus != null) authStatus.setText(getAuthStatusText());
+                    toast("Signed in with Google.");
+                    loadCloudHistory();
+                } else {
+                    toast("Sign-in failed. Verify Firebase Authentication and SHA-1/OAuth settings.");
+                }
+            });
+        } catch (ApiException e) {
+            toast("Google sign-in cancelled or not configured (code " + e.getStatusCode() + ").");
+        }
+    }
+
+    private void loadCloudHistory() {
+        if (firestore == null || firebaseAuth == null || firebaseAuth.getCurrentUser() == null) return;
+        firestore.collection("users").document(firebaseAuth.getCurrentUser().getUid())
+            .collection("chats").orderBy("updated", Query.Direction.DESCENDING).limit(50).get()
+            .addOnSuccessListener(snapshot -> {
+                JSONArray local = readChatSessions();
+                for (com.google.firebase.firestore.DocumentSnapshot doc : snapshot.getDocuments()) {
+                    try {
+                        String id = doc.getString("id");
+                        if (id == null || id.isEmpty()) continue;
+                        JSONObject obj = new JSONObject();
+                        obj.put("id", id);
+                        obj.put("title", doc.getString("title") == null ? "Saved chat" : doc.getString("title"));
+                        obj.put("transcript", doc.getString("transcript") == null ? "" : doc.getString("transcript"));
+                        obj.put("updated", doc.getLong("updated") == null ? 0 : doc.getLong("updated"));
+                        JSONArray merged = new JSONArray();
+                        boolean exists = false;
+                        for (int i = 0; i < local.length(); i++) {
+                            JSONObject old = local.optJSONObject(i);
+                            if (old == null) continue;
+                            if (id.equals(old.optString("id"))) {
+                                if (!exists) merged.put(obj);
+                                exists = true;
+                            } else merged.put(old);
+                        }
+                        if (!exists) merged.put(obj);
+                        local = merged;
+                    } catch (Exception ignored) { }
+                }
+                prefs.edit().putString("chat_sessions", local.toString()).apply();
+                if (authStatus != null) authStatus.setText(getAuthStatusText());
+                renderHistory();
+            });
+    }
+
     private void startNewChat() {
         currentChatId = String.valueOf(System.currentTimeMillis());
         currentTranscript = "";
@@ -303,6 +434,15 @@ public class MainActivity extends Activity {
                 .putString("current_chat_transcript", currentTranscript)
                 .putString("current_chat_title", currentChatTitle).apply();
         } catch (Exception ignored) { }
+        if (firestore != null && firebaseAuth != null && firebaseAuth.getCurrentUser() != null) {
+            Map<String, Object> cloudChat = new HashMap<>();
+            cloudChat.put("id", currentChatId);
+            cloudChat.put("title", currentChatTitle);
+            cloudChat.put("transcript", currentTranscript);
+            cloudChat.put("updated", System.currentTimeMillis());
+            firestore.collection("users").document(firebaseAuth.getCurrentUser().getUid())
+                .collection("chats").document(currentChatId).set(cloudChat);
+        }
     }
 
     private void renderHistory() {
