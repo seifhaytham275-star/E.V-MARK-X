@@ -184,12 +184,14 @@ public class MainActivity extends Activity {
         modelPicker.setPadding(dp(6), dp(6), dp(6), dp(6));
         modelPicker.setBackground(background(panel2, dp(12), Color.TRANSPARENT));
         modelIds.clear();
+        modelIds.add("gemini-3.5-flash");
+        modelIds.add("gemini-3.5-flash-lite");
         modelIds.add("gemini-2.5-flash");
         modelIds.add("gemini-2.5-flash-lite");
         modelIds.add("gemini-2.5-pro");
         modelIds.add("gemini-2.0-flash");
         modelIds.add("gemini-2.0-flash-lite");
-        refreshModelPicker(prefs.getString("selected_model", "gemini-2.5-flash"));
+        refreshModelPicker(prefs.getString("selected_model", "gemini-3.5-flash"));
         LinearLayout.LayoutParams sp = params();
         sp.topMargin = dp(8);
         modelCard.addView(modelPicker, sp);
@@ -702,7 +704,7 @@ public class MainActivity extends Activity {
             build.setEnabled(false);
             build.setText("BUILDING YOUR PLAN…");
             new Thread(() -> {
-                String answer = askGemini(key, planPrompt, "gemini-2.5-flash");
+                String answer = askGemini(key, planPrompt, "gemini-3.5-flash");
                 runOnUiThread(() -> {
                     build.setEnabled(true);
                     build.setText("✦  BUILD MY WELLNESS PLAN");
