@@ -251,6 +251,32 @@ public class MainActivity extends Activity {
         renderHistory();
 
         LinearLayout chatCard = cardBox();
+        chatCard.addView(label("QUICK PROMPTS", 11, cyan, true));
+        TextView promptHint = label("Tap a starter to fill your message, then edit it or send it as-is.", 11, muted, false);
+        promptHint.setPadding(0, dp(5), 0, dp(8));
+        chatCard.addView(promptHint);
+        LinearLayout promptRow = new LinearLayout(this);
+        promptRow.setOrientation(LinearLayout.HORIZONTAL);
+        String[][] starters = new String[][] {
+            {"PLAN MY DAY", "Create a realistic daily plan with time for priorities, breaks, and rest."},
+            {"EXPLAIN SIMPLY", "Explain this topic in simple language, then give me one example: "},
+            {"WRITE BETTER", "Help me write a clear, friendly, professional message about: "}
+        };
+        for (String[] starter : starters) {
+            Button quick = button(starter[0], panel2);
+            quick.setAllCaps(false);
+            quick.setTextSize(9);
+            LinearLayout.LayoutParams qbp = new LinearLayout.LayoutParams(0, dp(42), 1);
+            qbp.setMargins(0, 0, dp(5), 0);
+            promptRow.addView(quick, qbp);
+            quick.setOnClickListener(v -> {
+                question.setText(starter[1]);
+                question.setSelection(question.getText().length());
+                question.requestFocus();
+            });
+        }
+        chatCard.addView(promptRow, params());
+        spaceIn(chatCard, 12);
         chatCard.addView(label("MESSAGE", 11, cyan, true));
         question = field("What would you like to explore?", true);
         LinearLayout.LayoutParams qp = params();
@@ -260,6 +286,19 @@ public class MainActivity extends Activity {
         Button ask = button("✦  SEND TO GEMINI", accent);
         ask.setAllCaps(false);
         chatCard.addView(ask, params());
+        LinearLayout actionRow = new LinearLayout(this);
+        actionRow.setOrientation(LinearLayout.HORIZONTAL);
+        Button shareChat = button("↗  SHARE CHAT", panel2);
+        shareChat.setAllCaps(false);
+        Button clearChat = button("＋  NEW CHAT", panel2);
+        clearChat.setAllCaps(false);
+        LinearLayout.LayoutParams actionButtonParams = new LinearLayout.LayoutParams(0, dp(44), 1);
+        actionButtonParams.setMargins(0, dp(8), dp(5), 0);
+        actionRow.addView(shareChat, actionButtonParams);
+        LinearLayout.LayoutParams clearParams = new LinearLayout.LayoutParams(0, dp(44), 1);
+        clearParams.setMargins(dp(5), dp(8), 0, 0);
+        actionRow.addView(clearChat, clearParams);
+        chatCard.addView(actionRow);
         conversationView = label(currentTranscript.isEmpty() ? "Your response will appear here." : currentTranscript, 14, Color.WHITE, false);
         conversationView.setPadding(dp(14), dp(14), dp(14), dp(14));
         conversationView.setBackground(background(panel2, dp(14), Color.TRANSPARENT));
@@ -267,6 +306,22 @@ public class MainActivity extends Activity {
         LinearLayout.LayoutParams ap = params();
         ap.topMargin = dp(12);
         chatCard.addView(conversationView, ap);
+        shareChat.setOnClickListener(v -> {
+            if (currentTranscript == null || currentTranscript.trim().isEmpty()) {
+                toast("There is no conversation to share yet.");
+                return;
+            }
+            Intent share = new Intent(Intent.ACTION_SEND);
+            share.setType("text/plain");
+            share.putExtra(Intent.EXTRA_SUBJECT, "E.V-MARK-X conversation");
+            share.putExtra(Intent.EXTRA_TEXT, currentTranscript);
+            startActivity(Intent.createChooser(share, "Share E.V-MARK-X chat"));
+        });
+        clearChat.setOnClickListener(v -> {
+            startNewChat();
+            showAI();
+            toast("Started a new chat.");
+        });
         body.addView(chatCard, params());
 
         ask.setOnClickListener(v -> {
