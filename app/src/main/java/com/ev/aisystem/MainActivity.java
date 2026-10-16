@@ -4,6 +4,12 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.RectF;
+import android.graphics.Shader;
+import android.graphics.LinearGradient;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.view.Gravity;
@@ -166,6 +172,11 @@ public class MainActivity extends Activity {
 
     private void showAI() {
         base("E.V INTELLIGENCE  /  GEMINI STUDIO", "Your AI command center.", "Free-tier Gemini models, saved chats, one workspace.");
+        SpiderTechView spiderVisual = new SpiderTechView(this);
+        LinearLayout.LayoutParams spiderVisualParams = params();
+        spiderVisualParams.height = dp(190);
+        spiderVisualParams.bottomMargin = dp(16);
+        body.addView(spiderVisual, 1, spiderVisualParams);
         LinearLayout loginCard = cardBox();
         loginCard.addView(label("ACCOUNT & SYNC", 11, cyan, true));
         authStatus = label(getAuthStatusText(), 12, muted, false);
@@ -934,6 +945,89 @@ public class MainActivity extends Activity {
             prefs.edit().putInt("calorie_total", 0).remove("last_food").remove("last_food_calories").apply();
             showCalories();
         });
+    }
+
+    private final class SpiderTechView extends View {
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final RectF bounds = new RectF();
+
+        SpiderTechView(android.content.Context context) {
+            super(context);
+            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        }
+
+        @Override protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            float w = getWidth(), h = getHeight();
+            bounds.set(0, 0, w, h);
+            Path clip = new Path();
+            clip.addRoundRect(bounds, dp(20), dp(20), Path.Direction.CW);
+            int save = canvas.save();
+            canvas.clipPath(clip);
+            paint.setShader(new LinearGradient(0, 0, w, h,
+                new int[]{Color.rgb(93, 12, 33), Color.rgb(15, 25, 45), Color.rgb(8, 67, 105)},
+                null, Shader.TileMode.CLAMP));
+            canvas.drawRect(bounds, paint);
+            paint.setShader(null);
+
+            // Original spider-web-inspired tech artwork, not a movie still.
+            paint.setColor(Color.argb(48, 88, 184, 255));
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(dp(1));
+            float cx = w * 0.78f, cy = h * 0.38f;
+            for (int i = 0; i < 12; i++) {
+                double a = Math.PI * 2 * i / 12.0;
+                canvas.drawLine(cx, cy,
+                    cx + (float)Math.cos(a) * w * 0.72f,
+                    cy + (float)Math.sin(a) * h * 0.88f, paint);
+            }
+            for (int ring = 1; ring <= 6; ring++) {
+                bounds.set(cx - dp(12 * ring), cy - dp(9 * ring),
+                    cx + dp(12 * ring), cy + dp(9 * ring));
+                canvas.drawOval(bounds, paint);
+            }
+
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(Color.argb(32, 255, 53, 79));
+            canvas.drawCircle(w * 0.78f, h * 0.4f, h * 0.42f, paint);
+
+            // Abstract spider-tech emblem.
+            float sx = w * 0.77f, sy = h * 0.55f;
+            paint.setColor(Color.rgb(235, 43, 67));
+            canvas.drawOval(sx - dp(8), sy - dp(16), sx + dp(8), sy + dp(8), paint);
+            canvas.drawCircle(sx, sy - dp(19), dp(6), paint);
+            paint.setStrokeWidth(dp(4));
+            paint.setStrokeCap(Paint.Cap.ROUND);
+            for (int side : new int[]{-1, 1}) {
+                for (int leg = 0; leg < 4; leg++) {
+                    float startY = sy - dp(12) + dp(6 * leg);
+                    Path p = new Path();
+                    p.moveTo(sx + side * dp(5), startY);
+                    p.lineTo(sx + side * dp(18), startY - dp(8));
+                    p.lineTo(sx + side * dp(30), startY + dp(1));
+                    canvas.drawPath(p, paint);
+                }
+            }
+
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(Color.WHITE);
+            paint.setTextSize(dp(10));
+            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+            canvas.drawText("EV // SPIDER TECH", dp(18), dp(28), paint);
+            paint.setTextSize(dp(23));
+            canvas.drawText("AI CORE", dp(18), dp(62), paint);
+            paint.setColor(Color.rgb(167, 211, 255));
+            paint.setTextSize(dp(11));
+            paint.setTypeface(Typeface.DEFAULT);
+            canvas.drawText("YOUR INTELLIGENCE. YOUR CONTROL.", dp(18), dp(84), paint);
+            paint.setColor(Color.argb(210, 255, 255, 255));
+            canvas.drawRoundRect(dp(18), h - dp(36), dp(136), h - dp(15), dp(10), dp(10), paint);
+            paint.setColor(Color.rgb(27, 33, 48));
+            paint.setTextSize(dp(9));
+            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+            canvas.drawText("SYSTEM ONLINE", dp(27), h - dp(22), paint);
+            canvas.restoreToCount(save);
+        }
     }
 
     private LinearLayout cardBox() {
