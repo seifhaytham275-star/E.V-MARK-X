@@ -233,17 +233,24 @@
       if(!callsInResponse.length)return {answer:candidateText(candidate)||"Agent finished without a text response.",candidate,sources};
       if(step===4||calls>=4)return {answer:"Agent reached its safe tool-step limit. Narrow the task or continue with a follow-up.",candidate:lastCandidate,sources};
       agentContents.push(candidate.content);const responses=[];
-      for(const call of callsInResponse.slice(0,Math.max(1,4-calls))){
-        calls++;const args=call.args||{};let result;
-        try{
-          if(call.name==="calculate")result={result:parseSafeMath(args.expression)};
-          else if(call.name==="get_current_time")result={localTime:new Date().toString(),isoTime:new Date().toISOString()};
-          else if(call.name==="search_web"){const found=await searchWebTool(args.query,key);sources.push(...found.sources);result={answer:found.answer,sources:found.sources};}
-          else if(call.name==="create_studio_preview")result={status:"success",message:await generateStudio(args.description,key)};
-          else if(call.name==="read_saved_memory")result={memory:readMemory()||"No saved memory is stored."};
-          else result={error:"Tool not available. Choose a declared tool."};
-        }catch(error){result={error:(error&&error.message)||"Tool execution failed."};}
-        responses.push({functionResponse:{name:call.name,response:{result}}});
+      for(const call of callsInResponse){
+        let result;
+        if(calls>=4) {
+          result={error:"Agent tool-call limit reached for this turn."};
+        } else {
+          calls++;const args=call.args||{};
+          try{
+            if(call.name==="calculate")result={result:parseSafeMath(args.expression)};
+            else if(call.name==="get_current_time")result={localTime:new Date().toString(),isoTime:new Date().toISOString()};
+            else if(call.name==="search_web"){const found=await searchWebTool(args.query,key);sources.push(...found.sources);result={answer:found.answer,sources:found.sources};}
+            else if(call.name==="create_studio_preview")result={status:"success",message:await generateStudio(args.description,key)};
+            else if(call.name==="read_saved_memory")result={memory:readMemory()||"No saved memory is stored."};
+            else result={error:"Tool not available. Choose a declared tool."};
+          }catch(error){result={error:(error&&error.message)||"Tool execution failed."};}
+        }
+        const functionResponse={name:call.name,response:{result}};
+        if(call.id)functionResponse.id=call.id;
+        responses.push({functionResponse});
       }
       agentContents.push({role:"user",parts:responses});
     }
