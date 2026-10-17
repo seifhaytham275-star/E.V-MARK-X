@@ -71,10 +71,10 @@ app.post("/api/auth/google", authLimiter, async (req, res) => {
   }
 });
 
-async function getModels() {
-  if (modelCache.expires > Date.now() && modelCache.models.length) return modelCache.models;
+async function getModels(apiKey = GEMINI_API_KEY) {
+  if (apiKey === GEMINI_API_KEY && modelCache.expires > Date.now() && modelCache.models.length) return modelCache.models;
   const url = "https://generativelanguage.googleapis.com/v1beta/models?pageSize=100";
-  const response = await fetch(url, { headers: { "x-goog-api-key": GEMINI_API_KEY } });
+  const response = await fetch(url, { headers: { "x-goog-api-key": apiKey } });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error?.message || "Could not retrieve Gemini models.");
   const models = (data.models || [])
@@ -85,28 +85,30 @@ async function getModels() {
     const rank = n => { n = n.toLowerCase(); if (n.includes("flash-lite")) return 2; if (n.includes("flash")) return 0; if (n.includes("pro")) return 1; return 3; };
     return rank(a.name) - rank(b.name) || a.name.localeCompare(b.name);
   });
-  modelCache = { expires: Date.now() + MODEL_CACHE_MS, models };
+  if (apiKey === GEMINI_API_KEY) modelCache = { expires: Date.now() + MODEL_CACHE_MS, models };
   return models;
 }
 
-app.get("/api/models", apiLimiter, verifyGoogleCredential, async (_req, res) => {
-  if (!GEMINI_API_KEY) return res.status(503).json({ error: "The backend administrator has not configured Gemini yet." });
-  try { res.setHeader("Cache-Control", "private, no-store"); res.json({ models: await getModels() }); }
+app.get("/api/models", apiLimiter, verifyGoogleCredential, async (req, res) => {
+  const apiKey = (req.get("x-ev-gemini-key") || GEMINI_API_KEY || "").trim();
+  if (!apiKey) return res.status(400).json({ error: "Add your Gemini API key in Settings." });
+  try { res.setHeader("Cache-Control", "private, no-store"); res.json({ models: await getModels(apiKey) }); }
   catch (error) { res.status(502).json({ error: error.message || "Could not load models." }); }
 });
 
 app.post("/api/chat", chatLimiter, verifyGoogleCredential, async (req, res) => {
-  if (!GEMINI_API_KEY) return res.status(503).json({ error: "The backend administrator has not configured Gemini yet." });
+  const apiKey = (req.get("x-ev-gemini-key") || GEMINI_API_KEY || "").trim();
+  if (!apiKey) return res.status(400).json({ error: "Add your Gemini API key in Settings." });
   const model = typeof req.body?.model === "string" ? req.body.model.replace(/^models\//, "") : "";
   const prompt = typeof req.body?.prompt === "string" ? req.body.prompt.trim() : "";
   if (!model || model.length > 150) return res.status(400).json({ error: "Choose a valid model." });
   if (!prompt || prompt.length > 12000) return res.status(400).json({ error: "Enter a message up to 12,000 characters." });
   try {
-    const models = await getModels();
+    const models = await getModels(apiKey);
     if (!models.some(m => m.name === model)) return res.status(400).json({ error: "That model is not available for this API key. Refresh the model list." });
     const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
+      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
       body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] })
     });
     const data = await response.json().catch(() => ({}));
