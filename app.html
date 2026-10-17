@@ -405,22 +405,22 @@
   };
 
   function runLocalCommand(text){
-    const match=String(text||"").trim().match(/^\\/(help|commands|math|wordcount|reverse|upper|lower|date|time|export)(?:\\s+([\\s\\S]*))?$/i);
+    const match=String(text||"").trim().match(/^\/(help|commands|math|wordcount|reverse|upper|lower|date|time|export)(?:\s+([\s\S]*))?$/i);
     if(!match||pendingParts.length) return false;
     const command=match[1].toLowerCase(), arg=(match[2]||"").trim();
     let result="";
     try{
       if(command==="help"||command==="commands"){
-        result="E.V-MARK-X commands\\n\\nLocal: /math 12*(3+4), /wordcount text, /reverse text, /upper text, /lower text, /date, /time, /export\\n\\nAI workflows: "+Object.keys(FEATURE_COMMANDS).map(name=>"/"+name).join(", ")+"\\n\\nExisting modes: /agent task and /studio describe an app. AI workflows require your Gemini API key.";
+        result="E.V-MARK-X commands\n\nLocal: /math 12*(3+4), /wordcount text, /reverse text, /upper text, /lower text, /date, /time, /export\n\nAI workflows: "+Object.keys(FEATURE_COMMANDS).map(name=>"/"+name).join(", ")+"\n\nExisting modes: /agent task and /studio describe an app. AI workflows require your Gemini API key.";
       }else if(command==="math"){result=String(parseSafeMath(arg));}
-      else if(command==="wordcount"){result="Words: "+(arg.trim()?arg.trim().split(/\\s+/).length:0)+"\\nCharacters: "+arg.length+"\\nCharacters without spaces: "+arg.replace(/\\s/g,"").length;}
+      else if(command==="wordcount"){result="Words: "+(arg.trim()?arg.trim().split(/\s+/).length:0)+"\nCharacters: "+arg.length+"\nCharacters without spaces: "+arg.replace(/\s/g,"").length;}
       else if(command==="reverse"){result=Array.from(arg).reverse().join("");}
       else if(command==="upper"){result=arg.toLocaleUpperCase();}
       else if(command==="lower"){result=arg.toLocaleLowerCase();}
-      else if(command==="date"){const d=new Date();result="Local date: "+d.toLocaleDateString()+"\\nISO date: "+d.toISOString().slice(0,10);}
+      else if(command==="date"){const d=new Date();result="Local date: "+d.toLocaleDateString()+"\nISO date: "+d.toISOString().slice(0,10);}
       else if(command==="time"){result="Local time: "+new Date().toLocaleTimeString();}
       else if(command==="export"){
-        const transcript=Array.from($("chat").querySelectorAll(".message")).map(node=>{const who=node.querySelector(".who");const body=who&&who.nextElementSibling;return (who?who.textContent:"Message")+": "+(body?body.textContent:"");}).join("\\n\\n");
+        const transcript=Array.from($("chat").querySelectorAll(".message")).map(node=>{const who=node.querySelector(".who");const body=who&&who.nextElementSibling;return (who?who.textContent:"Message")+": "+(body?body.textContent:"");}).join("\n\n");
         const blob=new Blob([transcript||"E.V-MARK-X conversation is empty."],{type:"text/plain;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="ev-mark-x-chat.txt";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);result="Conversation export prepared as a text file.";
       }
     }catch(error){result="Command error: "+(error.message||"Invalid input.");}
@@ -433,13 +433,13 @@
     const text = (rawText || $("prompt").value).trim();
     if((!text && !pendingParts.length) || busy) return;
     if(runLocalCommand(text)) return;
-    const commandMatch = text.match(/^\\/([a-z][a-z0-9_-]*)(?:\\s+([\\s\\S]*))?$/i);
+    const commandMatch = text.match(/^\/([a-z][a-z0-9_-]*)(?:\s+([\s\S]*))?$/i);
     const commandName = commandMatch ? commandMatch[1].toLowerCase() : "";
     const mode = commandName === "agent" || commandName === "studio" ? commandName : "chat";
     const taskText = commandMatch ? (commandMatch[2] || "").trim() : text;
     const featurePrompt = FEATURE_COMMANDS[commandName];
     const requestText = featurePrompt
-      ? featurePrompt + "\\n\\nUser request / source material:\\n" + (taskText || "Use the conversation context where relevant.")
+      ? featurePrompt + "\n\nUser request / source material:\n" + (taskText || "Use the conversation context where relevant.")
       : taskText || (mode === "studio" ? "Create a polished interactive web app starter." : mode === "agent" ? "Help me plan and complete my next task." : text);
     const key = savedKey();
     if(!key){
