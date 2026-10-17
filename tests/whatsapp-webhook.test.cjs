@@ -6,7 +6,6 @@ const server = fs.readFileSync("server/index.js", "utf8");
 const adapter = fs.readFileSync("server/whatsapp.js", "utf8");
 const render = fs.readFileSync("render.yaml", "utf8");
 const setup = fs.readFileSync("WEB_BACKEND_SETUP.md", "utf8");
-const render = fs.readFileSync("render.yaml", "utf8");
 
 test("WhatsApp webhook is mounted before JSON parsing so signature verification sees raw bytes", () => {
   const mount = server.indexOf('app.use("/api/webhooks/whatsapp"');
