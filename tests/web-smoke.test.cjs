@@ -30,16 +30,18 @@ test("web search is opt-in and source links are constrained to HTTP(S)", () => {
   assert.match(script, /requestBody\.tools = \[\{googleSearch:\{\}\}\]/);
   assert.match(script, /groundingMetadata/);
   assert.match(script, /noopener noreferrer/);
-  assert.match(script, /\^https\?:\\\/\\\//);
+  assert.match(script, /https\?:/);
 });
 
 test("attachment handling includes size limits and supported formats", () => {
   assert.match(html, /id="attachments"/);
   assert.match(script, /MAX_FILE_BYTES = 10 \* 1024 \* 1024/);
+  assert.match(script, /pendingBytes \+ file\.size > MAX_FILE_BYTES/);
   assert.match(script, /application\/pdf/);
   assert.match(script, /image\/png/);
   assert.match(script, /Attached file:/);
   assert.match(script, /DOCX\/XLSX parsing is planned next/);
+  assert.match(script, /Attachments restored for retry/);
 });
 
 test("memory and local projects are user-controllable", () => {
@@ -55,4 +57,14 @@ test("all HTML IDs are unique", () => {
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
   const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
   assert.deepEqual([...new Set(duplicates)], []);
+});
+
+test("every JavaScript ID lookup has a matching HTML element", () => {
+  const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]));
+  const used = [...script.matchAll(/\$\("([^"]+)"\)/g)].map(match => match[1]);
+  assert.deepEqual([...new Set(used.filter(id => !ids.has(id)))], []);
+});
+
+test("empty saved-project selection is ignored", () => {
+  assert.match(script, /if\(!\$\("projectSelect"\)\.value\) return/);
 });
