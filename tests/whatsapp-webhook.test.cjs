@@ -6,6 +6,7 @@ const server = fs.readFileSync("server/index.js", "utf8");
 const adapter = fs.readFileSync("server/whatsapp.js", "utf8");
 const render = fs.readFileSync("render.yaml", "utf8");
 const setup = fs.readFileSync("WEB_BACKEND_SETUP.md", "utf8");
+const render = fs.readFileSync("render.yaml", "utf8");
 
 test("WhatsApp webhook is mounted before JSON parsing so signature verification sees raw bytes", () => {
   const mount = server.indexOf('app.use("/api/webhooks/whatsapp"');
@@ -36,4 +37,13 @@ test("WhatsApp credentials are environment-only and setup docs state initial sco
   }
   assert.match(setup, /incoming text messages and automated text replies only/);
   assert.match(setup, /does not implement outbound campaigns, media messages, persistence-based deduplication, or voice\/telephone calls/);
+});
+
+
+test("External integrations remain disabled by default while their code is retained", () => {
+  assert.match(adapter, /process\.env\.INTEGRATIONS_ENABLED === "true"/);
+  assert.match(adapter, /if \(!INTEGRATIONS_ENABLED\) return res\.status\(503\)/);
+  assert.match(render, /key: INTEGRATIONS_ENABLED\n\s+value: "false"/);
+  assert.match(setup, /code and configuration are intentionally retained/);
+  assert.match(setup, /does not disable the ordinary E\.V website chat/);
 });
