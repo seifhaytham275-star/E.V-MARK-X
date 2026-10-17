@@ -135,6 +135,31 @@ test("local utility commands work without adding UI controls", () => {
   assert.match(script, /ev-mark-x-chat\.txt/);
 });
 
+
+test("conversation context is bounded and prior binary attachments are not resent", () => {
+  const match = script.match(/function buildHistoryContext\(items\)\{[\s\S]*?\n  \}/);
+  assert.ok(match, "bounded history helper should exist");
+  const build = vm.runInNewContext("(function(){const MAX_HISTORY_MESSAGES=24;const MAX_HISTORY_CHARS=60000;" + match[0] + ";return buildHistoryContext;})()");
+  const items = [];
+  for (let i = 0; i < 30; i++) {
+    items.push({ role: "user", parts: [{ text: "message-" + i }, ...(i === 29 ? [{ inline_data: { mime_type: "application/pdf", data: "A".repeat(100000) } }] : [])] });
+    items.push({ role: "model", parts: [{ text: "reply-" + i }] });
+  }
+  const result = build(items);
+  assert.ok(result.length <= 24, "context should include at most 24 messages");
+  assert.ok(result.reduce((sum, item) => sum + item.parts.reduce((n, part) => n + (part.text || "").length, 0), 0) <= 60000);
+  assert.ok(result.every(item => item.parts.every(part => !part.inline_data)), "binary attachments must not be replayed");
+  assert.ok(result.some(item => item.parts.some(part => (part.text || "").includes("omitted to keep context small"))));
+  assert.ok(result.some(item => item.parts.some(part => (part.text || "").includes("message-29"))));
+});
+
+test("conversation history stores attachment placeholders and is capped after each reply", () => {
+  assert.match(script, /const MAX_HISTORY_MESSAGES = 24/);
+  assert.match(script, /const historyParts = userParts\.map\(part => part && part\.inline_data/);
+  assert.match(script, /if\(history\.length > MAX_HISTORY_MESSAGES\) history = history\.slice\(-MAX_HISTORY_MESSAGES\)/);
+  assert.match(script, /const contents = buildHistoryContext\(history\)/);
+});
+
 test("unknown slash-prefixed text remains ordinary chat", () => {
   assert.match(script, /const recognizedCommand = mode === "agent" \|\| mode === "studio" \|\| Boolean\(featurePrompt\)/);
   assert.match(script, /commandMatch && recognizedCommand \? \(commandMatch\[2\] \|\| ""\)\.trim\(\) : text/);
