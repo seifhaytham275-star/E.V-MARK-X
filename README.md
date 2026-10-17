@@ -71,3 +71,104 @@ The current workspace brand is **E.V-MARK-XI Platinum**. The existing repository
 ## E.V Business Desk preview
 
 Open [Business Desk](https://seifhaytham275-star.github.io/E.V-MARK-X/business.html) to track customer leads, phone numbers, opportunity values, stages, and follow-up tasks. The current preview stores data only in the current browser/device; it has no account sync, shared team database, billing, or automatic outbound messaging. Call and WhatsApp links are launched only after a user action. Do not store sensitive customer information in this local-only preview.
+
+
+## E.V Business Manager — Roadmap
+
+E.V is intended to grow beyond a chat interface into a business workspace that
+helps customers organize daily operations. The items below distinguish the
+current preview from planned production capabilities.
+
+### Available in the current Business Desk preview
+
+Open the [E.V Business Desk](https://seifhaytham275-star.github.io/E.V-MARK-X/business.html).
+
+- Customer and lead records: name, company, phone, email, stage, deal value,
+  next step, follow-up date, and notes.
+- Sales pipeline stages: New, Contacted, Qualified, Won, and Lost.
+- Search and stage filtering.
+- Dashboard totals for open leads, pipeline value, won revenue, and follow-ups
+  due.
+- Follow-up task list with due dates and completion status.
+- Click-to-call and user-triggered WhatsApp links.
+- Responsive layout for desktop and mobile browsers.
+
+**Current limitations:** this preview stores records in the browser on the
+current device only. It does not yet provide cloud sync, shared team access,
+secure customer accounts, automated messages, billing, or a production CRM
+database. Avoid entering sensitive customer information.
+
+### Planned: E.V Business Agent
+
+- **Business insights:** summarize sales activity and highlight overdue
+  follow-ups, stalled opportunities, and trends from data the customer provides.
+- **Next-best-action suggestions:** recommend practical next steps and draft
+  customer replies, quotations, and follow-up messages for review.
+- **E.V Studio:** help create and update simple business websites, landing pages,
+  and reusable business content.
+- **Data Intelligence:** analyze customer-approved CSV and spreadsheet data,
+  create summaries and charts, and explain business metrics.
+- **Customer operations:** organize tasks, notes, leads, and follow-up schedules.
+- **Human approval:** ask the customer before sending messages, contacting
+  people, publishing changes, or performing other external actions.
+- **Privacy controls:** provide clear data export and deletion, access controls,
+  and a way to disconnect integrations.
+
+These capabilities are planned; they should not be presented as available until
+implemented and tested.
+
+### Planned: accounts, cloud data, and team workspace
+
+Before offering Business Desk as a real multi-user service, implement:
+
+1. Secure sign-in and server-side session handling.
+2. A production database with each business's records isolated from other
+   customers.
+3. Server-side authorization checks on every read and write.
+4. Data export, account deletion, retention rules, and audit logs.
+5. Backups, error monitoring, rate limits, and recovery procedures.
+6. Explicit customer consent before importing contacts or connecting external
+   services.
+
+The browser-local preview is not a substitute for this production setup.
+
+### Planned: subscriptions and automatic model selection
+
+The intended subscription flow is:
+
+1. Customer chooses a plan and completes payment with a supported payment
+   provider.
+2. The server verifies the payment using a trusted provider webhook.
+3. The server activates the plan and its usage limits for that customer.
+4. E.V selects an eligible AI model on the server according to the active plan,
+   task requirements, usage budget, and provider availability.
+5. Usage is metered and the customer can view plan status and remaining limits.
+6. Failed payments, refunds, cancellations, and expired subscriptions update
+   access according to the published billing policy.
+
+**Security requirements:**
+
+- Never send provider API keys to the browser or mobile app.
+- Keep secrets in server-side environment variables or a secret manager.
+- Never trust a success page or client-side payment status as proof of payment.
+- Enforce plan entitlements, rate limits, and spending limits on the server.
+- Do not promise a particular model or unlimited usage until provider access,
+  costs, and availability have been verified.
+- Choose an AI provider whose current terms allow the intended audience and
+  use case. Review age requirements, privacy terms, and commercial-use terms
+  before launch.
+
+Subscription prices and included quotas remain undecided until model costs,
+payment fees, and expected usage have been measured.
+
+### Production readiness checklist
+
+- [ ] Secure accounts and isolated cloud database.
+- [ ] Authorization and privacy tests for all customer records.
+- [ ] Verified payment webhooks and subscription lifecycle handling.
+- [ ] Server-side model routing, quotas, usage tracking, and cost controls.
+- [ ] Approved AI provider and documented provider fallback behavior.
+- [ ] Customer-approved integrations and external actions.
+- [ ] Backup, export, deletion, monitoring, and recovery tests.
+- [ ] End-to-end tests on mobile and desktop.
+- [ ] Clear terms, privacy notice, pricing, and customer support contact.
