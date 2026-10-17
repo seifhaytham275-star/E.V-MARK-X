@@ -57,8 +57,17 @@ This roadmap describes the staged work for the existing GitHub Pages workspace. 
 - Studio previews never execute inside the main page context.
 - Every claimed feature has an automated test where feasible and a documented manual API/device test where credentials or a real device are required.
 
+## Developer-focused roadmap
 
-### Business Desk preview (implemented)
-- Standalone `business.html` dashboard with customer/lead records, phone and email fields, deal stages and values, search/filter, click-to-call and user-triggered WhatsApp links, follow-up tasks, and summary metrics.
-- Current storage is local to the browser/device; it is not yet a secure multi-user CRM and does not synchronize across devices.
-- Next production steps: server-side accounts and database, tenant-level authorization, audit trail, encrypted transport and retention controls, export/delete controls, explicit opt-in before any automated contact, verified payment webhooks, plan entitlements and per-user usage limits, and an approved AI provider suitable for the intended audience.
+E.V is aimed at programmers and developers. Priorities:
+
+1. **E.V Studio:** improve editing, reset/copy actions, version history, and artifact handling while keeping previews isolated from the main application.
+2. **Data Intelligence:** improve CSV/JSON analysis, spreadsheet summaries, data validation, and useful charts with clear explanations of limits.
+3. **Agent Mode:** show step-by-step progress, support cancellation, and keep tool access allowlisted and bounded.
+4. **Developer productivity:** improve code review/debugging, test generation, documentation, accessibility, and security workflows.
+5. **Reliability:** expand automated smoke tests, improve error states, test mobile layouts and APK behavior, and keep setup/privacy documentation accurate.
+6. **Distribution:** publish clear screenshots, a concise feature list, release notes, and a useful GitHub README. Do not claim features work until verified end-to-end.
+
+## Non-goals
+
+Business CRM, customer lead tracking, sales pipelines, and business-manager features are not part of the target product.
