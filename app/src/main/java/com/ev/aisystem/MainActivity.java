@@ -1,1002 +1,302 @@
 package com.ev.aisystem;
 
 import android.app.Activity;
-import android.os.Bundle;
+import android.app.DownloadManager;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.RectF;
-import android.graphics.Shader;
-import android.graphics.LinearGradient;
-import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
-import android.text.InputType;
-import android.util.Base64;
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyProperties;
-import java.security.KeyStore;
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.GCMParameterSpec;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
+import android.webkit.CookieManager;
+import android.webkit.DownloadListener;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
-    private static final String MODEL_ID = "gemini-3.5-flash-lite";
-    private final int bg = Color.rgb(7, 11, 24);
-    private final int panel = Color.rgb(19, 22, 35);
-    private final int panel2 = Color.rgb(28, 34, 52);
-    private final int accent = Color.rgb(220, 42, 67);
-    private final int cyan = Color.rgb(61, 169, 255);
-    private final int red = Color.rgb(255, 63, 83);
-    private final int muted = Color.rgb(164, 179, 207);
-    private LinearLayout root, body;
-    private EditText apiKey, question;
-    private String sessionApiKey = "";
-    private static final String API_KEY_PREF = "gemini_api_key_encrypted";
-    private static final String API_KEY_ALIAS = "ev_gemini_api_key";
-    private android.content.SharedPreferences prefs;
-    private LinearLayout historyList;
-    private TextView conversationView;
-    private String currentChatId = "";
-    private String currentTranscript = "";
-    private String currentChatTitle = "New chat";
-    private FirebaseAuth firebaseAuth;
-    private FirebaseFirestore firestore;
-    private TextView authStatus;
-    private static final int RC_GOOGLE_SIGN_IN = 701;
+    private static final String HOME_URL = "https://seifhaytham275-star.github.io/E.V-MARK-X/app.html";
+    private static final String HOME_HOST = "seifhaytham275-star.github.io";
+    private static final int FILE_PICKER_REQUEST = 4401;
 
-    @Override public void onCreate(Bundle state) {
+    private FrameLayout container;
+    private WebView webView;
+    private ProgressBar progress;
+    private LinearLayout errorPanel;
+    private ValueCallback<Uri[]> fileChooserCallback;
+    private boolean pageLoaded = false;
+
+    @Override
+    public void onCreate(Bundle state) {
         super.onCreate(state);
-        prefs = getSharedPreferences("ev_system", MODE_PRIVATE);
-        sessionApiKey = loadSavedApiKey();
-        initializeFirebase();
-        getWindow().setStatusBarColor(bg);
-        getWindow().setNavigationBarColor(bg);
+        getWindow().setStatusBarColor(Color.rgb(8, 13, 25));
+        getWindow().setNavigationBarColor(Color.rgb(8, 13, 25));
         getWindow().getDecorView().setSystemUiVisibility(0);
-        root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(bg);
-        setContentView(root);
 
-        LinearLayout header = new LinearLayout(this);
-        header.setOrientation(LinearLayout.VERTICAL);
-        header.setPadding(dp(20), dp(18), dp(20), dp(12));
-        header.setBackground(background(panel, dp(18), Color.TRANSPARENT));
-        LinearLayout.LayoutParams hp = new LinearLayout.LayoutParams(-1, -2);
-        hp.setMargins(dp(12), dp(10), dp(12), dp(10));
-        root.addView(header, hp);
+        container = new FrameLayout(this);
+        container.setBackgroundColor(Color.rgb(8, 13, 25));
 
-        LinearLayout brandRow = new LinearLayout(this);
-        brandRow.setGravity(Gravity.CENTER_VERTICAL);
-        TextView mark = label("EV", 25, Color.WHITE, true);
-        mark.setGravity(Gravity.CENTER);
-        mark.setBackground(background(accent, dp(14), Color.TRANSPARENT));
-        brandRow.addView(mark, new LinearLayout.LayoutParams(dp(52), dp(48)));
-        LinearLayout brandText = new LinearLayout(this);
-        brandText.setOrientation(LinearLayout.VERTICAL);
-        brandText.setPadding(dp(12), 0, 0, 0);
-        brandText.addView(label("E.V MARK X", 19, Color.WHITE, true));
-        brandText.addView(label("AI SYSTEM  /  YOUR WORKSPACE", 10, cyan, true));
-        brandRow.addView(brandText, new LinearLayout.LayoutParams(0, -2, 1));
-        header.addView(brandRow);
+        LinearLayout shell = new LinearLayout(this);
+        shell.setOrientation(LinearLayout.VERTICAL);
+        shell.setBackgroundColor(Color.rgb(8, 13, 25));
+        container.addView(shell, new FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-        LinearLayout nav = new LinearLayout(this);
-        nav.setPadding(dp(10), dp(2), dp(10), dp(8));
-        nav.setGravity(Gravity.CENTER);
-        root.addView(nav);
-        addNav(nav, "✦  AI CORE", 0);
-        addNav(nav, "WALLET", 1);
-        addNav(nav, "CALORIES", 2);
+        progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        progress.setMax(100);
+        progress.setProgress(0);
+        progress.setProgressTintList(android.content.res.ColorStateList.valueOf(Color.rgb(92, 156, 255)));
+        progress.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(24, 37, 58)));
+        shell.addView(progress, new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(3)));
 
-        ScrollView scroll = new ScrollView(this);
-        scroll.setFillViewport(true);
-        root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
-        body = new LinearLayout(this);
-        body.setPadding(dp(16), dp(8), dp(16), dp(28));
-        body.setOrientation(LinearLayout.VERTICAL);
-        body.setGravity(Gravity.CENTER_HORIZONTAL);
-        int screenDp = (int)(getResources().getDisplayMetrics().widthPixels / getResources().getDisplayMetrics().density);
-        int contentWidth = screenDp >= 760 ? dp(700) : -1;
-        scroll.addView(body, new ScrollView.LayoutParams(contentWidth, -2));
-        currentChatId = prefs.getString("current_chat_id", "");
-        currentTranscript = prefs.getString("current_chat_transcript", "");
-        currentChatTitle = prefs.getString("current_chat_title", "New chat");
-        if (currentChatId.isEmpty()) startNewChat();
-        showAI();
-        if (firebaseAuth != null && firebaseAuth.getCurrentUser() != null) loadCloudHistory();
-    }
+        webView = new WebView(this);
+        webView.setBackgroundColor(Color.rgb(8, 13, 25));
+        shell.addView(webView, new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
-    private void addNav(LinearLayout nav, String title, int page) {
-        Button b = button(title, panel2);
-        b.setTextSize(10);
-        b.setAllCaps(false);
-        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, dp(44), 1);
-        p.setMargins(dp(3), 0, dp(3), 0);
-        nav.addView(b, p);
-        b.setOnClickListener(v -> {
-            if (apiKey != null) {
-                String entered = apiKey.getText().toString().trim();
-                if (!entered.isEmpty() && !entered.equals(sessionApiKey) && saveApiKey(entered)) sessionApiKey = entered;
-            }
-            if (page == 0) showAI();
-            else if (page == 1) showWallet();
-            else showCalories();
-        });
-    }
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setDatabaseEnabled(true);
+        settings.setLoadsImagesAutomatically(true);
+        settings.setAllowFileAccess(false);
+        settings.setAllowContentAccess(true);
+        settings.setSupportZoom(false);
+        settings.setBuiltInZoomControls(false);
+        settings.setDisplayZoomControls(false);
+        settings.setMediaPlaybackRequiresUserGesture(true);
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        settings.setJavaScriptCanOpenWindowsAutomatically(false);
+        settings.setSupportMultipleWindows(false);
+        settings.setSafeBrowsingEnabled(true);
+        CookieManager.getInstance().setAcceptCookie(true);
 
-    private void base(String protocol, String title, String desc) {
-        body.removeAllViews();
-        LinearLayout hero = new LinearLayout(this);
-        hero.setOrientation(LinearLayout.VERTICAL);
-        hero.setPadding(dp(18), dp(18), dp(18), dp(18));
-        hero.setBackground(heroBackground());
-        TextView eyebrow = label(protocol, 10, cyan, true);
-        hero.addView(eyebrow);
-        TextView heading = label(title, 27, Color.WHITE, true);
-        heading.setPadding(0, dp(8), 0, dp(5));
-        hero.addView(heading);
-        hero.addView(label(desc, 12, muted, false));
-        LinearLayout.LayoutParams p = params();
-        p.bottomMargin = dp(16);
-        body.addView(hero, p);
-    }
-
-    private void showAI() {
-        base("E.V INTELLIGENCE  /  GEMINI STUDIO", "Your AI command center.", "Free-tier Gemini models, saved chats, one workspace.");
-        SpiderTechView spiderVisual = new SpiderTechView(this);
-        LinearLayout.LayoutParams spiderVisualParams = params();
-        spiderVisualParams.height = dp(190);
-        spiderVisualParams.bottomMargin = dp(16);
-        body.addView(spiderVisual, 1, spiderVisualParams);
-        LinearLayout loginCard = cardBox();
-        loginCard.addView(label("ACCOUNT & SYNC", 11, cyan, true));
-        authStatus = label(getAuthStatusText(), 12, muted, false);
-        authStatus.setPadding(0, dp(7), 0, dp(9));
-        loginCard.addView(authStatus);
-        Button googleButton = button("G  CONTINUE WITH GOOGLE", panel2);
-        googleButton.setAllCaps(false);
-        loginCard.addView(googleButton, params());
-        googleButton.setOnClickListener(v -> beginGoogleSignIn());
-        body.addView(loginCard, params());
-        space(12);
-
-        LinearLayout keyCard = cardBox();
-        keyCard.addView(label("GEMINI CONNECTION", 11, cyan, true));
-        apiKey = field("Paste your Gemini API key", false);
-        apiKey.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        apiKey.setText(sessionApiKey);
-        LinearLayout.LayoutParams fp = params();
-        fp.topMargin = dp(10);
-        keyCard.addView(apiKey, fp);
-        TextView hint = label(sessionApiKey.isEmpty()
-            ? "Your key is not saved yet. Save it on this device to reuse it next time."
-            : "API key saved on this device. It will be reused when you reopen the app.", 11, muted, false);
-        hint.setPadding(0, dp(6), 0, dp(8));
-        keyCard.addView(hint);
-        LinearLayout keyActions = new LinearLayout(this);
-        keyActions.setOrientation(LinearLayout.HORIZONTAL);
-        Button saveKey = button("✓  SAVE API KEY", accent);
-        saveKey.setAllCaps(false);
-        Button clearKey = button("REMOVE KEY", panel2);
-        clearKey.setAllCaps(false);
-        LinearLayout.LayoutParams keyActionParams = new LinearLayout.LayoutParams(0, dp(44), 1);
-        keyActionParams.setMargins(0, dp(4), dp(5), 0);
-        keyActions.addView(saveKey, keyActionParams);
-        LinearLayout.LayoutParams clearKeyParams = new LinearLayout.LayoutParams(0, dp(44), 1);
-        clearKeyParams.setMargins(dp(5), dp(4), 0, 0);
-        keyActions.addView(clearKey, clearKeyParams);
-        keyCard.addView(keyActions);
-        saveKey.setOnClickListener(v -> {
-            String entered = apiKey.getText().toString().trim();
-            if (entered.isEmpty()) { toast("Paste your Gemini API key first."); return; }
-            if (saveApiKey(entered)) {
-                sessionApiKey = entered;
-                hint.setText("API key saved securely on this device. You won't need to enter it again here.");
-                toast("Gemini API key saved.");
-            } else {
-                toast("Could not protect the key on this device. Please try again.");
-            }
-        });
-        clearKey.setOnClickListener(v -> {
-            clearSavedApiKey();
-            sessionApiKey = "";
-            apiKey.setText("");
-            hint.setText("API key removed from this device.");
-            toast("Saved API key removed.");
-        });
-        body.addView(keyCard, params());
-        space(12);
-
-        LinearLayout modelCard = cardBox();
-        modelCard.addView(label("ACTIVE MODEL", 11, cyan, true));
-        TextView fixedModel = label("Gemini 3.5 Flash-Lite", 16, Color.WHITE, true);
-        fixedModel.setPadding(0, dp(10), 0, dp(4));
-        modelCard.addView(fixedModel, params());
-        TextView modelDescription = label("Fixed model across the E.V workspace for consistent behavior.", 11, muted, false);
-        modelDescription.setPadding(0, dp(4), 0, dp(8));
-        modelCard.addView(modelDescription, params());
-        body.addView(modelCard, params());
-        space(12);
-
-        LinearLayout historyCard = cardBox();
-        LinearLayout historyHeader = new LinearLayout(this);
-        historyHeader.setGravity(Gravity.CENTER_VERTICAL);
-        TextView historyTitle = label("CHAT HISTORY", 11, cyan, true);
-        historyHeader.addView(historyTitle, new LinearLayout.LayoutParams(0, -2, 1));
-        Button historyToggle = button("☰ HISTORY", panel2);
-        historyToggle.setAllCaps(false);
-        LinearLayout.LayoutParams htp = new LinearLayout.LayoutParams(-2, dp(40));
-        htp.rightMargin = dp(6);
-        historyHeader.addView(historyToggle, htp);
-        Button newChat = button("＋ NEW CHAT", panel2);
-        newChat.setAllCaps(false);
-        historyHeader.addView(newChat, new LinearLayout.LayoutParams(-2, dp(40)));
-        historyCard.addView(historyHeader);
-        historyList = new LinearLayout(this);
-        historyList.setOrientation(LinearLayout.VERTICAL);
-        historyList.setVisibility(View.GONE);
-        historyToggle.setOnClickListener(v -> historyList.setVisibility(historyList.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE));
-        LinearLayout.LayoutParams hlp = params(); hlp.topMargin = dp(8);
-        historyCard.addView(historyList, hlp);
-        body.addView(historyCard, params());
-        space(12);
-        newChat.setOnClickListener(v -> { startNewChat(); showAI(); });
-        renderHistory();
-
-        LinearLayout chatCard = cardBox();
-        chatCard.addView(label("QUICK PROMPTS", 11, cyan, true));
-        TextView promptHint = label("Tap a starter to fill your message, then edit it or send it as-is.", 11, muted, false);
-        promptHint.setPadding(0, dp(5), 0, dp(8));
-        chatCard.addView(promptHint);
-        LinearLayout promptRow = new LinearLayout(this);
-        promptRow.setOrientation(LinearLayout.HORIZONTAL);
-        String[][] starters = new String[][] {
-            {"PLAN MY DAY", "Create a realistic daily plan with time for priorities, breaks, and rest."},
-            {"EXPLAIN SIMPLY", "Explain this topic in simple language, then give me one example: "},
-            {"WRITE BETTER", "Help me write a clear, friendly, professional message about: "}
-        };
-        for (String[] starter : starters) {
-            Button quick = button(starter[0], panel2);
-            quick.setAllCaps(false);
-            quick.setTextSize(9);
-            LinearLayout.LayoutParams qbp = new LinearLayout.LayoutParams(0, dp(42), 1);
-            qbp.setMargins(0, 0, dp(5), 0);
-            promptRow.addView(quick, qbp);
-            quick.setOnClickListener(v -> {
-                question.setText(starter[1]);
-                question.setSelection(question.getText().length());
-                question.requestFocus();
-            });
-        }
-        chatCard.addView(promptRow, params());
-        spaceIn(chatCard, 12);
-        chatCard.addView(label("MESSAGE", 11, cyan, true));
-        question = field("What would you like to explore?", true);
-        LinearLayout.LayoutParams qp = params();
-        qp.topMargin = dp(8);
-        chatCard.addView(question, qp);
-        spaceIn(chatCard, 10);
-        Button ask = button("✦  SEND TO GEMINI", accent);
-        ask.setAllCaps(false);
-        chatCard.addView(ask, params());
-        LinearLayout actionRow = new LinearLayout(this);
-        actionRow.setOrientation(LinearLayout.HORIZONTAL);
-        Button shareChat = button("↗  SHARE CHAT", panel2);
-        shareChat.setAllCaps(false);
-        Button clearChat = button("＋  NEW CHAT", panel2);
-        clearChat.setAllCaps(false);
-        LinearLayout.LayoutParams actionButtonParams = new LinearLayout.LayoutParams(0, dp(44), 1);
-        actionButtonParams.setMargins(0, dp(8), dp(5), 0);
-        actionRow.addView(shareChat, actionButtonParams);
-        LinearLayout.LayoutParams clearParams = new LinearLayout.LayoutParams(0, dp(44), 1);
-        clearParams.setMargins(dp(5), dp(8), 0, 0);
-        actionRow.addView(clearChat, clearParams);
-        chatCard.addView(actionRow);
-        conversationView = label(currentTranscript.isEmpty() ? "Your response will appear here." : currentTranscript, 14, Color.WHITE, false);
-        conversationView.setPadding(dp(14), dp(14), dp(14), dp(14));
-        conversationView.setBackground(background(panel2, dp(14), Color.TRANSPARENT));
-        conversationView.setTextIsSelectable(true);
-        LinearLayout.LayoutParams ap = params();
-        ap.topMargin = dp(12);
-        chatCard.addView(conversationView, ap);
-        shareChat.setOnClickListener(v -> {
-            if (currentTranscript == null || currentTranscript.trim().isEmpty()) {
-                toast("There is no conversation to share yet.");
-                return;
-            }
-            Intent share = new Intent(Intent.ACTION_SEND);
-            share.setType("text/plain");
-            share.putExtra(Intent.EXTRA_SUBJECT, "E.V-MARK-X conversation");
-            share.putExtra(Intent.EXTRA_TEXT, currentTranscript);
-            startActivity(Intent.createChooser(share, "Share E.V-MARK-X chat"));
-        });
-        clearChat.setOnClickListener(v -> {
-            startNewChat();
-            showAI();
-            toast("Started a new chat.");
-        });
-        body.addView(chatCard, params());
-
-        ask.setOnClickListener(v -> {
-            String enteredKey = apiKey.getText().toString().trim();
-            final String key = enteredKey.isEmpty() ? sessionApiKey : enteredKey;
-            if (!key.isEmpty() && !key.equals(sessionApiKey)) {
-                if (saveApiKey(key)) sessionApiKey = key;
-            }
-            String q = question.getText().toString().trim();
-            String model = MODEL_ID;
-            if (key.isEmpty() || q.isEmpty()) { toast("Enter your API key and a message."); return; }
-            if (currentChatId.isEmpty()) startNewChat();
-            if (currentChatTitle.equals("New chat")) {
-                currentChatTitle = q.length() > 34 ? q.substring(0, 34) + "…" : q;
-            }
-            currentTranscript = (currentTranscript.isEmpty() ? "" : currentTranscript + "\n\n") + "You: " + q + "\n\nEV: Thinking with " + model + "…";
-            conversationView.setText(currentTranscript);
-            question.setText("");
-            ask.setEnabled(false);
-            saveCurrentChat();
-            new Thread(() -> {
-                String result = askGemini(key, q, model);
-                runOnUiThread(() -> {
-                    int marker = currentTranscript.lastIndexOf("EV: Thinking with ");
-                    if (marker >= 0) currentTranscript = currentTranscript.substring(0, marker) + "EV: " + result;
-                    else currentTranscript += "\n\nEV: " + result;
-                    conversationView.setText(currentTranscript);
-                    ask.setEnabled(true);
-                    saveCurrentChat();
-                    renderHistory();
-                });
-            }).start();
-        });
-    }
-
-
-
-    private String loadSavedApiKey() {
-        String encrypted = prefs.getString(API_KEY_PREF, "");
-        if (encrypted.isEmpty()) return "";
-        try {
-            byte[] packed = Base64.decode(encrypted, Base64.NO_WRAP);
-            if (packed.length <= 12) return "";
-            byte[] iv = new byte[12];
-            byte[] ciphertext = new byte[packed.length - 12];
-            System.arraycopy(packed, 0, iv, 0, 12);
-            System.arraycopy(packed, 12, ciphertext, 0, ciphertext.length);
-            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
-            keyStore.load(null);
-            SecretKey secretKey = (SecretKey) keyStore.getKey(API_KEY_ALIAS, null);
-            if (secretKey == null) return "";
-            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, new GCMParameterSpec(128, iv));
-            return new String(cipher.doFinal(ciphertext), StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
-    private boolean saveApiKey(String key) {
-        if (key == null || key.trim().isEmpty()) return false;
-        try {
-            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
-            keyStore.load(null);
-            if (!keyStore.containsAlias(API_KEY_ALIAS)) {
-                KeyGenerator generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
-                generator.init(new KeyGenParameterSpec.Builder(API_KEY_ALIAS,
-                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                    .setRandomizedEncryptionRequired(true)
-                    .build());
-                generator.generateKey();
-            }
-            SecretKey secretKey = (SecretKey) keyStore.getKey(API_KEY_ALIAS, null);
-            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            byte[] iv = cipher.getIV();
-            byte[] encrypted = cipher.doFinal(key.trim().getBytes(StandardCharsets.UTF_8));
-            byte[] packed = new byte[iv.length + encrypted.length];
-            System.arraycopy(iv, 0, packed, 0, iv.length);
-            System.arraycopy(encrypted, 0, packed, iv.length, encrypted.length);
-            prefs.edit().putString(API_KEY_PREF, Base64.encodeToString(packed, Base64.NO_WRAP)).apply();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private void clearSavedApiKey() {
-        prefs.edit().remove(API_KEY_PREF).apply();
-        try {
-            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
-            keyStore.load(null);
-            if (keyStore.containsAlias(API_KEY_ALIAS)) keyStore.deleteEntry(API_KEY_ALIAS);
-        } catch (Exception ignored) { }
-    }
-
-    private void initializeFirebase() {
-        try {
-            String apiKey = getString(R.string.firebase_api_key);
-            String appId = getString(R.string.firebase_app_id);
-            String projectId = getString(R.string.firebase_project_id);
-            String webClientId = getString(R.string.default_web_client_id);
-            if (apiKey.startsWith("REPLACE_") || appId.startsWith("REPLACE_") ||
-                projectId.startsWith("REPLACE_") || webClientId.startsWith("REPLACE_")) return;
-            if (FirebaseApp.getApps(this).isEmpty()) {
-                FirebaseOptions options = new FirebaseOptions.Builder()
-                    .setApiKey(apiKey).setApplicationId(appId).setProjectId(projectId).build();
-                FirebaseApp.initializeApp(this, options);
-            }
-            firebaseAuth = FirebaseAuth.getInstance();
-            firestore = FirebaseFirestore.getInstance();
-        } catch (Exception ignored) {
-            firebaseAuth = null;
-            firestore = null;
-        }
-    }
-
-    private String getAuthStatusText() {
-        if (firebaseAuth == null) return "Google sign-in needs the Firebase project values configured. See SETUP.md.";
-        if (firebaseAuth.getCurrentUser() == null) return "Sign in once; Google keeps your session on this device.";
-        String name = firebaseAuth.getCurrentUser().getDisplayName();
-        return "Signed in" + (name == null || name.isEmpty() ? "" : " as " + name) + " · chat sync enabled";
-    }
-
-    private void beginGoogleSignIn() {
-        if (firebaseAuth == null) {
-            toast("Google sign-in setup is required. Open SETUP.md in the repository.");
-            return;
-        }
-        try {
-            GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail().requestIdToken(getString(R.string.default_web_client_id)).build();
-            GoogleSignInClient client = GoogleSignIn.getClient(this, options);
-            startActivityForResult(client.getSignInIntent(), RC_GOOGLE_SIGN_IN);
-        } catch (Exception e) {
-            toast("Could not start Google sign-in. Check Firebase and OAuth setup.");
-        }
-    }
-
-    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode != RC_GOOGLE_SIGN_IN) return;
-        try {
-            GoogleSignInAccount account = GoogleSignIn.getSignedInAccountFromIntent(data).getResult(ApiException.class);
-            if (account == null || account.getIdToken() == null || firebaseAuth == null) {
-                toast("Google sign-in returned no token. Check the Web client ID.");
-                return;
-            }
-            AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
-            firebaseAuth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
-                if (task.isSuccessful()) {
-                    if (authStatus != null) authStatus.setText(getAuthStatusText());
-                    toast("Signed in with Google.");
-                    loadCloudHistory();
-                } else {
-                    toast("Sign-in failed. Verify Firebase Authentication and SHA-1/OAuth settings.");
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                if (!request.isForMainFrame()) return false;
+                Uri uri = request.getUrl();
+                String scheme = uri.getScheme() == null ? "" : uri.getScheme();
+                String host = uri.getHost() == null ? "" : uri.getHost();
+                if ("https".equalsIgnoreCase(scheme) && HOME_HOST.equalsIgnoreCase(host)) {
+                    return false;
                 }
-            });
-        } catch (ApiException e) {
-            toast("Google sign-in cancelled or not configured (code " + e.getStatusCode() + ").");
-        }
-    }
-
-    private void loadCloudHistory() {
-        if (firestore == null || firebaseAuth == null || firebaseAuth.getCurrentUser() == null) return;
-        firestore.collection("users").document(firebaseAuth.getCurrentUser().getUid())
-            .collection("chats").orderBy("updated", Query.Direction.DESCENDING).limit(50).get()
-            .addOnSuccessListener(snapshot -> {
-                JSONArray local = readChatSessions();
-                for (com.google.firebase.firestore.DocumentSnapshot doc : snapshot.getDocuments()) {
+                if ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)
+                        || "mailto".equalsIgnoreCase(scheme) || "tel".equalsIgnoreCase(scheme)) {
                     try {
-                        String id = doc.getString("id");
-                        if (id == null || id.isEmpty()) continue;
-                        JSONObject obj = new JSONObject();
-                        obj.put("id", id);
-                        obj.put("title", doc.getString("title") == null ? "Saved chat" : doc.getString("title"));
-                        obj.put("transcript", doc.getString("transcript") == null ? "" : doc.getString("transcript"));
-                        obj.put("updated", doc.getLong("updated") == null ? 0 : doc.getLong("updated"));
-                        JSONArray merged = new JSONArray();
-                        boolean exists = false;
-                        for (int i = 0; i < local.length(); i++) {
-                            JSONObject old = local.optJSONObject(i);
-                            if (old == null) continue;
-                            if (id.equals(old.optString("id"))) {
-                                if (!exists) merged.put(obj);
-                                exists = true;
-                            } else merged.put(old);
-                        }
-                        if (!exists) merged.put(obj);
-                        local = merged;
-                    } catch (Exception ignored) { }
+                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                        startActivity(intent);
+                    } catch (ActivityNotFoundException ignored) {
+                        toast("No app can open this link.");
+                    }
+                    return true;
                 }
-                prefs.edit().putString("chat_sessions", local.toString()).apply();
-                if (authStatus != null) authStatus.setText(getAuthStatusText());
-                renderHistory();
-            });
-    }
-
-    private void startNewChat() {
-        currentChatId = String.valueOf(System.currentTimeMillis());
-        currentTranscript = "";
-        currentChatTitle = "New chat";
-        prefs.edit().putString("current_chat_id", currentChatId)
-            .putString("current_chat_transcript", "")
-            .putString("current_chat_title", currentChatTitle).apply();
-    }
-
-    private JSONArray readChatSessions() {
-        try { return new JSONArray(prefs.getString("chat_sessions", "[]")); }
-        catch (Exception e) { return new JSONArray(); }
-    }
-
-    private void saveCurrentChat() {
-        if (currentChatId == null || currentChatId.isEmpty() || currentTranscript.isEmpty()) return;
-        JSONArray old = readChatSessions();
-        JSONArray next = new JSONArray();
-        JSONObject current = new JSONObject();
-        try {
-            current.put("id", currentChatId);
-            current.put("title", currentChatTitle);
-            current.put("transcript", currentTranscript);
-            current.put("updated", System.currentTimeMillis());
-            boolean replaced = false;
-            for (int i = 0; i < old.length(); i++) {
-                JSONObject item = old.optJSONObject(i);
-                if (item == null) continue;
-                if (currentChatId.equals(item.optString("id"))) {
-                    if (!replaced) { next.put(current); replaced = true; }
-                } else next.put(item);
+                return true;
             }
-            if (!replaced) next.put(current);
-            JSONArray limited = new JSONArray();
-            int start = Math.max(0, next.length() - 50);
-            for (int i = next.length() - 1; i >= start; i--) limited.put(next.optJSONObject(i));
-            JSONArray ordered = new JSONArray();
-            for (int i = limited.length() - 1; i >= 0; i--) ordered.put(limited.optJSONObject(i));
-            prefs.edit().putString("chat_sessions", ordered.toString())
-                .putString("current_chat_id", currentChatId)
-                .putString("current_chat_transcript", currentTranscript)
-                .putString("current_chat_title", currentChatTitle).apply();
-        } catch (Exception ignored) { }
-        if (firestore != null && firebaseAuth != null && firebaseAuth.getCurrentUser() != null) {
-            Map<String, Object> cloudChat = new HashMap<>();
-            cloudChat.put("id", currentChatId);
-            cloudChat.put("title", currentChatTitle);
-            cloudChat.put("transcript", currentTranscript);
-            cloudChat.put("updated", System.currentTimeMillis());
-            firestore.collection("users").document(firebaseAuth.getCurrentUser().getUid())
-                .collection("chats").document(currentChatId).set(cloudChat);
-        }
-    }
 
-    private void renderHistory() {
-        if (historyList == null) return;
-        historyList.removeAllViews();
-        JSONArray sessions = readChatSessions();
-        int count = 0;
-        for (int i = sessions.length() - 1; i >= 0; i--) {
-            JSONObject item = sessions.optJSONObject(i);
-            if (item == null) continue;
-            String id = item.optString("id", "");
-            String title = item.optString("title", "Saved chat");
-            if (id.isEmpty()) continue;
-            Button entry = button((id.equals(currentChatId) ? "●  " : "  ") + title, id.equals(currentChatId) ? accent : panel2);
-            entry.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
-            entry.setPadding(dp(12), 0, dp(8), 0);
-            entry.setAllCaps(false);
-            LinearLayout.LayoutParams ep = params(); ep.topMargin = dp(5);
-            historyList.addView(entry, ep);
-            entry.setOnClickListener(v -> {
-                currentChatId = id;
-                currentChatTitle = title;
-                currentTranscript = item.optString("transcript", "");
-                prefs.edit().putString("current_chat_id", currentChatId)
-                    .putString("current_chat_title", currentChatTitle)
-                    .putString("current_chat_transcript", currentTranscript).apply();
-                showAI();
-            });
-            count++;
-            if (count >= 12) break;
-        }
-        if (count == 0) historyList.addView(label("Your saved conversations will appear here.", 12, muted, false));
-    }
-
-    private String askGemini(String key, String prompt, String model) {
-        HttpURLConnection c = null;
-        try {
-            URL url = new URL("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent");
-            c = (HttpURLConnection)url.openConnection();
-            c.setRequestMethod("POST");
-            c.setConnectTimeout(15000);
-            c.setReadTimeout(45000);
-            c.setDoOutput(true);
-            c.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-            c.setRequestProperty("x-goog-api-key", key);
-            JSONObject part = new JSONObject();
-            part.put("text", "You are EV AI Core, a helpful assistant. Answer clearly and safely. The user may be a minor. For minors, do not prescribe calorie deficits, weight-loss calorie targets, restrictive diets, fasting, supplements, or weight-loss programs. Encourage a parent/guardian and pediatric healthcare professional for weight or growth concerns. You may offer balanced meal ideas, hydration, sleep, enjoyable age-appropriate activity, and non-extreme strength training with supervision. User: " + prompt);
-            JSONArray parts = new JSONArray(); parts.put(part);
-            JSONObject content = new JSONObject(); content.put("parts", parts);
-            JSONArray contents = new JSONArray(); contents.put(content);
-            JSONObject payload = new JSONObject(); payload.put("contents", contents);
-            try (OutputStream out = c.getOutputStream()) { out.write(payload.toString().getBytes(StandardCharsets.UTF_8)); }
-            int status = c.getResponseCode();
-            InputStream stream = status >= 200 && status < 300 ? c.getInputStream() : c.getErrorStream();
-            StringBuilder raw = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
-                String line; while ((line = reader.readLine()) != null) raw.append(line);
+            @Override
+            public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                pageLoaded = false;
+                progress.setVisibility(View.VISIBLE);
+                progress.setProgress(5);
+                errorPanel.setVisibility(View.GONE);
             }
-            JSONObject response = new JSONObject(raw.toString());
-            if (status < 200 || status >= 300) {
-                JSONObject err = response.optJSONObject("error");
-                return "Gemini API error: " + (err == null ? "HTTP " + status : err.optString("message", "Request failed"));
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                pageLoaded = true;
+                progress.setProgress(100);
+                progress.setVisibility(View.GONE);
             }
-            JSONArray candidates = response.optJSONArray("candidates");
-            if (candidates == null || candidates.length() == 0) return "Gemini returned no answer. Try another model.";
-            JSONObject candidate = candidates.optJSONObject(0);
-            JSONObject responseContent = candidate == null ? null : candidate.optJSONObject("content");
-            JSONArray responseParts = responseContent == null ? null : responseContent.optJSONArray("parts");
-            if (responseParts == null) return "Gemini returned an empty answer.";
-            StringBuilder text = new StringBuilder();
-            for (int i = 0; i < responseParts.length(); i++) {
-                JSONObject p = responseParts.optJSONObject(i);
-                if (p != null && p.has("text")) {
-                    if (text.length() > 0) text.append("\n");
-                    text.append(p.optString("text"));
-                }
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                if (request.isForMainFrame() && !pageLoaded) showError();
             }
-            return text.length() == 0 ? "Gemini returned an empty answer." : text.toString();
-        } catch (Exception e) {
-            return "Could not connect. Check internet, API key, and selected model. " + e.getMessage();
-        } finally { if (c != null) c.disconnect(); }
-    }
-
-    private void showWallet() {
-        base("PROTOCOL 02  /  FINANCE", "EV Wallet", "A simple personal income and expense tracker · EGP");
-        int income = prefs.getInt("income", 0), expense = prefs.getInt("expense", 0);
-        card("CURRENT BALANCE", (income - expense) + " EGP", "Income: " + income + " EGP   •   Expenses: " + expense + " EGP");
-        LinearLayout box = cardBox();
-        box.addView(label("ADD A TRANSACTION", 11, cyan, true));
-        EditText amount = field("Amount in EGP", false);
-        amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        LinearLayout.LayoutParams ap = params(); ap.topMargin = dp(10); box.addView(amount, ap);
-        LinearLayout row = new LinearLayout(this);
-        Button inc = button("＋ INCOME", accent), exp = button("− EXPENSE", red);
-        row.addView(inc, new LinearLayout.LayoutParams(0, dp(48), 1));
-        row.addView(exp, new LinearLayout.LayoutParams(0, dp(48), 1));
-        LinearLayout.LayoutParams rp = params(); rp.topMargin = dp(10); box.addView(row, rp);
-        body.addView(box, params());
-        inc.setOnClickListener(v -> saveMoney(amount, true));
-        exp.setOnClickListener(v -> saveMoney(amount, false));
-        space(10);
-        Button reset = button("RESET TOTALS", panel2); body.addView(reset, params());
-        reset.setOnClickListener(v -> { prefs.edit().putInt("income", 0).putInt("expense", 0).apply(); showWallet(); });
-    }
-
-    private void saveMoney(EditText amount, boolean isIncome) {
-        try {
-            double value = Double.parseDouble(amount.getText().toString().trim());
-            if (value <= 0) throw new NumberFormatException();
-            String key = isIncome ? "income" : "expense";
-            int next = prefs.getInt(key, 0) + (int)Math.round(value);
-            prefs.edit().putInt(key, next).apply();
-            showWallet();
-        } catch (Exception e) { toast("Enter a valid positive amount."); }
-    }
-
-    private void showCalories() {
-        base("EV WELLNESS  /  NUTRITION + MOVEMENT", "Your daily wellness", "Balanced meals, movement, hydration and recovery — all in one place.");
-
-        LinearLayout profile = cardBox();
-        profile.addView(label("YOUR PROFILE", 11, cyan, true));
-        TextView note = label("For teens, calorie needs depend on growth and individual health. This app will not set a weight-loss calorie target or restrictive diet. If you are worried about weight or growth, talk with a parent/guardian and a pediatric healthcare professional.", 12, muted, false);
-        note.setPadding(0, dp(8), 0, dp(12));
-        profile.addView(note);
-        EditText age = field("Age in years (e.g. 15)", false);
-        age.setInputType(InputType.TYPE_CLASS_NUMBER);
-        EditText weight = field("Weight in kg (optional)", false);
-        weight.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        EditText height = field("Height in cm (optional)", false);
-        height.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        age.setText(prefs.getString("wellness_age", "15"));
-        weight.setText(prefs.getString("wellness_weight", ""));
-        height.setText(prefs.getString("wellness_height", ""));
-        for (EditText e : new EditText[]{age, weight, height}) {
-            LinearLayout.LayoutParams p = params();
-            p.topMargin = dp(8);
-            profile.addView(e, p);
-        }
-        body.addView(profile, params());
-        space(12);
-
-        LinearLayout coach = cardBox();
-        coach.addView(label("GEMINI WELLNESS COACH", 11, cyan, true));
-        coach.addView(label("Build a balanced meal routine and beginner-friendly weekly movement plan with Gemini 2.5 Flash. No calorie-deficit targets or restrictive dieting.", 12, muted, false));
-        EditText api = field("Gemini API key (not saved)", false);
-        api.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        api.setText(sessionApiKey);
-        LinearLayout.LayoutParams ak = params();
-        ak.topMargin = dp(10);
-        coach.addView(api, ak);
-        EditText preferences = field("Food preferences, allergies, schedule, gym access (optional)", true);
-        LinearLayout.LayoutParams pp = params();
-        pp.topMargin = dp(8);
-        coach.addView(preferences, pp);
-        Button build = button("✦  BUILD MY WELLNESS PLAN", accent);
-        build.setAllCaps(false);
-        LinearLayout.LayoutParams bp = params();
-        bp.topMargin = dp(12);
-        coach.addView(build, bp);
-        TextView plan = label(prefs.getString("wellness_plan", "Your plan will appear here. Add preferences and tap Build My Wellness Plan."), 13, Color.WHITE, false);
-        plan.setPadding(dp(14), dp(14), dp(14), dp(14));
-        plan.setBackground(background(panel2, dp(14), Color.TRANSPARENT));
-        LinearLayout.LayoutParams planP = params();
-        planP.topMargin = dp(10);
-        coach.addView(plan, planP);
-        build.setOnClickListener(v -> {
-            String key = api.getText().toString().trim();
-            sessionApiKey = key;
-            String ageText = age.getText().toString().trim();
-            if (key.isEmpty()) { toast("Enter your Gemini API key to generate a plan."); return; }
-            int years;
-            try {
-                years = Integer.parseInt(ageText);
-                if (years < 1 || years > 100) throw new NumberFormatException();
-            } catch (Exception ex) { toast("Enter a valid age."); return; }
-            String w = weight.getText().toString().trim();
-            String h = height.getText().toString().trim();
-            prefs.edit().putString("wellness_age", ageText).putString("wellness_weight", w)
-                .putString("wellness_height", h).apply();
-            String context = "Create a practical, non-restrictive wellbeing routine for a " + years + "-year-old user. ";
-            if (!w.isEmpty()) context += "User provided weight " + w + " kg. ";
-            if (!h.isEmpty()) context += "User provided height " + h + " cm. ";
-            context += "Food preferences and schedule: " + preferences.getText().toString().trim() + ". ";
-            context += "Give balanced sample meals and snacks without calorie counts, no calorie deficit, no target weight, no fasting, and no supplements. Include hydration, sleep, and a beginner-friendly weekly movement schedule. For a teen, suggest enjoyable daily activity and strength/bone-strengthening activity about three days a week when appropriate; start gradually, use good form and adult/coach supervision in a gym. Explain that food needs vary during growth and a parent/guardian plus pediatric healthcare professional should help with weight or growth concerns. Do not diagnose or claim medical precision. Use short headings and bullets.";
-            final String planPrompt = context;
-            build.setEnabled(false);
-            build.setText("BUILDING YOUR PLAN…");
-            new Thread(() -> {
-                String answer = askGemini(key, planPrompt, MODEL_ID);
-                runOnUiThread(() -> {
-                    build.setEnabled(true);
-                    build.setText("✦  BUILD MY WELLNESS PLAN");
-                    plan.setText(answer);
-                    prefs.edit().putString("wellness_plan", answer).apply();
-                });
-            }).start();
         });
-        body.addView(coach, params());
-        space(12);
 
-        int total = prefs.getInt("calorie_total", 0);
-        LinearLayout tracker = cardBox();
-        tracker.addView(label("OPTIONAL FOOD LOG", 11, cyan, true));
-        TextView totalText = label(total + " kcal logged", 22, Color.WHITE, true);
-        totalText.setPadding(0, dp(5), 0, dp(4));
-        tracker.addView(totalText);
-        tracker.addView(label("This is a record of foods you choose to log, not a daily target or a judgement of how much you should eat.", 11, muted, false));
-        EditText food = field("Food name", false);
-        EditText calories = field("Calories on food label (optional)", false);
-        calories.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        EditText servings = field("Servings (defaults to 1)", false);
-        servings.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        for (EditText e : new EditText[]{food, calories, servings}) {
-            LinearLayout.LayoutParams p = params();
-            p.topMargin = dp(8);
-            tracker.addView(e, p);
-        }
-        Button add = button("＋  LOG FOOD", panel2);
-        add.setAllCaps(false);
-        LinearLayout.LayoutParams addP = params();
-        addP.topMargin = dp(10);
-        tracker.addView(add, addP);
-        add.setOnClickListener(v -> {
-            try {
-                String name = food.getText().toString().trim();
-                String calorieText = calories.getText().toString().trim();
-                String servingText = servings.getText().toString().trim();
-                if (name.isEmpty()) throw new NumberFormatException();
-                int added = 0;
-                if (!calorieText.isEmpty()) {
-                    double per = Double.parseDouble(calorieText);
-                    double count = servingText.isEmpty() ? 1 : Double.parseDouble(servingText);
-                    if (per < 0 || count <= 0) throw new NumberFormatException();
-                    added = (int)Math.round(per * count);
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onProgressChanged(WebView view, int newProgress) {
+                if (progress != null) {
+                    progress.setProgress(newProgress);
+                    progress.setVisibility(newProgress >= 100 ? View.GONE : View.VISIBLE);
                 }
-                prefs.edit().putInt("calorie_total", prefs.getInt("calorie_total", 0) + added)
-                    .putString("last_food", name).putInt("last_food_calories", added).apply();
-                showCalories();
-                toast("Food logged");
-            } catch (Exception ex) { toast("Enter a food name and valid optional label values."); }
+            }
+
+            @Override
+            public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback,
+                    FileChooserParams params) {
+                if (fileChooserCallback != null) fileChooserCallback.onReceiveValue(null);
+                fileChooserCallback = callback;
+                Intent intent;
+                try {
+                    intent = params.createIntent();
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.setType("*/*");
+                    startActivityForResult(intent, FILE_PICKER_REQUEST);
+                    return true;
+                } catch (Exception e) {
+                    fileChooserCallback = null;
+                    toast("File picker is unavailable on this device.");
+                    return false;
+                }
+            }
         });
-        body.addView(tracker, params());
-        space(8);
-        Button reset = button("RESET FOOD LOG", panel2);
-        body.addView(reset, params());
-        reset.setOnClickListener(v -> {
-            prefs.edit().putInt("calorie_total", 0).remove("last_food").remove("last_food_calories").apply();
-            showCalories();
+
+        webView.setDownloadListener(new DownloadListener() {
+            @Override
+            public void onDownloadStart(String url, String userAgent, String contentDisposition,
+                    String mimeType, long contentLength) {
+                try {
+                    if (url == null || !(url.startsWith("https://") || url.startsWith("http://"))) {
+                        toast("This download type is not supported inside the app yet.");
+                        return;
+                    }
+                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                    request.setMimeType(mimeType);
+                    request.addRequestHeader("User-Agent", userAgent);
+                    request.setNotificationVisibility(
+                        DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                    request.setTitle("E.V-MARK-X download");
+                    request.setDescription("Downloading your file");
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
+                        "EV-MARK-X-" + System.currentTimeMillis());
+                    DownloadManager manager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                    manager.enqueue(request);
+                    toast("Download started. Check your notifications.");
+                } catch (Exception e) {
+                    toast("Could not start the download.");
+                }
+            }
+        });
+
+        errorPanel = new LinearLayout(this);
+        errorPanel.setOrientation(LinearLayout.VERTICAL);
+        errorPanel.setGravity(Gravity.CENTER);
+        errorPanel.setPadding(dp(28), dp(24), dp(28), dp(24));
+        errorPanel.setBackgroundColor(Color.rgb(8, 13, 25));
+        TextView title = new TextView(this);
+        title.setText("E.V-MARK-X");
+        title.setTextColor(Color.WHITE);
+        title.setTextSize(25);
+        title.setTypeface(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD);
+        title.setGravity(Gravity.CENTER);
+        errorPanel.addView(title, new LinearLayout.LayoutParams(-1, -2));
+        TextView message = new TextView(this);
+        message.setText("The workspace could not connect. Check your internet connection and try again.");
+        message.setTextColor(Color.rgb(165, 181, 208));
+        message.setTextSize(14);
+        message.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams messageParams = new LinearLayout.LayoutParams(-1, -2);
+        messageParams.topMargin = dp(12);
+        errorPanel.addView(message, messageParams);
+        Button retry = new Button(this);
+        retry.setText("Try again");
+        retry.setTextColor(Color.WHITE);
+        retry.setAllCaps(false);
+        retry.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(45, 111, 224)));
+        LinearLayout.LayoutParams retryParams = new LinearLayout.LayoutParams(-1, dp(48));
+        retryParams.topMargin = dp(20);
+        errorPanel.addView(retry, retryParams);
+        retry.setOnClickListener(v -> loadWorkspace());
+        errorPanel.setVisibility(View.GONE);
+        container.addView(errorPanel, new FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        setContentView(container);
+        if (state != null && webView.restoreState(state) != null) {
+            // The previous page and navigation history were restored.
+        } else {
+            loadWorkspace();
+        }
+    }
+
+    private void loadWorkspace() {
+        pageLoaded = false;
+        errorPanel.setVisibility(View.GONE);
+        progress.setVisibility(View.VISIBLE);
+        webView.loadUrl(HOME_URL);
+    }
+
+    private void showError() {
+        runOnUiThread(() -> {
+            if (!pageLoaded && errorPanel != null) {
+                progress.setVisibility(View.GONE);
+                errorPanel.setVisibility(View.VISIBLE);
+            }
         });
     }
 
-    private final class SpiderTechView extends View {
-        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final RectF bounds = new RectF();
-
-        SpiderTechView(android.content.Context context) {
-            super(context);
-            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-        }
-
-        @Override protected void onDraw(Canvas canvas) {
-            super.onDraw(canvas);
-            float w = getWidth(), h = getHeight();
-            bounds.set(0, 0, w, h);
-            Path clip = new Path();
-            clip.addRoundRect(bounds, dp(20), dp(20), Path.Direction.CW);
-            int save = canvas.save();
-            canvas.clipPath(clip);
-            paint.setShader(new LinearGradient(0, 0, w, h,
-                new int[]{Color.rgb(93, 12, 33), Color.rgb(15, 25, 45), Color.rgb(8, 67, 105)},
-                null, Shader.TileMode.CLAMP));
-            canvas.drawRect(bounds, paint);
-            paint.setShader(null);
-
-            // Original spider-web-inspired tech artwork, not a movie still.
-            paint.setColor(Color.argb(48, 88, 184, 255));
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(dp(1));
-            float cx = w * 0.78f, cy = h * 0.38f;
-            for (int i = 0; i < 12; i++) {
-                double a = Math.PI * 2 * i / 12.0;
-                canvas.drawLine(cx, cy,
-                    cx + (float)Math.cos(a) * w * 0.72f,
-                    cy + (float)Math.sin(a) * h * 0.88f, paint);
-            }
-            for (int ring = 1; ring <= 6; ring++) {
-                bounds.set(cx - dp(12 * ring), cy - dp(9 * ring),
-                    cx + dp(12 * ring), cy + dp(9 * ring));
-                canvas.drawOval(bounds, paint);
-            }
-
-            paint.setStyle(Paint.Style.FILL);
-            paint.setColor(Color.argb(32, 255, 53, 79));
-            canvas.drawCircle(w * 0.78f, h * 0.4f, h * 0.42f, paint);
-
-            // Abstract spider-tech emblem.
-            float sx = w * 0.77f, sy = h * 0.55f;
-            paint.setColor(Color.rgb(235, 43, 67));
-            canvas.drawOval(sx - dp(8), sy - dp(16), sx + dp(8), sy + dp(8), paint);
-            canvas.drawCircle(sx, sy - dp(19), dp(6), paint);
-            paint.setStrokeWidth(dp(4));
-            paint.setStrokeCap(Paint.Cap.ROUND);
-            for (int side : new int[]{-1, 1}) {
-                for (int leg = 0; leg < 4; leg++) {
-                    float startY = sy - dp(12) + dp(6 * leg);
-                    Path p = new Path();
-                    p.moveTo(sx + side * dp(5), startY);
-                    p.lineTo(sx + side * dp(18), startY - dp(8));
-                    p.lineTo(sx + side * dp(30), startY + dp(1));
-                    canvas.drawPath(p, paint);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == FILE_PICKER_REQUEST && fileChooserCallback != null) {
+            Uri[] results = null;
+            if (resultCode == RESULT_OK && data != null) {
+                if (data.getClipData() != null) {
+                    int count = data.getClipData().getItemCount();
+                    results = new Uri[count];
+                    for (int i = 0; i < count; i++) results[i] = data.getClipData().getItemAt(i).getUri();
+                } else if (data.getData() != null) {
+                    results = new Uri[]{data.getData()};
                 }
             }
-
-            paint.setStyle(Paint.Style.FILL);
-            paint.setColor(Color.WHITE);
-            paint.setTextSize(dp(10));
-            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-            canvas.drawText("EV // SPIDER TECH", dp(18), dp(28), paint);
-            paint.setTextSize(dp(23));
-            canvas.drawText("AI CORE", dp(18), dp(62), paint);
-            paint.setColor(Color.rgb(167, 211, 255));
-            paint.setTextSize(dp(11));
-            paint.setTypeface(Typeface.DEFAULT);
-            canvas.drawText("YOUR INTELLIGENCE. YOUR CONTROL.", dp(18), dp(84), paint);
-            paint.setColor(Color.argb(210, 255, 255, 255));
-            canvas.drawRoundRect(dp(18), h - dp(36), dp(136), h - dp(15), dp(10), dp(10), paint);
-            paint.setColor(Color.rgb(27, 33, 48));
-            paint.setTextSize(dp(9));
-            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-            canvas.drawText("SYSTEM ONLINE", dp(27), h - dp(22), paint);
-            canvas.restoreToCount(save);
+            fileChooserCallback.onReceiveValue(results);
+            fileChooserCallback = null;
         }
     }
 
-    private LinearLayout cardBox() {
-        LinearLayout c = new LinearLayout(this);
-        c.setOrientation(LinearLayout.VERTICAL);
-        c.setPadding(dp(16), dp(16), dp(16), dp(16));
-        c.setBackground(background(panel, dp(18), Color.TRANSPARENT));
-        return c;
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        if (webView != null) webView.saveState(outState);
+        super.onSaveInstanceState(outState);
     }
 
-    private void card(String eyebrow, String title, String desc) {
-        LinearLayout c = cardBox();
-        c.addView(label(eyebrow, 10, cyan, true));
-        TextView t = label(title, 23, Color.WHITE, true);
-        t.setPadding(0, dp(6), 0, dp(6));
-        c.addView(t);
-        c.addView(label(desc, 12, muted, false));
-        LinearLayout.LayoutParams p = params(); p.bottomMargin = dp(14);
-        body.addView(c, p);
+    @Override
+    public void onBackPressed() {
+        if (webView != null && webView.canGoBack()) {
+            webView.goBack();
+        } else {
+            super.onBackPressed();
+        }
     }
 
-    private GradientDrawable heroBackground() {
-        GradientDrawable d = new GradientDrawable(
-            GradientDrawable.Orientation.TL_BR,
-            new int[]{Color.rgb(88, 13, 31), Color.rgb(19, 27, 48), Color.rgb(10, 57, 92)}
-        );
-        d.setCornerRadius(dp(20));
-        d.setStroke(dp(1), Color.rgb(199, 47, 74));
-        return d;
+    @Override
+    protected void onDestroy() {
+        if (fileChooserCallback != null) {
+            fileChooserCallback.onReceiveValue(null);
+            fileChooserCallback = null;
+        }
+        if (webView != null) {
+            webView.stopLoading();
+            webView.setWebChromeClient(null);
+            webView.setWebViewClient(null);
+            webView.destroy();
+            webView = null;
+        }
+        super.onDestroy();
     }
 
-    private GradientDrawable background(int color, int radius, int stroke) {
-        GradientDrawable d = new GradientDrawable();
-        d.setColor(color);
-        d.setCornerRadius(radius);
-        if (stroke != Color.TRANSPARENT) d.setStroke(dp(1), stroke);
-        return d;
+    private int dp(int value) {
+        return (int) (value * getResources().getDisplayMetrics().density + 0.5f);
     }
 
-    private EditText field(String hint, boolean multiline) {
-        EditText e = new EditText(this);
-        e.setHint(hint);
-        e.setTextColor(Color.WHITE);
-        e.setHintTextColor(muted);
-        e.setTextSize(14);
-        e.setPadding(dp(12), dp(10), dp(12), dp(10));
-        e.setBackground(background(panel2, dp(12), Color.TRANSPARENT));
-        if (multiline) { e.setMinLines(3); e.setGravity(Gravity.TOP | Gravity.START); }
-        return e;
+    private void toast(String text) {
+        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
     }
-
-    private Button button(String text, int color) {
-        Button b = new Button(this);
-        b.setText(text); b.setTextSize(11); b.setTextColor(Color.WHITE);
-        b.setAllCaps(false);
-        b.setBackground(background(color, dp(12), Color.TRANSPARENT));
-        return b;
-    }
-
-    private TextView label(String text, int size, int color, boolean bold) {
-        TextView t = new TextView(this);
-        t.setText(text); t.setTextSize(size); t.setTextColor(color);
-        if (bold) t.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        return t;
-    }
-
-    private LinearLayout.LayoutParams params() {
-        return new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-    }
-    private void space(int h) { View v = new View(this); body.addView(v, new LinearLayout.LayoutParams(1, dp(h))); }
-    private void spaceIn(LinearLayout parent, int h) { View v = new View(this); parent.addView(v, new LinearLayout.LayoutParams(1, dp(h))); }
-    private int dp(int v) { return (int)(v * getResources().getDisplayMetrics().density + 0.5f); }
-    private void toast(String message) { Toast.makeText(this, message, Toast.LENGTH_SHORT).show(); }
 }
