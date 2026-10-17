@@ -28,7 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
-    private static final String HOME_URL = "https://seifhaytham275-star.github.io/E.V-MARK-XI Platinum/app.html";
+    private static final String HOME_URL = "https://seifhaytham275-star.github.io/E.V-MARK-X/app.html";
     private static final String HOME_HOST = "seifhaytham275-star.github.io";
     private static final int FILE_PICKER_REQUEST = 4401;
 
