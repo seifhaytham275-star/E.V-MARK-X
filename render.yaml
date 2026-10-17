@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: ev-mark-x-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: FRONTEND_ORIGIN
+        value: https://seifhaytham275-star.github.io
+      - key: EXTRA_ALLOWED_ORIGINS
+        value: ""
+      - key: MODELS_CACHE_SECONDS
+        value: "300"
