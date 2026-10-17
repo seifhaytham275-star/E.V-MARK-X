@@ -2,7 +2,7 @@
 
 **Live website:** https://seifhaytham275-star.github.io/E.V-MARK-X/  
 **Open the AI workspace:** https://seifhaytham275-star.github.io/E.V-MARK-X/app.html  
-**About & privacy:** https://seifhaytham275-star.github.io/E.V-MARK-X/about.html  
+**About & privacy:** https://seifhaytham275-star.github.io/E.V-MARK-X/about.html  \n**Sign in:** https://seifhaytham275-star.github.io/E.V-MARK-X/login.html  \n**Proposed plans:** https://seifhaytham275-star.github.io/E.V-MARK-X/pricing.html  
 **Source repository:** https://github.com/seifhaytham275-star/E.V-MARK-X
 
 E.V-MARK-XI Platinum is the refreshed workspace name for this E.V-MARK-X project: a responsive AI workspace with chat, study and writing workflows, a browser-based Studio, and a limited tool-using Agent. The web workspace uses the configured Gemini 3.5 Flash-Lite model. Google sign-in is not required for the GitHub Pages version.
@@ -86,3 +86,14 @@ The current website remains an online-first static app. Studio and Agent workflo
 - Keep screenshots, setup instructions, known limitations, and release notes current.
 - Never publish secrets, API keys, or user data in source control.
 - Before public distribution, confirm the selected AI provider's current terms permit the intended audience and use case.
+
+
+## Accounts, GitHub, email, and pricing
+
+- `login.html` provides email/password, email magic-link, and GitHub OAuth UI using Supabase Auth when configured.
+- `pricing.html` shows proposed Free, Developer ($3.99/month), and Pro ($7.99/month) plans. These are **not active subscriptions** and checkout is not enabled.
+- `config.js` supports the public Supabase project URL and anon/publishable key. These must be configured by the project owner; never place service-role keys, GitHub client secrets, SMTP credentials, payment secrets, or AI provider secrets in the frontend.
+- The app checks for a Supabase session only when Supabase is configured. This does not yet implement paid-plan entitlements or server-side usage metering.
+- Follow [AUTH_BILLING_SETUP.md](AUTH_BILLING_SETUP.md) to configure email and GitHub auth and understand the backend work required before billing.
+- The GitHub sign-in provider and GitHub repository permissions are separate. Repository actions require a properly configured GitHub App and minimum permissions.
+- Before selling an AI bundle, move AI requests behind a secure server-side gateway and validate provider terms for the owner and intended audience. The existing personal-key browser mode is not a subscription backend.
