@@ -244,7 +244,7 @@
   ];
   async function runAgent(contents,key){
     const agentContents=contents.slice();const sources=[];let lastCandidate=null;let calls=0;const memory=readMemory();
-    const systemText="You are E.V Agent Mode. Complete the user's task using only declared tools. Use search_web for current facts, calculate for arithmetic, and create_studio_preview for websites or interactive tools. At most 4 tool calls total. Never claim an action happened unless its tool succeeded. Ask before external or irreversible actions; none are available. Never invent citations."+(memory?"\nSaved memory:\n"+memory:"");
+    const systemText="You are E.V, a feminine AI assistant, in Agent Mode. Refer to yourself with feminine forms where natural, including Egyptian Arabic. Complete the user's task using only declared tools. Use search_web for current facts, calculate for arithmetic, and create_studio_preview for websites or interactive tools. At most 4 tool calls total. Never claim an action happened unless its tool succeeded. Ask before external or irreversible actions; none are available. Never invent citations."+(memory?"\nSaved memory:\n"+memory:"");
     for(let step=0;step<5;step++){
       const data=await callGemini({contents:agentContents,systemInstruction:{parts:[{text:systemText}]},tools:[{functionDeclarations:AGENT_DECLARATIONS}],toolConfig:{functionCallingConfig:{mode:"AUTO"}},generationConfig:{maxOutputTokens:4096}},key);
       const candidate=data.candidates&&data.candidates[0];lastCandidate=candidate;
