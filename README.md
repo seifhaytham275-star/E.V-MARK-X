@@ -23,7 +23,7 @@ The APK is an Android WebView wrapper around the same live `app.html` workspace.
 - `app.html` — responsive AI workspace, fixed to Gemini 3.5 Flash-Lite.
 - `about.html` — project, privacy, and security notes.
 - `config.js` — optional public configuration; never place API secrets here.
-- `server/` — optional backend for Google credential verification and server-side Gemini requests.
+- `server/` — optional backend for Google credential verification, server-side Gemini requests, and the WhatsApp Cloud API webhook adapter.
 - `render.yaml` and `WEB_BACKEND_SETUP.md` — optional backend deployment setup.
 - `app/` — Android project source.
 - `.github/workflows/build-apk.yml` — Android debug APK build workflow.
@@ -54,7 +54,7 @@ GitHub Pages serves static files only. The browser-based setup does not need Goo
 - The APK loads the hosted website and is online-first; it does not bundle the whole workspace for offline use.
 - The Android source includes Firebase dependencies, but Google sign-in/cloud sync need a real Firebase project configuration. See [SETUP.md](SETUP.md).
 
-## Tests and roadmap
+## Integrations status\n\nThe backend includes an initial WhatsApp Cloud API inbound-text webhook adapter. It is not live until Meta credentials are configured in the backend host; voice calls, Gmail/Drive OAuth API access, and GitHub App/OAuth access are separate integration steps. See [WEB_BACKEND_SETUP.md](WEB_BACKEND_SETUP.md).\n\n## Tests and roadmap
 
 Run the static regression tests locally with:
 
