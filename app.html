@@ -93,7 +93,7 @@
     if(!name || !name.trim()) return;
     const items = readProjects();
     items.push({name:name.trim().slice(0,80), history:history.map(item => ({role:item.role,text:item.text,parts:[{text:item.text}]})), updatedAt:new Date().toISOString()});
-    if(saveProjects(items)) { refreshProjects(); $("projectSelect").value = String(items.length - 1); $("attachmentStatus").textContent = "Project saved in this browser."; }
+    if(saveProjects(items)) { refreshProjects(); $("projectSelect").value = String(Math.min(items.length, 30) - 1); $("attachmentStatus").textContent = "Project saved in this browser."; }
   });
   $("projectSelect").addEventListener("change", () => {
     if(!$("projectSelect").value) return;
