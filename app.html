@@ -329,13 +329,118 @@
     updateSend();
   });
 
+
+  // Slash-command workflows extend the existing composer without changing the UI.
+  const FEATURE_COMMANDS = {
+    summarize:"Summarize the material into key points and preserve important facts.",
+    explain:"Explain the topic step by step from beginner level, with examples.",
+    translate:"Translate the supplied text; infer the target language from the request, or ask briefly if essential.",
+    quiz:"Create a quiz from this topic with a separate answer key.",
+    flashcards:"Create concise question-and-answer flashcards from the material.",
+    rewrite:"Rewrite for clarity and flow while preserving meaning.",
+    grammar:"Correct grammar, spelling, and punctuation and explain major corrections.",
+    email:"Draft a polished, ready-to-edit email for this situation.",
+    plan:"Create a practical step-by-step plan with priorities and milestones.",
+    brainstorm:"Generate diverse, actionable ideas grouped by theme.",
+    code:"Write a complete maintainable solution and explain how to run it.",
+    debug:"Diagnose the error or code, explain the root cause, and provide a fix.",
+    review:"Review for correctness, clarity, maintainability, risks, and improvements.",
+    outline:"Create a hierarchical outline with headings and subheadings.",
+    notes:"Convert this into organized, scannable notes.",
+    todo:"Extract action items, priorities, dependencies, and deadlines only when known.",
+    mindmap:"Create a readable text-based mind map with nested branches.",
+    table:"Organize the information into a useful Markdown table.",
+    json:"Return valid JSON only for the requested task, with no Markdown fences.",
+    csv:"Convert the data to valid CSV and correctly escape fields.",
+    regex:"Create and explain a suitable regular expression with test examples.",
+    define:"Define key terms simply and give an example for each.",
+    proscons:"Compare benefits, drawbacks, trade-offs, and caveats.",
+    decision:"Create a decision matrix with criteria, trade-offs, and a justified recommendation.",
+    interview:"Create role-appropriate interview questions with sample answers.",
+    story:"Write an original story with a coherent beginning, middle, and end.",
+    poem:"Write an original poem matching the requested subject and style.",
+    debate:"Present strong arguments on both sides and identify the central disagreements.",
+    teach:"Teach the topic in small steps, address misconceptions, and recap.",
+    studyplan:"Create a realistic study plan with breaks and spaced review.",
+    exam:"Create practice exam questions and a separate answer key.",
+    research:"Create a research brief, separate facts from uncertainty, and identify needed sources.",
+    compare:"Compare options using consistent criteria and summarize the differences.",
+    simplify:"Explain the material in simpler language without losing key meaning.",
+    expand:"Expand the supplied outline into a detailed structured draft.",
+    title:"Suggest specific titles and recommend the best fit for the audience.",
+    resume:"Improve resume wording without inventing experience, results, or qualifications.",
+    coverletter:"Draft a tailored cover letter using only the supplied facts.",
+    agenda:"Create a time-boxed meeting agenda with objectives and outcomes.",
+    minutes:"Turn notes into minutes, decisions, and action items; do not invent owners or dates.",
+    risks:"List risks, likelihood, impact, mitigations, and open assumptions.",
+    checklist:"Create a practical checklist with verifiable items.",
+    timeline:"Create a chronological timeline with dependencies and estimates.",
+    requirements:"Turn the idea into functional and non-functional requirements and acceptance criteria.",
+    userstories:"Write user stories and testable acceptance criteria.",
+    testcases:"Generate positive, negative, edge, and accessibility test cases.",
+    api:"Outline an API with endpoints, inputs, outputs, errors, and security considerations.",
+    sql:"Write an understandable SQL query and state schema assumptions.",
+    html:"Create accessible semantic HTML for the requested content.",
+    css:"Write responsive CSS for the requested component and explain assumptions.",
+    javascript:"Write modern JavaScript with validation, error handling, and edge cases.",
+    python:"Write readable Python with input validation and examples.",
+    git:"Explain the correct Git workflow and provide commands for the goal.",
+    security:"Review the design for security risks and prioritize defensive mitigations.",
+    accessibility:"Audit accessibility and suggest practical improvements.",
+    seo:"Suggest ethical, user-focused SEO improvements, metadata, and content structure.",
+    productbrief:"Create a product brief covering users, problem, scope, constraints, and success metrics.",
+    uxreview:"Review the described UX and suggest improvements without assuming unseen UI details.",
+    release:"Draft a release checklist and concise changelog from the supplied changes.",
+    changelog:"Turn supplied changes into a categorized changelog.",
+    documentation:"Write documentation with setup, usage, examples, and troubleshooting.",
+    lesson:"Create a lesson with objectives, explanations, examples, activities, and recap.",
+    vocabulary:"Extract important vocabulary with definitions and example sentences.",
+    citation:"Flag claims needing citations and suggest credible source types; never invent references.",
+    prompt:"Improve this AI prompt with clear role, context, constraints, and output format.",
+    feedback:"Give constructive, specific feedback and prioritize the most valuable improvements.",
+    estimate:"Estimate effort as a range, state assumptions, and list factors that could change it.",
+    troubleshoot:"Diagnose systematically, starting with likely causes and low-risk checks.",
+    summarizecode:"Explain the code structure, behavior, dependencies, and likely issues.",
+    changerequest:"Turn this request into a scoped proposal with affected areas, risks, and verification steps."
+  };
+
+  function runLocalCommand(text){
+    const match=String(text||"").trim().match(/^\\/(help|commands|math|wordcount|reverse|upper|lower|date|time|export)(?:\\s+([\\s\\S]*))?$/i);
+    if(!match||pendingParts.length) return false;
+    const command=match[1].toLowerCase(), arg=(match[2]||"").trim();
+    let result="";
+    try{
+      if(command==="help"||command==="commands"){
+        result="E.V-MARK-X commands\\n\\nLocal: /math 12*(3+4), /wordcount text, /reverse text, /upper text, /lower text, /date, /time, /export\\n\\nAI workflows: "+Object.keys(FEATURE_COMMANDS).map(name=>"/"+name).join(", ")+"\\n\\nExisting modes: /agent task and /studio describe an app. AI workflows require your Gemini API key.";
+      }else if(command==="math"){result=String(parseSafeMath(arg));}
+      else if(command==="wordcount"){result="Words: "+(arg.trim()?arg.trim().split(/\\s+/).length:0)+"\\nCharacters: "+arg.length+"\\nCharacters without spaces: "+arg.replace(/\\s/g,"").length;}
+      else if(command==="reverse"){result=Array.from(arg).reverse().join("");}
+      else if(command==="upper"){result=arg.toLocaleUpperCase();}
+      else if(command==="lower"){result=arg.toLocaleLowerCase();}
+      else if(command==="date"){const d=new Date();result="Local date: "+d.toLocaleDateString()+"\\nISO date: "+d.toISOString().slice(0,10);}
+      else if(command==="time"){result="Local time: "+new Date().toLocaleTimeString();}
+      else if(command==="export"){
+        const transcript=Array.from($("chat").querySelectorAll(".message")).map(node=>{const who=node.querySelector(".who");const body=who&&who.nextElementSibling;return (who?who.textContent:"Message")+": "+(body?body.textContent:"");}).join("\\n\\n");
+        const blob=new Blob([transcript||"E.V-MARK-X conversation is empty."],{type:"text/plain;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="ev-mark-x-chat.txt";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);result="Conversation export prepared as a text file.";
+      }
+    }catch(error){result="Command error: "+(error.message||"Invalid input.");}
+    $("prompt").value="";$("counter").textContent="0 / 12,000";updateSend();
+    addMessage("user",String(text));addMessage("assistant",result);
+    return true;
+  }
+
   async function sendMessage(rawText){
     const text = (rawText || $("prompt").value).trim();
     if((!text && !pendingParts.length) || busy) return;
-    const commandMatch = text.match(/^\/(agent|studio)(?:\s+([\s\S]*))?$/i);
-    const mode = commandMatch ? commandMatch[1].toLowerCase() : "chat";
+    if(runLocalCommand(text)) return;
+    const commandMatch = text.match(/^\\/([a-z][a-z0-9_-]*)(?:\\s+([\\s\\S]*))?$/i);
+    const commandName = commandMatch ? commandMatch[1].toLowerCase() : "";
+    const mode = commandName === "agent" || commandName === "studio" ? commandName : "chat";
     const taskText = commandMatch ? (commandMatch[2] || "").trim() : text;
-    const requestText = taskText || (mode === "studio" ? "Create a polished interactive web app starter." : mode === "agent" ? "Help me plan and complete my next task." : text);
+    const featurePrompt = FEATURE_COMMANDS[commandName];
+    const requestText = featurePrompt
+      ? featurePrompt + "\\n\\nUser request / source material:\\n" + (taskText || "Use the conversation context where relevant.")
+      : taskText || (mode === "studio" ? "Create a polished interactive web app starter." : mode === "agent" ? "Help me plan and complete my next task." : text);
     const key = savedKey();
     if(!key){
       showNotice("Add your Gemini API key in Settings first.");
