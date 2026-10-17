@@ -1,4 +1,4 @@
-# E.V-MARK-X Feature Roadmap
+# E.V-MARK-7 Platinum Feature Roadmap
 
 This roadmap describes the staged work for the existing GitHub Pages workspace. The model remains fixed to `gemini-3.5-flash-lite`; this project does not add a model picker.
 
