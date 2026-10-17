@@ -18,6 +18,9 @@ This roadmap describes the staged work for the existing GitHub Pages workspace. 
 - **Local memory and projects:** user-editable memory plus browser-local save/load for conversation projects.
 - **E.V Studio:** send `/studio describe your app` in the existing chat box to generate a standalone HTML app. Preview runs in a sandboxed iframe with scripts allowed but same-origin access and network requests blocked; generated HTML can be downloaded.
 - **Agent Mode:** send `/agent describe the task` in the existing chat box. The model can request an allowlisted calculator, current-time lookup, grounded web search, saved-memory read, or Studio preview. Tool execution is bounded to four calls per task; no arbitrary shell, file-system, account, or irreversible external actions are exposed.
+- **70+ workflow commands:** added a registry of focused AI workflows for learning, writing, planning, coding, debugging, reviews, testing, documentation, accessibility, security, and product work. These are invoked in the existing composer with `/command your request`; `/help` and `/commands` list them.
+- **Local utility commands:** `/math` uses the safe arithmetic parser, `/wordcount`, `/reverse`, `/upper`, `/lower`, `/date`, and `/time` run locally, and `/export` downloads the displayed conversation as plain text.
+- **UI preservation:** no new visible controls or CSS changes were required; the existing message box is the command entry point. Gemini-powered workflows continue to use only the pinned Gemini 3.5 Flash-Lite model.
 - **Regression tests:** JavaScript syntax, model pinning, UI IDs, attachment limits, search wiring, sandbox configuration, and actual safe-calculator arithmetic tests.
 
 ## Next implementation phases
