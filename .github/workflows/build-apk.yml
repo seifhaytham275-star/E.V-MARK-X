@@ -21,6 +21,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Node.js for regression tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run web and integration regression tests
+        run: node --test tests/*.test.cjs
+
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
