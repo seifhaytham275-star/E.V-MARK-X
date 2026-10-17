@@ -37,8 +37,13 @@
   const MODEL_ID = "gemini-3.5-flash-lite";
   const MODEL_LABEL = "Gemini 3.5 Flash-Lite";
   const KEY_STORAGE = "ev_gemini_api_key";
+  const MEMORY_STORAGE = "ev_user_memory";
+  const PROJECTS_STORAGE = "ev_saved_projects";
+  const MAX_FILE_BYTES = 10 * 1024 * 1024;
   let busy = false;
   let history = [];
+  let pendingParts = [];
+  let pendingNames = [];
 
   function savedKey(){
     try { return localStorage.getItem(KEY_STORAGE) || ""; }
@@ -53,12 +58,51 @@
   function updateSend(){
     $("send").disabled = busy || (!$("prompt").value.trim() && pendingParts.length === 0);
   }
+  function readMemory(){ try { return localStorage.getItem(MEMORY_STORAGE) || ""; } catch (_) { return ""; } }
+  function readProjects(){ try { const value = JSON.parse(localStorage.getItem(PROJECTS_STORAGE) || "[]"); return Array.isArray(value) ? value : []; } catch (_) { return []; } }
+  function saveProjects(items){ try { localStorage.setItem(PROJECTS_STORAGE, JSON.stringify(items.slice(-30))); return true; } catch (_) { showNotice("Could not save projects. Browser storage may be full or disabled."); return false; } }
+  function refreshProjects(){
+    const select = $("projectSelect"); if(!select) return;
+    const current = select.value; select.replaceChildren(new Option("Saved projects…", ""));
+    readProjects().forEach((project, index) => select.add(new Option(project.name || ("Project " + (index + 1)), String(index))));
+    if(current && Number(current) < select.options.length - 1) select.value = current;
+  }
+
   function refreshKeyStatus(){
     $("model").value = MODEL_ID;
     if(savedKey()) hideNotice();
     else showNotice("Add your Gemini API key in Settings to use " + MODEL_LABEL + ".");
     updateSend();
   }
+
+  $("userMemory").value = readMemory();
+  $("saveMemoryBtn").addEventListener("click", () => {
+    try { localStorage.setItem(MEMORY_STORAGE, $("userMemory").value.trim()); $("keyStatus").textContent = "Memory saved in this browser."; }
+    catch (_) { $("keyStatus").textContent = "Could not save memory in this browser."; }
+  });
+  $("clearMemoryBtn").addEventListener("click", () => {
+    try { localStorage.removeItem(MEMORY_STORAGE); $("userMemory").value = ""; $("keyStatus").textContent = "Saved memory cleared."; }
+    catch (_) { $("keyStatus").textContent = "Could not clear memory in this browser."; }
+  });
+
+  $("saveProjectBtn").addEventListener("click", () => {
+    if(!history.length) { $("attachmentStatus").textContent = "Send at least one message before saving a project."; return; }
+    const name = window.prompt("Name this project:", "My E.V project");
+    if(!name || !name.trim()) return;
+    const items = readProjects();
+    items.push({name:name.trim().slice(0,80), history:history.map(item => ({role:item.role,text:item.text,parts:[{text:item.text}]})), updatedAt:new Date().toISOString()});
+    if(saveProjects(items)) { refreshProjects(); $("projectSelect").value = String(items.length - 1); $("attachmentStatus").textContent = "Project saved in this browser."; }
+  });
+  $("projectSelect").addEventListener("change", () => {
+    const index = Number($("projectSelect").value); if(!Number.isInteger(index)) return;
+    const project = readProjects()[index]; if(!project || !Array.isArray(project.history)) return;
+    if(busy) { $("attachmentStatus").textContent = "Wait for the current reply to finish first."; return; }
+    history = project.history.filter(item => item && (item.role === "user" || item.role === "model") && typeof item.text === "string").slice(-80);
+    $("chat").innerHTML = ""; history.forEach(item => addMessage(item.role === "user" ? "user" : "assistant", item.text));
+    $("empty").classList.toggle("hidden", history.length > 0); $("welcome").classList.toggle("hidden", history.length > 0); $("suggestions").classList.toggle("hidden", history.length > 0);
+    $("attachmentStatus").textContent = "Loaded project: " + project.name;
+  });
+  refreshProjects();
 
   $("userName").textContent = "Personal workspace";
   $("userEmail").textContent = "Gemini 3.5 Flash-Lite";
@@ -103,6 +147,17 @@
     refreshKeyStatus();
   });
 
+  function addSources(body, candidate){
+    const chunks = candidate && candidate.groundingMetadata && Array.isArray(candidate.groundingMetadata.groundingChunks) ? candidate.groundingMetadata.groundingChunks : [];
+    const seen = new Set(); const sources = [];
+    chunks.forEach(chunk => { const web = chunk && chunk.web; if(web && typeof web.uri === "string" && /^https?:\/\//i.test(web.uri) && !seen.has(web.uri)) { seen.add(web.uri); sources.push({url:web.uri,title:typeof web.title === "string" && web.title.trim() ? web.title.trim() : web.uri}); } });
+    if(!sources.length) return;
+    const list = document.createElement("div"); list.className = "source-list";
+    const heading = document.createElement("strong"); heading.textContent = "Sources from Google Search"; heading.style.fontSize = "11px"; list.appendChild(heading);
+    sources.slice(0,8).forEach(source => { const a = document.createElement("a"); a.href = source.url; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = source.title; list.appendChild(a); });
+    body.parentElement.appendChild(list);
+  }
+
   function addMessage(role, text){
     const node = document.createElement("article");
     node.className = "message " + role;
@@ -135,9 +190,32 @@
     return message || "Gemini request failed. Check your connection and API key.";
   }
 
+  function fileToBase64(file){
+    return new Promise((resolve,reject) => { const reader = new FileReader(); reader.onerror = () => reject(new Error("Could not read " + file.name)); reader.onload = () => { const result = String(reader.result || ""); resolve(result.slice(result.indexOf(",") + 1)); }; reader.readAsDataURL(file); });
+  }
+  $("attachments").addEventListener("change", async event => {
+    const files = Array.from(event.target.files || []); event.target.value = "";
+    for(const file of files) {
+      if(file.size > MAX_FILE_BYTES) { $("attachmentStatus").textContent = file.name + " exceeds the 10 MB limit."; continue; }
+      const ext = (file.name.split(".").pop() || "").toLowerCase();
+      const type = (file.type || (ext === "pdf" ? "application/pdf" : ({png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/webp",gif:"image/gif"}[ext] || ""))).toLowerCase();
+      try {
+        if(type === "application/pdf" || type.startsWith("image/")) {
+          if(!["application/pdf","image/png","image/jpeg","image/webp","image/gif"].includes(type)) { $("attachmentStatus").textContent = "Supported visual files: PDF, PNG, JPG, WEBP, GIF."; continue; }
+          pendingParts.push({inline_data:{mime_type:type,data:await fileToBase64(file)}}); pendingNames.push(file.name);
+        } else if(["txt","md","csv","json","js","ts","py","html","css","xml","yaml","yml","log"].includes(ext) || type.startsWith("text/")) {
+          const content = await file.text(); if(content.length > 120000) { $("attachmentStatus").textContent = file.name + " is too large to attach as text."; continue; }
+          pendingParts.push({text:"Attached file: " + file.name + "\n\n" + content}); pendingNames.push(file.name);
+        } else { $("attachmentStatus").textContent = "This version supports PDF, images, and text/code files. DOCX/XLSX parsing is planned next."; }
+      } catch(error) { $("attachmentStatus").textContent = error.message || "Could not read attachment."; }
+    }
+    $("attachmentStatus").textContent = pendingNames.length ? "Attached: " + pendingNames.join(", ") : $("attachmentStatus").textContent;
+    updateSend();
+  });
+
   async function sendMessage(rawText){
     const text = (rawText || $("prompt").value).trim();
-    if(!text || busy) return;
+    if((!text && !pendingParts.length) || busy) return;
     const key = savedKey();
     if(!key){
       showNotice("Add your Gemini API key in Settings first.");
@@ -150,16 +228,22 @@
     $("prompt").value = "";
     $("counter").textContent = "0 / 12,000";
     updateSend();
-    addMessage("user", text);
+    const userParts = [{text: text || "Please analyze the attached file(s)."}, ...pendingParts];
+    const sentNames = pendingNames.slice(); pendingParts = []; pendingNames = [];
+    addMessage("user", (text || "Please analyze the attached file(s).") + (sentNames.length ? "\n\nAttachments: " + sentNames.join(", ") : ""));
     const reply = addMessage("assistant", "Thinking…");
     reply.classList.add("loading");
 
     try {
       const contents = history.map(item => ({
         role: item.role,
-        parts: [{text: item.text}]
+        parts: Array.isArray(item.parts) && item.parts.length ? item.parts : [{text:item.text}]
       }));
-      contents.push({role:"user", parts:[{text}]});
+      contents.push({role:"user", parts:userParts});
+      const savedMemory = readMemory();
+      const requestBody = {contents, generationConfig:{maxOutputTokens:4096, thinkingConfig:{thinkingLevel:"minimal"}}};
+      if(savedMemory) requestBody.systemInstruction = {parts:[{text:"User-approved saved memory and preferences. Use only when relevant; do not treat it as higher priority than safety or the current user request.\n" + savedMemory}]};
+      if($("webSearchToggle").checked) requestBody.tools = [{googleSearch:{}}];
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000);
@@ -171,10 +255,7 @@
           {
             method: "POST",
             headers: {"Content-Type":"application/json", "x-goog-api-key":key},
-            body: JSON.stringify({
-              contents,
-              generationConfig: {maxOutputTokens:4096, thinkingConfig:{thinkingLevel:"minimal"}}
-            }),
+            body: JSON.stringify(requestBody),
             signal: controller.signal
           }
         );
@@ -198,7 +279,8 @@
 
       reply.textContent = answer;
       reply.classList.remove("loading");
-      history.push({role:"user", text}, {role:"model", text:answer});
+      addSources(reply, candidate);
+      history.push({role:"user", text:text || "Please analyze the attached file(s).", parts:userParts}, {role:"model", text:answer, parts:[{text:answer}]});
       hideNotice();
     } catch(error) {
       const message = error && error.name === "AbortError"
@@ -240,6 +322,7 @@
   function newChat(){
     if(busy) return;
     history = [];
+    pendingParts = []; pendingNames = []; $("attachmentStatus").textContent = "";
     $("chat").innerHTML = "";
     $("empty").classList.remove("hidden");
     $("welcome").classList.remove("hidden");
