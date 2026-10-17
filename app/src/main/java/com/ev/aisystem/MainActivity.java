@@ -48,6 +48,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 public class MainActivity extends Activity {
+    private static final String MODEL_ID = "gemini-3.5-flash-lite";
     private final int bg = Color.rgb(7, 11, 24);
     private final int panel = Color.rgb(19, 22, 35);
     private final int panel2 = Color.rgb(28, 34, 52);
@@ -60,10 +61,7 @@ public class MainActivity extends Activity {
     private String sessionApiKey = "";
     private static final String API_KEY_PREF = "gemini_api_key_encrypted";
     private static final String API_KEY_ALIAS = "ev_gemini_api_key";
-    private Spinner modelPicker;
-    private TextView modelStatus;
     private android.content.SharedPreferences prefs;
-    private ArrayList<String> modelIds = new ArrayList<>();
     private LinearLayout historyList;
     private TextView conversationView;
     private String currentChatId = "";
@@ -237,51 +235,13 @@ public class MainActivity extends Activity {
         space(12);
 
         LinearLayout modelCard = cardBox();
-        modelCard.addView(label("MODEL SELECTOR", 11, cyan, true));
-        modelPicker = new Spinner(this);
-        modelPicker.setPadding(dp(6), dp(6), dp(6), dp(6));
-        modelPicker.setBackground(background(panel2, dp(12), Color.TRANSPARENT));
-        modelIds.clear();
-        modelIds.add("gemini-3.5-flash");
-        modelIds.add("gemini-3.5-flash-lite");
-        modelIds.add("gemini-2.5-flash");
-        modelIds.add("gemini-2.5-flash-lite");
-        modelIds.add("gemini-2.5-pro");
-        modelIds.add("gemini-2.0-flash");
-        modelIds.add("gemini-2.0-flash-lite");
-        refreshModelPicker(prefs.getString("selected_model", "gemini-3.5-flash"));
-        LinearLayout.LayoutParams sp = params();
-        sp.topMargin = dp(8);
-        modelCard.addView(modelPicker, sp);
-        modelStatus = label("Gemini models supported by your API key. API access does not guarantee free-tier access; check current Google quotas.", 11, muted, false);
-        modelStatus.setPadding(0, dp(8), 0, dp(8));
-        modelCard.addView(modelStatus);
-        Button refresh = button("↻  REFRESH AVAILABLE MODELS", panel2);
-        refresh.setAllCaps(false);
-        modelCard.addView(refresh, params());
-        refresh.setOnClickListener(v -> {
-            String key = apiKey.getText().toString().trim();
-            if (key.isEmpty()) key = sessionApiKey;
-            if (key.isEmpty()) { toast("Enter your Gemini API key first."); return; }
-            final String modelLookupKey = key;
-            refresh.setEnabled(false);
-            modelStatus.setText("Loading models from Google…");
-            new Thread(() -> {
-                ArrayList<String> available = fetchModels(modelLookupKey);
-                runOnUiThread(() -> {
-                    refresh.setEnabled(true);
-                    if (available.isEmpty()) {
-                        modelStatus.setText("Could not load models. Check your API key and connection; common model options remain.");
-                    } else {
-                        String selected = modelPicker.getSelectedItem() == null ? "gemini-2.5-flash" : modelPicker.getSelectedItem().toString();
-                        modelIds.clear();
-                        modelIds.addAll(available);
-                        refreshModelPicker(selected);
-                        modelStatus.setText(available.size() + " models supporting text generation found for this API key.");
-                    }
-                });
-            }).start();
-        });
+        modelCard.addView(label("ACTIVE MODEL", 11, cyan, true));
+        TextView fixedModel = label("Gemini 3.5 Flash-Lite", 16, Color.WHITE, true);
+        fixedModel.setPadding(0, dp(10), 0, dp(4));
+        modelCard.addView(fixedModel, params());
+        TextView modelDescription = label("Fixed model across the E.V workspace for consistent behavior.", 11, muted, false);
+        modelDescription.setPadding(0, dp(4), 0, dp(8));
+        modelCard.addView(modelDescription, params());
         body.addView(modelCard, params());
         space(12);
 
@@ -391,9 +351,8 @@ public class MainActivity extends Activity {
                 if (saveApiKey(key)) sessionApiKey = key;
             }
             String q = question.getText().toString().trim();
-            String model = modelPicker.getSelectedItem() == null ? "gemini-2.5-flash" : modelPicker.getSelectedItem().toString();
+            String model = MODEL_ID;
             if (key.isEmpty() || q.isEmpty()) { toast("Enter your API key and a message."); return; }
-            prefs.edit().putString("selected_model", model).apply();
             if (currentChatId.isEmpty()) startNewChat();
             if (currentChatTitle.equals("New chat")) {
                 currentChatTitle = q.length() > 34 ? q.substring(0, 34) + "…" : q;
@@ -669,67 +628,6 @@ public class MainActivity extends Activity {
         if (count == 0) historyList.addView(label("Your saved conversations will appear here.", 12, muted, false));
     }
 
-    private void refreshModelPicker(String preferred) {
-        if (modelPicker == null) return;
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, modelIds) {
-            @Override public View getView(int position, View convertView, ViewGroup parent) {
-                TextView t = (TextView) super.getView(position, convertView, parent);
-                t.setTextColor(Color.WHITE);
-                t.setTextSize(14);
-                return t;
-            }
-            @Override public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                TextView t = (TextView) super.getDropDownView(position, convertView, parent);
-                t.setTextColor(Color.WHITE);
-                t.setBackgroundColor(panel2);
-                t.setPadding(dp(12), dp(12), dp(12), dp(12));
-                return t;
-            }
-        };
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        modelPicker.setAdapter(adapter);
-        int index = modelIds.indexOf(preferred);
-        modelPicker.setSelection(index >= 0 ? index : 0);
-    }
-
-    private ArrayList<String> fetchModels(String key) {
-        ArrayList<String> found = new ArrayList<>();
-        HttpURLConnection c = null;
-        try {
-            URL url = new URL("https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000");
-            c = (HttpURLConnection)url.openConnection();
-            c.setRequestMethod("GET");
-            c.setConnectTimeout(15000);
-            c.setReadTimeout(20000);
-            c.setRequestProperty("x-goog-api-key", key);
-            int status = c.getResponseCode();
-            InputStream stream = status >= 200 && status < 300 ? c.getInputStream() : c.getErrorStream();
-            StringBuilder raw = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
-                String line; while ((line = reader.readLine()) != null) raw.append(line);
-            }
-            if (status < 200 || status >= 300) return found;
-            JSONArray models = new JSONObject(raw.toString()).optJSONArray("models");
-            if (models == null) return found;
-            for (int i = 0; i < models.length(); i++) {
-                JSONObject item = models.optJSONObject(i);
-                if (item == null) continue;
-                JSONArray methods = item.optJSONArray("supportedGenerationMethods");
-                boolean supports = false;
-                if (methods != null) for (int j = 0; j < methods.length(); j++)
-                    if ("generateContent".equals(methods.optString(j))) supports = true;
-                String name = item.optString("name", "");
-                if (supports && name.startsWith("models/")) {
-                    String id = name.substring("models/".length());
-                    found.add(id);
-                }
-            }
-            java.util.Collections.sort(found);
-        } catch (Exception ignored) {
-        } finally { if (c != null) c.disconnect(); }
-        return found;
-    }
-
     private String askGemini(String key, String prompt, String model) {
         HttpURLConnection c = null;
         try {
@@ -884,7 +782,7 @@ public class MainActivity extends Activity {
             build.setEnabled(false);
             build.setText("BUILDING YOUR PLAN…");
             new Thread(() -> {
-                String answer = askGemini(key, planPrompt, "gemini-3.5-flash");
+                String answer = askGemini(key, planPrompt, MODEL_ID);
                 runOnUiThread(() -> {
                     build.setEnabled(true);
                     build.setText("✦  BUILD MY WELLNESS PLAN");
