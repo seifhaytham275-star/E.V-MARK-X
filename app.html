@@ -308,6 +308,10 @@
   async function sendMessage(rawText){
     const text = (rawText || $("prompt").value).trim();
     if((!text && !pendingParts.length) || busy) return;
+    const commandMatch = text.match(/^\/(agent|studio)(?:\s+([\s\S]*))?$/i);
+    const mode = commandMatch ? commandMatch[1].toLowerCase() : "chat";
+    const taskText = commandMatch ? (commandMatch[2] || "").trim() : text;
+    const requestText = taskText || (mode === "studio" ? "Create a polished interactive web app starter." : mode === "agent" ? "Help me plan and complete my next task." : text);
     const key = savedKey();
     if(!key){
       showNotice("Add your Gemini API key in Settings first.");
@@ -320,7 +324,7 @@
     $("prompt").value = "";
     $("counter").textContent = "0 / 12,000";
     updateSend();
-    const userParts = [{text: text || "Please analyze the attached file(s)."}, ...pendingParts];
+    const userParts = [{text: requestText || "Please analyze the attached file(s)."}, ...pendingParts];
     const sentNames = pendingNames.slice(); pendingParts = []; pendingNames = []; pendingBytes = 0;
     addMessage("user", (text || "Please analyze the attached file(s).") + (sentNames.length ? "\n\nAttachments: " + sentNames.join(", ") : ""));
     const reply = addMessage("assistant", "Thinking…");
@@ -331,48 +335,28 @@
         role: item.role,
         parts: Array.isArray(item.parts) && item.parts.length ? item.parts : [{text:item.text}]
       }));
-      contents.push({role:"user", parts:userParts});
-      const savedMemory = readMemory();
-      const requestBody = {contents, generationConfig:{maxOutputTokens:4096, thinkingConfig:{thinkingLevel:"minimal"}}};
-      if(savedMemory) requestBody.systemInstruction = {parts:[{text:"User-approved saved memory and preferences. Use only when relevant; do not treat it as higher priority than safety or the current user request.\n" + savedMemory}]};
-      if($("webSearchToggle").checked) requestBody.tools = [{google_search:{}}];
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000);
-      let response;
-      try {
-        response = await fetch(
-          "https://generativelanguage.googleapis.com/v1beta/models/" +
-          encodeURIComponent(MODEL_ID) + ":generateContent",
-          {
-            method: "POST",
-            headers: {"Content-Type":"application/json", "x-goog-api-key":key},
-            body: JSON.stringify(requestBody),
-            signal: controller.signal
-          }
-        );
-      } finally {
-        clearTimeout(timeoutId);
+      contents.push({role:"user",parts:userParts});
+      const savedMemory=readMemory();
+      let candidate=null,answer="",extraSources=[];
+      if(mode==="studio"){
+        answer=await generateStudio(requestText,key);
+      }else if(mode==="agent"){
+        const result=await runAgent(contents,key);
+        candidate=result.candidate;answer=result.answer;extraSources=result.sources;
+      }else{
+        const requestBody={contents,generationConfig:{maxOutputTokens:4096,thinkingConfig:{thinkingLevel:"minimal"}}};
+        if(savedMemory)requestBody.systemInstruction={parts:[{text:"User-approved saved memory and preferences. Use only when relevant; do not treat it as higher priority than safety or the current user request.\n"+savedMemory}]};
+        if($("webSearchToggle").checked)requestBody.tools=[{google_search:{}}];
+        const data=await callGemini(requestBody,key);
+        candidate=data.candidates&&data.candidates[0];
+        answer=candidateText(candidate);
+        if(!answer){const reason=candidate&&candidate.finishReason?" (finish reason: "+candidate.finishReason+")":"";throw new Error("Gemini returned no text"+reason+". Try sending the message again.");}
       }
-
-      const data = await response.json().catch(() => ({}));
-      if(!response.ok){
-        const apiMessage = data && data.error && data.error.message;
-        throw new Error(explainApiError(response.status, apiMessage || ("HTTP " + response.status)));
-      }
-      const candidate = data.candidates && data.candidates[0];
-      const answer = candidate && candidate.content && Array.isArray(candidate.content.parts)
-        ? candidate.content.parts.map(part => typeof part.text === "string" ? part.text : "").join("").trim()
-        : "";
-      if(!answer){
-        const reason = candidate && candidate.finishReason ? " (finish reason: " + candidate.finishReason + ")" : "";
-        throw new Error("Gemini returned no text" + reason + ". Try sending the message again.");
-      }
-
-      reply.textContent = answer;
+      if(!answer)throw new Error("Gemini returned no text. Try sending the request again.");
+      reply.textContent=answer;
       reply.classList.remove("loading");
-      addSources(reply, candidate);
-      history.push({role:"user", text:text || "Please analyze the attached file(s).", parts:userParts}, {role:"model", text:answer, parts:[{text:answer}]});
+      addSources(reply,candidate,extraSources);
+      history.push({role:"user",text:text||"Please analyze the attached file(s).",parts:userParts},{role:"model",text:answer,parts:[{text:answer}]});
       hideNotice();
     } catch(error) {
       const message = error && error.name === "AbortError"
