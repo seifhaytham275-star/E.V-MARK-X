@@ -274,6 +274,33 @@
     return {answer:candidateText(lastCandidate)||"Agent stopped after reaching its tool-step limit.",candidate:lastCandidate,sources};
   }
 
+  const MAX_HISTORY_MESSAGES = 24;
+  const MAX_HISTORY_CHARS = 60000;
+
+  // Keep follow-up context useful without repeatedly uploading large PDFs/images
+  // or allowing a long session to grow into an oversized request.
+  function buildHistoryContext(items){
+    let remaining = MAX_HISTORY_CHARS;
+    const selected = [];
+    for(const item of items.slice(-MAX_HISTORY_MESSAGES).reverse()){
+      const sourceParts = Array.isArray(item.parts) && item.parts.length ? item.parts : [{text:String(item.text || "")}];
+      const parts = [];
+      for(const part of sourceParts.slice().reverse()){
+        if(part && part.inline_data){
+          const placeholder = "[A visual/PDF attachment from an earlier turn was omitted to keep context small. Reattach it if needed.]";
+          if(remaining >= placeholder.length){ parts.unshift({text:placeholder}); remaining -= placeholder.length; }
+        } else if(part && typeof part.text === "string" && remaining > 0){
+          const value = part.text.slice(-remaining);
+          remaining -= value.length;
+          if(value) parts.unshift({text:value});
+        }
+      }
+      if(parts.length) selected.unshift({role:item.role,parts});
+      if(remaining <= 0) break;
+    }
+    return selected;
+  }
+
   function addMessage(role, text){
     const node = document.createElement("article");
     node.className = "message " + role;
@@ -461,10 +488,7 @@
     reply.classList.add("loading");
 
     try {
-      const contents = history.map(item => ({
-        role: item.role,
-        parts: Array.isArray(item.parts) && item.parts.length ? item.parts : [{text:item.text}]
-      }));
+      const contents = buildHistoryContext(history);
       contents.push({role:"user",parts:userParts});
       const savedMemory=readMemory();
       let candidate=null,answer="",extraSources=[];
@@ -486,7 +510,14 @@
       reply.textContent=answer;
       reply.classList.remove("loading");
       addSources(reply,candidate,extraSources);
-      history.push({role:"user",text:text||"Please analyze the attached file(s).",parts:userParts},{role:"model",text:answer,parts:[{text:answer}]});
+      const historyParts = userParts.map(part => part && part.inline_data
+        ? {text:"[A visual/PDF attachment was shared in an earlier turn and is not resent automatically. Reattach it if you need it analyzed again.]"}
+        : part);
+      history.push(
+        {role:"user",text:text||"Please analyze the attached file(s).",parts:historyParts},
+        {role:"model",text:answer,parts:[{text:answer}]}
+      );
+      if(history.length > MAX_HISTORY_MESSAGES) history = history.slice(-MAX_HISTORY_MESSAGES);
       hideNotice();
     } catch(error) {
       const message = error && error.name === "AbortError"
