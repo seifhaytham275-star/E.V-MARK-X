@@ -155,7 +155,15 @@
     try {
       localStorage.setItem(KEY_STORAGE, key);
       panel.classList.remove("open");
-      document.querySelectorAll(".protocol-launch").forEach(button => button.addEventListener("click", () => {
+      $("keyStatus").textContent = "API key saved in this browser.";
+      refreshKeyStatus();
+    } catch (_) {
+      $("keyStatus").textContent = "This browser could not save the key. Enable site storage or try a normal browser tab.";
+    }
+  });
+
+  // Register protocol controls once at startup, not whenever the API key is saved.
+  document.querySelectorAll(".protocol-launch").forEach(button => button.addEventListener("click", () => {
     const mode = button.dataset.mode;
     const prompts = {
       agent: "/agent Plan this task into steps, use the available tools, verify the result, and report progress: ",
@@ -173,6 +181,7 @@
     document.getElementById("send").disabled = false;
     document.getElementById("suggestions").scrollIntoView({behavior:"smooth",block:"center"});
   }));
+
   const protocolPrompts = {
     web: "Use Web Protocol: research this topic with current sources and provide source links: ",
     file: "Use File Protocol to inspect the attached file. Summarize its structure, key information, and any issues: ",
@@ -190,10 +199,6 @@
     document.getElementById("send").disabled = false;
   }));
   refreshKeyStatus();
-    } catch (_) {
-      $("keyStatus").textContent = "This browser could not save the key. Enable site storage or try a normal browser tab.";
-    }
-  });
   $("clearKeyBtn").addEventListener("click", () => {
     try { localStorage.removeItem(KEY_STORAGE); }
     catch (_) { $("keyStatus").textContent = "The browser would not allow the saved key to be removed."; return; }
