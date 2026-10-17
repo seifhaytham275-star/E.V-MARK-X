@@ -1,4 +1,4 @@
-# E.V-MARK-X — E.V-MARK-7 Platinum
+# E.V-MARK-7 Platinum
 
 **Live website:** https://seifhaytham275-star.github.io/E.V-MARK-X/  
 **Open the AI workspace:** https://seifhaytham275-star.github.io/E.V-MARK-X/app.html  
@@ -64,4 +64,4 @@ node --test tests/web-smoke.test.cjs
 
 The same tests run in GitHub Actions. They do not replace testing with a real Gemini API key or testing the APK on a physical Android device.
 
-The current workspace brand is **E.V-MARK-7 Platinum**; the GitHub repository URL and package identifier remain unchanged for compatibility. See [FEATURE_ROADMAP.md](FEATURE_ROADMAP.md) for planned work.
+The current workspace brand is **E.V-MARK-7 Platinum**. The existing repository URL remains unchanged so current links continue working. See [FEATURE_ROADMAP.md](FEATURE_ROADMAP.md) for planned work.
