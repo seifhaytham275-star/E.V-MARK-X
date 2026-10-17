@@ -51,9 +51,9 @@ test("attachment handling includes size limits and supported formats", () => {
   assert.match(script, /application\/pdf/);
   assert.match(script, /image\/png/);
   assert.match(script, /Attached file:/);
-  assert.match(html, /\\.docx,\\.xlsx/);
-  assert.match(html, /mammoth@1\\.9\\.1/);
-  assert.match(html, /xlsx@0\\.18\\.5/);
+  assert.match(html, /\.docx,\.xlsx/);
+  assert.match(html, /mammoth@1\.9\.1/);
+  assert.match(html, /xlsx@0\.18\.5/);
   assert.match(script, /extractRawText/);
   assert.match(script, /sheet_to_csv/);
   assert.match(script, /Attached Word document:/);
