@@ -114,16 +114,16 @@ test("Agent and Studio commands preserve the fixed model and existing UI", () =>
 });
 
 test("70+ new workflow commands are available without changing the UI", () => {
-  const block = script.match(/const FEATURE_COMMANDS = \\{([\\s\\S]*?)\\n  \\};/);
+  const block = script.match(/const FEATURE_COMMANDS = \{([\s\S]*?)\n  \};/);
   assert.ok(block, "workflow registry should exist");
-  const names = [...block[1].matchAll(/^\\s{4}([a-z][a-z0-9]*):/gm)].map(match => match[1]);
+  const names = [...block[1].matchAll(/^\s{4}([a-z][a-z0-9]*):/gm)].map(match => match[1]);
   assert.ok(names.length >= 65, "expected at least 65 new AI workflows");
   for (const command of ["summarize", "translate", "quiz", "flashcards", "debug", "studyplan", "security", "documentation", "testcases", "troubleshoot"]) {
     assert.ok(names.includes(command), "missing /" + command);
   }
-  assert.match(script, /runLocalCommand\\(text\\)/);
+  assert.match(script, /runLocalCommand\(text\)/);
   assert.match(script, /recognizedCommand/);
-  assert.match(script, /const MODEL_ID = "gemini-3\\.5-flash-lite"/);
+  assert.match(script, /const MODEL_ID = "gemini-3\.5-flash-lite"/);
   assert.doesNotMatch(html, /<select[^>]+id=["']model["']/i);
 });
 
@@ -131,11 +131,11 @@ test("local utility commands work without adding UI controls", () => {
   for (const command of ["help", "commands", "math", "wordcount", "reverse", "upper", "lower", "date", "time", "export"]) {
     assert.match(script, new RegExp(command));
   }
-  assert.match(script, /parseSafeMath\\(arg\\)/);
-  assert.match(script, /ev-mark-x-chat\\.txt/);
+  assert.match(script, /parseSafeMath\(arg\)/);
+  assert.match(script, /ev-mark-x-chat\.txt/);
 });
 
 test("unknown slash-prefixed text remains ordinary chat", () => {
-  assert.match(script, /const recognizedCommand = mode === "agent" \\|\\| mode === "studio" \\|\\| Boolean\\(featurePrompt\\)/);
-  assert.match(script, /commandMatch && recognizedCommand \\? \\(commandMatch\\[2\\] \\|\\| ""\\)\\.trim\\(\\) : text/);
+  assert.match(script, /const recognizedCommand = mode === "agent" \|\| mode === "studio" \|\| Boolean\(featurePrompt\)/);
+  assert.match(script, /commandMatch && recognizedCommand \? \(commandMatch\[2\] \|\| ""\)\.trim\(\) : text/);
 });
