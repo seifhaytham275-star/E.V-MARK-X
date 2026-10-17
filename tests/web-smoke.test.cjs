@@ -136,6 +136,33 @@ test("local utility commands work without adding UI controls", () => {
 });
 
 
+
+test("Studio HTML receives a restrictive CSP in every document shape", () => {
+  const match = script.match(/function secureStudioHtml\(html\)\{[\s\S]*?\n  \}/);
+  assert.ok(match, "Studio HTML security wrapper should exist");
+  const secure = vm.runInNewContext("(" + match[0] + ")");
+  for (const source of [
+    "<!doctype html><html><head><title>Test</title></head><body>ok</body></html>",
+    "<html><body>fragment</body></html>",
+    "<p>fragment</p>"
+  ]) {
+    const result = secure(source);
+    assert.match(result, /Content-Security-Policy/);
+    assert.match(result, /connect-src 'none'/);
+    assert.match(result, /form-action 'none'/);
+    assert.match(result, /base-uri 'none'/);
+  }
+  const existingPolicy = secure("<html><head><meta http-equiv=\"Content-Security-Policy\" content=\"default-src https:\"></head><body></body></html>");
+  assert.equal((existingPolicy.match(/Content-Security-Policy/g) || []).length, 2, "existing policies should remain while the restrictive policy is added");
+});
+
+test("Gemini requests have a timeout and do not expose the API key in the URL", () => {
+  assert.match(script, /new AbortController\(\)/);
+  assert.match(script, /setTimeout\(\(\)=>controller\.abort\(\),60000\)/);
+  assert.match(script, /headers:\{\"Content-Type\":\"application\/json\",\"x-goog-api-key\":key\}/);
+  assert.doesNotMatch(script, /generativelanguage\.googleapis\.com[^\n]*[?&]key=/i);
+});
+
 test("conversation context is bounded and prior binary attachments are not resent", () => {
   const match = script.match(/function buildHistoryContext\(items\)\{[\s\S]*?\n  \}/);
   assert.ok(match, "bounded history helper should exist");
