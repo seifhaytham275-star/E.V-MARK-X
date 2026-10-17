@@ -56,3 +56,9 @@ This roadmap describes the staged work for the existing GitHub Pages workspace. 
 - Memory/projects are user-controlled and local-only unless a clearly disclosed backend is added.
 - Studio previews never execute inside the main page context.
 - Every claimed feature has an automated test where feasible and a documented manual API/device test where credentials or a real device are required.
+
+
+### Business Desk preview (implemented)
+- Standalone `business.html` dashboard with customer/lead records, phone and email fields, deal stages and values, search/filter, click-to-call and user-triggered WhatsApp links, follow-up tasks, and summary metrics.
+- Current storage is local to the browser/device; it is not yet a secure multi-user CRM and does not synchronize across devices.
+- Next production steps: server-side accounts and database, tenant-level authorization, audit trail, encrypted transport and retention controls, export/delete controls, explicit opt-in before any automated contact, verified payment webhooks, plan entitlements and per-user usage limits, and an approved AI provider suitable for the intended audience.
