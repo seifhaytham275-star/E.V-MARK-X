@@ -215,6 +215,41 @@
     return "E.V Studio preview is open in a sandboxed window. You can test the page or download its HTML. The preview cannot access this app's storage or make network requests.";
   }
 
+  const AGENT_DECLARATIONS=[
+    {name:"calculate",description:"Calculate a basic arithmetic expression using +, -, *, /, %, ^ and parentheses.",parameters:{type:"OBJECT",properties:{expression:{type:"STRING",description:"A basic arithmetic expression without variables or functions."}},required:["expression"]}},
+    {name:"get_current_time",description:"Get the current date and local time from the user's browser.",parameters:{type:"OBJECT",properties:{}}},
+    {name:"search_web",description:"Search the live web for current facts and return an answer with source URLs.",parameters:{type:"OBJECT",properties:{query:{type:"STRING",description:"A concise web search query."}},required:["query"]}},
+    {name:"create_studio_preview",description:"Build and open a sandboxed interactive HTML app in E.V Studio from the requested description.",parameters:{type:"OBJECT",properties:{description:{type:"STRING",description:"What the web app should do."}},required:["description"]}},
+    {name:"read_saved_memory",description:"Read the user's saved E.V memory to personalize this task.",parameters:{type:"OBJECT",properties:{}}}
+  ];
+  async function runAgent(contents,key){
+    const agentContents=contents.slice();const sources=[];let lastCandidate=null;let calls=0;const memory=readMemory();
+    const systemText="You are E.V Agent Mode. Complete the user's task using only declared tools. Use search_web for current facts, calculate for arithmetic, and create_studio_preview for websites or interactive tools. At most 4 tool calls total. Never claim an action happened unless its tool succeeded. Ask before external or irreversible actions; none are available. Never invent citations."+(memory?"\nSaved memory:\n"+memory:"");
+    for(let step=0;step<5;step++){
+      const data=await callGemini({contents:agentContents,systemInstruction:{parts:[{text:systemText}]},tools:[{functionDeclarations:AGENT_DECLARATIONS}],toolConfig:{functionCallingConfig:{mode:"AUTO"}},generationConfig:{maxOutputTokens:4096}},key);
+      const candidate=data.candidates&&data.candidates[0];lastCandidate=candidate;
+      const parts=candidate&&candidate.content&&Array.isArray(candidate.content.parts)?candidate.content.parts:[];
+      const callsInResponse=parts.filter(part=>part&&part.functionCall).map(part=>part.functionCall);
+      if(!callsInResponse.length)return {answer:candidateText(candidate)||"Agent finished without a text response.",candidate,sources};
+      if(step===4||calls>=4)return {answer:"Agent reached its safe tool-step limit. Narrow the task or continue with a follow-up.",candidate:lastCandidate,sources};
+      agentContents.push(candidate.content);const responses=[];
+      for(const call of callsInResponse.slice(0,Math.max(1,4-calls))){
+        calls++;const args=call.args||{};let result;
+        try{
+          if(call.name==="calculate")result={result:parseSafeMath(args.expression)};
+          else if(call.name==="get_current_time")result={localTime:new Date().toString(),isoTime:new Date().toISOString()};
+          else if(call.name==="search_web"){const found=await searchWebTool(args.query,key);sources.push(...found.sources);result={answer:found.answer,sources:found.sources};}
+          else if(call.name==="create_studio_preview")result={status:"success",message:await generateStudio(args.description,key)};
+          else if(call.name==="read_saved_memory")result={memory:readMemory()||"No saved memory is stored."};
+          else result={error:"Tool not available. Choose a declared tool."};
+        }catch(error){result={error:(error&&error.message)||"Tool execution failed."};}
+        responses.push({functionResponse:{name:call.name,response:{result}}});
+      }
+      agentContents.push({role:"user",parts:responses});
+    }
+    return {answer:candidateText(lastCandidate)||"Agent stopped after reaching its tool-step limit.",candidate:lastCandidate,sources};
+  }
+
   function addMessage(role, text){
     const node = document.createElement("article");
     node.className = "message " + role;
