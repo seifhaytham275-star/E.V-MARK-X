@@ -29,7 +29,7 @@
 <div id="chat" class="chat" aria-live="polite"></div>
 <div id="empty" class="empty">Your conversation will appear here. Send your first message to get started.</div>
 <div class="composer"><div class="composer-tools"><label class="btn" for="attachments">📎 Attach files</label><input id="attachments" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.txt,.md,.csv,.json,.js,.ts,.py,.html,.css,.xml,.yaml,.yml,.log,.docx,.xlsx"><label class="tool-toggle"><input type="checkbox" id="webSearchToggle"> Search web with sources</label><button class="btn" id="saveProjectBtn" type="button">Save project</button><select id="projectSelect" class="project-select" aria-label="Saved projects"><option value="">Saved projects…</option></select><span id="attachmentStatus" class="tool-status" aria-live="polite"></span></div><div class="composebox"><textarea id="prompt" rows="2" maxlength="12000" placeholder="Message E.V-MARK-7 Platinum… (Enter to send, Shift+Enter for a new line)"></textarea><button id="send" class="btn primary" disabled>Send ↗</button></div><div class="hint"><span>AI can make mistakes. Verify important information.</span><span id="counter">0 / 12,000</span></div></div>
-<div class="foot">E.V-MARK-X is an independent project. Your prompts are sent to the configured AI provider.</div>
+<div class="foot">E.V-MARK-7 Platinum is an independent project. Your prompts are sent to the configured AI provider.</div>
 </section>
 </main>
 </div>
@@ -308,7 +308,7 @@
     node.className = "message " + role;
     const who = document.createElement("div");
     who.className = "who";
-    who.textContent = role === "user" ? "You" : "E.V-MARK-X";
+    who.textContent = role === "user" ? "You" : "E.V-MARK-7 Platinum";
     const body = document.createElement("div");
     body.textContent = text;
     node.append(who, body);
@@ -457,7 +457,7 @@
     let result="";
     try{
       if(command==="help"||command==="commands"){
-        result="E.V-MARK-X commands\n\nLocal: /math 12*(3+4), /wordcount text, /reverse text, /upper text, /lower text, /date, /time, /export\n\nAI workflows: "+Object.keys(FEATURE_COMMANDS).map(name=>"/"+name).join(", ")+"\n\nExisting modes: /agent task and /studio describe an app. AI workflows require your Gemini API key.";
+        result="E.V-MARK-7 Platinum commands\n\nLocal: /math 12*(3+4), /wordcount text, /reverse text, /upper text, /lower text, /date, /time, /export\n\nAI workflows: "+Object.keys(FEATURE_COMMANDS).map(name=>"/"+name).join(", ")+"\n\nExisting modes: /agent task and /studio describe an app. AI workflows require your Gemini API key.";
       }else if(command==="math"){result=String(parseSafeMath(arg));}
       else if(command==="wordcount"){result="Words: "+(arg.trim()?arg.trim().split(/\s+/).length:0)+"\nCharacters: "+arg.length+"\nCharacters without spaces: "+arg.replace(/\s/g,"").length;}
       else if(command==="reverse"){result=Array.from(arg).reverse().join("");}
@@ -467,7 +467,7 @@
       else if(command==="time"){result="Local time: "+new Date().toLocaleTimeString();}
       else if(command==="export"){
         const transcript=Array.from($("chat").querySelectorAll(".message")).map(node=>{const who=node.querySelector(".who");const body=who&&who.nextElementSibling;return (who?who.textContent:"Message")+": "+(body?body.textContent:"");}).join("\n\n");
-        const blob=new Blob([transcript||"E.V-MARK-X conversation is empty."],{type:"text/plain;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="ev-mark-x-chat.txt";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);result="Conversation export prepared as a text file.";
+        const blob=new Blob([transcript||"E.V-MARK-7 Platinum conversation is empty."],{type:"text/plain;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="ev-mark-x-chat.txt";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);result="Conversation export prepared as a text file.";
       }
     }catch(error){result="Command error: "+(error.message||"Invalid input.");}
     $("prompt").value="";$("counter").textContent="0 / 12,000";updateSend();
