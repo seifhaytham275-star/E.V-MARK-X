@@ -21,6 +21,7 @@ The APK is an Android WebView wrapper around the same live `app.html` workspace.
 
 - `index.html` — public landing page.
 - `app.html` — responsive AI workspace, fixed to Gemini 3.5 Flash-Lite.
+- `business.html` — E.V Business Desk preview for customer contacts, phone numbers, sales pipeline, and follow-up tasks (browser-local storage only).
 - `about.html` — project, privacy, and security notes.
 - `config.js` — optional public configuration; never place API secrets here.
 - `server/` — optional backend for Google credential verification and server-side Gemini requests.
@@ -65,3 +66,8 @@ node --test tests/web-smoke.test.cjs
 The same tests run in GitHub Actions. They do not replace testing with a real Gemini API key or testing the APK on a physical Android device.
 
 The current workspace brand is **E.V-MARK-XI Platinum**. The existing repository URL remains unchanged so current links continue working. See [FEATURE_ROADMAP.md](FEATURE_ROADMAP.md) for planned work.
+
+
+## E.V Business Desk preview
+
+Open [Business Desk](https://seifhaytham275-star.github.io/E.V-MARK-X/business.html) to track customer leads, phone numbers, opportunity values, stages, and follow-up tasks. The current preview stores data only in the current browser/device; it has no account sync, shared team database, billing, or automatic outbound messaging. Call and WhatsApp links are launched only after a user action. Do not store sensitive customer information in this local-only preview.
