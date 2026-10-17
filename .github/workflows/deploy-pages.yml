@@ -4,6 +4,10 @@ on:
     branches: ["main"]
     paths:
       - "index.html"
+      - "app.html"
+      - "login.html"
+      - "about.html"
+      - "config.js"
       - ".github/workflows/deploy-pages.yml"
   workflow_dispatch:
 permissions:
