@@ -1,11 +1,11 @@
-# E.V-MARK-X
+# E.V-MARK-X — E.V-MARK-7 Platinum
 
 **Live website:** https://seifhaytham275-star.github.io/E.V-MARK-X/  
 **Open the AI workspace:** https://seifhaytham275-star.github.io/E.V-MARK-X/app.html  
 **About & privacy:** https://seifhaytham275-star.github.io/E.V-MARK-X/about.html  
 **Source repository:** https://github.com/seifhaytham275-star/E.V-MARK-X
 
-E.V-MARK-X is a responsive AI workspace with chat, study and writing workflows, a browser-based Studio, and a limited tool-using Agent. The web workspace uses the configured Gemini 3.5 Flash-Lite model. Google sign-in is not required for the GitHub Pages version.
+E.V-MARK-7 Platinum is the refreshed workspace name for this E.V-MARK-X project: a responsive AI workspace with chat, study and writing workflows, a browser-based Studio, and a limited tool-using Agent. The web workspace uses the configured Gemini 3.5 Flash-Lite model. Google sign-in is not required for the GitHub Pages version.
 
 ## Get the Android APK
 
@@ -38,7 +38,7 @@ GitHub Pages serves static files only. The browser-based setup does not need Goo
 ## Workspace features
 
 - Gemini chat with optional Google Search grounding and returned source links.
-- PDF, image, text, and code-file attachments (up to 10 MB total per message; actual PDF/image/search capabilities depend on API access).
+- PDF, image, text/code, DOCX, and XLSX attachments (up to 10 MB total per message). DOCX and XLSX files are converted to text in the browser before being sent to Gemini; workbook sheets are flattened to CSV-style text and capped at 120,000 characters per file.
 - Browser-local editable memory and save/load for text conversation projects.
 - **E.V Studio:** type `/studio build a to-do app with filters and local saving` in the message box to create a sandboxed HTML preview; use Download HTML to save it.
 - **Agent Mode:** type `/agent calculate 123*456 and explain the result` or `/agent research the latest changes in a topic and summarize the sources`. The Agent has an allowlisted tool set and a limit of four tool calls per task.
@@ -49,7 +49,7 @@ GitHub Pages serves static files only. The browser-based setup does not need Goo
 ## Limitations and privacy
 
 - Studio and Agent Mode still require a live Gemini API test with a valid key. Static tests do not prove API access, quotas, or model availability.
-- DOCX/XLSX parsing, built-in voice, image generation, and a real isolated code-execution environment are not implemented yet.
+- Built-in voice, image generation, and a real isolated code-execution environment are not implemented yet. DOCX/XLSX parsing uses pinned browser libraries loaded from jsDelivr, so those formats need an internet connection.
 - Saved memory, projects, and the Gemini API key remain in browser storage in the browser-based configuration. Do not save secrets in memory and do not use a shared device for a personal API key.
 - The APK loads the hosted website and is online-first; it does not bundle the whole workspace for offline use.
 - The Android source includes Firebase dependencies, but Google sign-in/cloud sync need a real Firebase project configuration. See [SETUP.md](SETUP.md).
@@ -64,4 +64,4 @@ node --test tests/web-smoke.test.cjs
 
 The same tests run in GitHub Actions. They do not replace testing with a real Gemini API key or testing the APK on a physical Android device.
 
-See [FEATURE_ROADMAP.md](FEATURE_ROADMAP.md) for planned work.
+The current workspace brand is **E.V-MARK-7 Platinum**; the GitHub repository URL and package identifier remain unchanged for compatibility. See [FEATURE_ROADMAP.md](FEATURE_ROADMAP.md) for planned work.
