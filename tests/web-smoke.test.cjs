@@ -79,6 +79,7 @@ test("Agent Mode has a bounded allowlist of local tools", () => {
   assert.match(script, /const AGENT_DECLARATIONS=/);
   assert.match(script, /async function runAgent\(contents,key\)/);
   assert.match(script, /calls>=4/);
+  assert.match(script, /if\(call\.id\)functionResponse\.id=call\.id/);
   assert.match(script, /functionCallingConfig:\{mode:"AUTO"\}/);
   for (const tool of ["calculate", "get_current_time", "search_web", "create_studio_preview", "read_saved_memory"]) {
     assert.match(script, new RegExp('name:"' + tool + '"'));
@@ -90,6 +91,7 @@ test("E.V Studio preview is sandboxed and restricts network access", () => {
   assert.match(script, /setAttribute\("sandbox","allow-scripts"\)/);
   assert.match(script, /connect-src 'none'/);
   assert.match(script, /textContent="Download HTML"/);
+  assert.match(script, /new Blob\(\[secureStudioHtml\(html\)\]/);
 });
 
 test("safe calculator evaluates arithmetic without eval", () => {
