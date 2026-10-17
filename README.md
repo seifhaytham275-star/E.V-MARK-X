@@ -25,3 +25,13 @@ GitHub Pages serves static files only. This browser-based setup does not need Go
 ## Android project
 
 The repository also contains Android source and APK build workflows. See the existing Android setup documentation in [SETUP.md](SETUP.md). The Android build and web backend are separate parts of this repository.
+
+## Workspace feature status
+
+The current web workspace includes opt-in Google Search grounding with returned source links, attachments for PDF/images/text and code files, editable browser-local memory, and save/load for text conversation projects. These features use the fixed Gemini 3.5 Flash-Lite model. PDF/image understanding and search depend on the model/API key's current access and should be tested with a real key before public launch.
+
+- Attachments are limited to 10 MB total per message. DOCX/XLSX parsing is not implemented yet.
+- Saved memory, projects, and the Gemini API key remain in browser storage on that device. Browser storage is not a secure vault; use a trusted device and do not save secrets in memory.
+- Voice, image generation, E.V Studio, sandboxed code execution, and Agent Mode are planned phases, not currently shipped features.
+- Roadmap: [FEATURE_ROADMAP.md](FEATURE_ROADMAP.md).
+- Static regression tests: `node --test tests/web-smoke.test.cjs` (also wired into GitHub Actions). These tests do not replace a live Gemini API test or a real-device APK test.
