@@ -45,6 +45,7 @@
   let history = [];
   let pendingParts = [];
   let pendingNames = [];
+  let pendingBytes = 0;
 
   function savedKey(){
     try { return localStorage.getItem(KEY_STORAGE) || ""; }
@@ -95,6 +96,7 @@
     if(saveProjects(items)) { refreshProjects(); $("projectSelect").value = String(items.length - 1); $("attachmentStatus").textContent = "Project saved in this browser."; }
   });
   $("projectSelect").addEventListener("change", () => {
+    if(!$("projectSelect").value) return;
     const index = Number($("projectSelect").value); if(!Number.isInteger(index)) return;
     const project = readProjects()[index]; if(!project || !Array.isArray(project.history)) return;
     if(busy) { $("attachmentStatus").textContent = "Wait for the current reply to finish first."; return; }
@@ -197,16 +199,16 @@
   $("attachments").addEventListener("change", async event => {
     const files = Array.from(event.target.files || []); event.target.value = "";
     for(const file of files) {
-      if(file.size > MAX_FILE_BYTES) { $("attachmentStatus").textContent = file.name + " exceeds the 10 MB limit."; continue; }
+      if(file.size > MAX_FILE_BYTES || pendingBytes + file.size > MAX_FILE_BYTES) { $("attachmentStatus").textContent = "Attachments are limited to 10 MB total per message; skipped " + file.name + "."; continue; }
       const ext = (file.name.split(".").pop() || "").toLowerCase();
       const type = (file.type || (ext === "pdf" ? "application/pdf" : ({png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/webp",gif:"image/gif"}[ext] || ""))).toLowerCase();
       try {
         if(type === "application/pdf" || type.startsWith("image/")) {
           if(!["application/pdf","image/png","image/jpeg","image/webp","image/gif"].includes(type)) { $("attachmentStatus").textContent = "Supported visual files: PDF, PNG, JPG, WEBP, GIF."; continue; }
-          pendingParts.push({inline_data:{mime_type:type,data:await fileToBase64(file)}}); pendingNames.push(file.name);
+          pendingParts.push({inline_data:{mime_type:type,data:await fileToBase64(file)}}); pendingNames.push(file.name); pendingBytes += file.size;
         } else if(["txt","md","csv","json","js","ts","py","html","css","xml","yaml","yml","log"].includes(ext) || type.startsWith("text/")) {
           const content = await file.text(); if(content.length > 120000) { $("attachmentStatus").textContent = file.name + " is too large to attach as text."; continue; }
-          pendingParts.push({text:"Attached file: " + file.name + "\n\n" + content}); pendingNames.push(file.name);
+          pendingParts.push({text:"Attached file: " + file.name + "\n\n" + content}); pendingNames.push(file.name); pendingBytes += file.size;
         } else { $("attachmentStatus").textContent = "This version supports PDF, images, and text/code files. DOCX/XLSX parsing is planned next."; }
       } catch(error) { $("attachmentStatus").textContent = error.message || "Could not read attachment."; }
     }
@@ -230,7 +232,7 @@
     $("counter").textContent = "0 / 12,000";
     updateSend();
     const userParts = [{text: text || "Please analyze the attached file(s)."}, ...pendingParts];
-    const sentNames = pendingNames.slice(); pendingParts = []; pendingNames = [];
+    const sentNames = pendingNames.slice(); pendingParts = []; pendingNames = []; pendingBytes = 0;
     addMessage("user", (text || "Please analyze the attached file(s).") + (sentNames.length ? "\n\nAttachments: " + sentNames.join(", ") : ""));
     const reply = addMessage("assistant", "Thinking…");
     reply.classList.add("loading");
@@ -323,7 +325,7 @@
   function newChat(){
     if(busy) return;
     history = [];
-    pendingParts = []; pendingNames = []; $("attachmentStatus").textContent = "";
+    pendingParts = []; pendingNames = []; pendingBytes = 0; $("attachmentStatus").textContent = "";
     $("chat").innerHTML = "";
     $("empty").classList.remove("hidden");
     $("welcome").classList.remove("hidden");
