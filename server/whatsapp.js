@@ -3,6 +3,8 @@ const express = require("express");
 
 const router = express.Router();
 const MODEL_ID = "gemini-3.5-flash-lite";
+// External integrations stay paused by default until the owner explicitly enables them.
+const INTEGRATIONS_ENABLED = process.env.INTEGRATIONS_ENABLED === "true";
 const META_GRAPH_VERSION = process.env.META_GRAPH_VERSION || "v23.0";
 const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || "";
 const APP_SECRET = process.env.WHATSAPP_APP_SECRET || "";
@@ -91,6 +93,7 @@ router.get("/", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
+  if (!INTEGRATIONS_ENABLED) return res.status(503).send("External integrations are temporarily paused.");
   if (!VERIFY_TOKEN) return res.status(503).send("WhatsApp webhook is not configured.");
   if (mode === "subscribe" && typeof token === "string" && token === VERIFY_TOKEN && typeof challenge === "string") {
     return res.status(200).type("text/plain").send(challenge);
@@ -99,6 +102,7 @@ router.get("/", (req, res) => {
 });
 
 router.post("/", (req, res) => {
+  if (!INTEGRATIONS_ENABLED) return res.status(503).send("External integrations are temporarily paused.");
   const rawBody = req.body;
   if (!Buffer.isBuffer(rawBody)) return res.sendStatus(400);
   if (!timingSafeSignatureMatch(rawBody, req.get("x-hub-signature-256"))) return res.sendStatus(401);
@@ -113,7 +117,8 @@ router.post("/", (req, res) => {
 router.get("/status", (_req, res) => {
   res.setHeader("Cache-Control", "no-store");
   res.json({
-    configured: Boolean(VERIFY_TOKEN && APP_SECRET && ACCESS_TOKEN && PHONE_NUMBER_ID && GEMINI_API_KEY),
+    enabled: INTEGRATIONS_ENABLED,
+    configured: Boolean(INTEGRATIONS_ENABLED && VERIFY_TOKEN && APP_SECRET && ACCESS_TOKEN && PHONE_NUMBER_ID && GEMINI_API_KEY),
     provider: "WhatsApp Cloud API",
     mode: "text-only inbound replies",
     model: MODEL_ID
