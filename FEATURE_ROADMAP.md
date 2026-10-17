@@ -14,7 +14,7 @@ This roadmap describes the staged work for the existing GitHub Pages workspace. 
 ## Implemented in this increment
 
 - **Web Search:** opt-in Google Search grounding uses the REST API's `google_search` tool field; source links are only shown when returned as grounding metadata.
-- **Attachments:** PDF, common image formats, and text/code/CSV/JSON files are supported, with a 10 MB total attachment limit per message. DOCX/XLSX parsing is still pending.
+- **Attachments:** PDF, common image formats, text/code/CSV/JSON, DOCX, and XLSX are supported, with a 10 MB total attachment limit per message. DOCX is extracted with Mammoth and XLSX sheets are converted to CSV-style text with SheetJS; each extracted document is capped at 120,000 characters. Pinned parser scripts load from jsDelivr and therefore require internet access.
 - **Local memory and projects:** user-editable memory plus browser-local save/load for conversation projects.
 - **E.V Studio:** send `/studio describe your app` in the existing chat box to generate a standalone HTML app. Preview runs in a sandboxed iframe with scripts allowed but same-origin access and network requests blocked; generated HTML can be downloaded.
 - **Agent Mode:** send `/agent describe the task` in the existing chat box. The model can request an allowlisted calculator, current-time lookup, grounded web search, saved-memory read, or Studio preview. Tool execution is bounded to four calls per task; no arbitrary shell, file-system, account, or irreversible external actions are exposed.
@@ -26,10 +26,10 @@ This roadmap describes the staged work for the existing GitHub Pages workspace. 
 ## Next implementation phases
 
 ### Phase 2 — robust documents and security
-- Add DOCX and XLSX parsing with pinned, integrity-checked dependencies or a tested backend parser.
-- Add file type validation based on both extension and content, clearer upload progress, and per-request payload limits.
+- Add content-signature validation for files in addition to extension/MIME checks.
+- Add clearer per-file upload progress and more comprehensive per-request payload limits.
 - Prefer a server-side API proxy for public deployments. The current browser-stored API key is not a secure vault and can be read by scripts running on the same origin.
-- Add explicit privacy controls for saved projects, export/delete actions, and storage quota handling.
+- Add a project manager with selective delete/export actions and storage quota handling.
 
 ### Phase 3 — E.V Studio improvements
 - Add edit, reset, copy, and version history actions to the generated preview workflow.
