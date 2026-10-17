@@ -46,21 +46,13 @@
    const models=(data.models||[])
     .filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent"))
     .map(m=>({...m,shortName:m.name.replace(/^models\\//,"")}))
-    .filter(m=>!/(tts|image|embedding|aqa|veo|robotics|computer-use|live|audio|native-audio)/i.test(m.shortName))
-    .filter(m=>!/^gemini-2\\.5-(flash|pro)(-|$)/i.test(m.shortName))
-    .sort((a,b)=>{
-      const rank=m=>/^gemini-3\\.8-flash(-lite)?$/i.test(m.shortName)?0:
-        /^gemini-3\\.1-flash(-lite)?$/i.test(m.shortName)?1:
-        /^gemini-3\\.0-flash(-lite)?$/i.test(m.shortName)?2:
-        /^gemini-3.*flash/i.test(m.shortName)?3:
-        /^gemini-3.*pro/i.test(m.shortName)?5:
-        /preview|experimental/i.test(m.shortName)?8:4;
-      return rank(a)-rank(b)||a.shortName.localeCompare(b.shortName);
-    });
+    .filter(m=>/^gemini-3\\.5-/i.test(m.shortName))
+    .filter(m=>!/(tts|live|transcribe|translate|image|embedding)/i.test(m.shortName))
+    .sort((a,b)=>a.shortName.localeCompare(b.shortName));
    select.innerHTML="";
    models.forEach(m=>{const opt=document.createElement("option");opt.value=m.shortName;opt.textContent=(m.displayName||m.shortName)+" · "+m.shortName;select.appendChild(opt)});
-   if(!select.options.length){select.innerHTML="<option value=''>No text chat models available</option>";showNotice("Google returned no compatible text-chat models for this key. Check Google AI Studio model access.");}
-   else{$("configNotice").classList.add("hidden");const preferred=models.find(m=>/^gemini-3\\.8-flash(-lite)?$/i.test(m.shortName))||models.find(m=>/^gemini-3\\.1-flash(-lite)?$/i.test(m.shortName))||models[0];select.value=preferred.shortName;}
+   if(!select.options.length){select.innerHTML="<option value=''>No Gemini 3.5 text models available</option>";showNotice("Google did not return a Gemini 3.5 text-chat model for this API key. Check which 3.5 models your project can access.");}
+   else{$("configNotice").classList.add("hidden");select.value=models.find(m=>m.shortName==="gemini-3.5-flash")?.shortName||models[0].shortName;}
    updateSend();
   }catch(e){select.innerHTML="<option value=''>Models unavailable</option>";showNotice(e.message+" Check the key and its Google AI Studio permissions.");updateSend()}
  }
