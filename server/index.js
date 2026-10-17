@@ -58,7 +58,7 @@ async function verifyGoogleCredential(req, res, next) {
 
 app.get("/health", (_req, res) => res.json({ ok: true, service: "E.V-MARK-X API", authConfigured: Boolean(GOOGLE_CLIENT_ID), geminiConfigured: Boolean(GEMINI_API_KEY) }));
 app.post("/api/auth/google", authLimiter, async (req, res) => {
-  if (!requireConfig(res)) return;
+  if (!GOOGLE_CLIENT_ID) return res.status(503).json({ error: "Google sign-in is not configured on the backend yet." });
   const credential = typeof req.body?.credential === "string" ? req.body.credential : "";
   if (!credential || credential.length > 10000) return res.status(400).json({ error: "A valid Google credential is required." });
   try {
