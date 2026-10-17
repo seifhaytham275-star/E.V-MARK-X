@@ -32,6 +32,9 @@ The current web workspace includes opt-in Google Search grounding with returned 
 
 - Attachments are limited to 10 MB total per message. DOCX/XLSX parsing is not implemented yet.
 - Saved memory, projects, and the Gemini API key remain in browser storage on that device. Browser storage is not a secure vault; use a trusted device and do not save secrets in memory.
-- Voice, image generation, E.V Studio, sandboxed code execution, and Agent Mode are planned phases, not currently shipped features.
+- **E.V Studio:** type `/studio build a to-do app with filters and local saving` in the existing message box. The generated page opens in a sandboxed preview; use Download HTML to save it.
+- **Agent Mode:** type `/agent research the latest changes in a topic and summarize the sources` or `/agent calculate 123*456 and explain the result`. Agent Mode uses an allowlisted set of tools and is limited to four tool calls per task.
+- Studio and Agent Mode are implemented in code but still need a live Gemini API test with your key. Their operation depends on the fixed model and Google API access.
+- Voice, image generation, DOCX/XLSX parsing, and a real isolated code-execution environment remain future work.
 - Roadmap: [FEATURE_ROADMAP.md](FEATURE_ROADMAP.md).
 - Static regression tests: `node --test tests/web-smoke.test.cjs` (also wired into GitHub Actions). These tests do not replace a live Gemini API test or a real-device APK test.
