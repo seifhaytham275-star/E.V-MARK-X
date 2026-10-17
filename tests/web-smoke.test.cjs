@@ -27,7 +27,7 @@ test("API key has save and remove controls and is not hard-coded", () => {
 
 test("web search is opt-in and source links are constrained to HTTP(S)", () => {
   assert.match(html, /id="webSearchToggle"/);
-  assert.match(script, /requestBody\.tools = \[\{googleSearch:\{\}\}\]/);
+  assert.match(script, /requestBody\.tools=\[\{google_search:\{\}\}\]/);
   assert.match(script, /groundingMetadata/);
   assert.match(script, /noopener noreferrer/);
   assert.match(script, /https\?:/);
@@ -67,4 +67,46 @@ test("every JavaScript ID lookup has a matching HTML element", () => {
 
 test("empty saved-project selection is ignored", () => {
   assert.match(script, /if\(!\$\("projectSelect"\)\.value\) return/);
+});
+
+test("web search uses the REST API tool field and renders grounding sources", () => {
+  assert.match(script, /google_search/);
+  assert.match(script, /groundingMetadata/);
+  assert.match(script, /function searchWebTool/);
+});
+
+test("Agent Mode has a bounded allowlist of local tools", () => {
+  assert.match(script, /const AGENT_DECLARATIONS=/);
+  assert.match(script, /async function runAgent\(contents,key\)/);
+  assert.match(script, /calls>=4/);
+  assert.match(script, /functionCallingConfig:\{mode:"AUTO"\}/);
+  for (const tool of ["calculate", "get_current_time", "search_web", "create_studio_preview", "read_saved_memory"]) {
+    assert.match(script, new RegExp('name:"' + tool + '"'));
+  }
+});
+
+test("E.V Studio preview is sandboxed and restricts network access", () => {
+  assert.match(script, /async function generateStudio\(description,key\)/);
+  assert.match(script, /setAttribute\("sandbox","allow-scripts"\)/);
+  assert.match(script, /connect-src 'none'/);
+  assert.match(script, /textContent="Download HTML"/);
+});
+
+test("safe calculator evaluates arithmetic without eval", () => {
+  const match = script.match(/function parseSafeMath\(expression\)\{[\s\S]*?\n  \}/);
+  assert.ok(match, "safe calculator should exist");
+  const calculate = vm.runInNewContext("(" + match[0] + ")");
+  assert.equal(calculate("2 + 3 * 4"), 14);
+  assert.equal(calculate("(10 - 4) / 2"), 3);
+  assert.throws(() => calculate("1 / 0"), /zero/);
+  assert.throws(() => calculate("alert(1)"));
+  assert.throws(() => calculate("2 + bad"));
+});
+
+test("Agent and Studio commands preserve the fixed model and existing UI", () => {
+  assert.match(script, /commandMatch = text\.match/);
+  assert.match(script, /mode==="studio"/);
+  assert.match(script, /mode==="agent"/);
+  assert.match(script, /const MODEL_ID = "gemini-3\.5-flash-lite"/);
+  assert.doesNotMatch(html, /<select[^>]+id=["']model["']/i);
 });
