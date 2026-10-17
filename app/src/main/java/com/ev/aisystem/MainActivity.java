@@ -28,7 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
-    private static final String HOME_URL = "https://seifhaytham275-star.github.io/E.V-MARK-X/app.html";
+    private static final String HOME_URL = "https://seifhaytham275-star.github.io/E.V-MARK-XI Platinum/app.html";
     private static final String HOME_HOST = "seifhaytham275-star.github.io";
     private static final int FILE_PICKER_REQUEST = 4401;
 
@@ -174,7 +174,7 @@ public class MainActivity extends Activity {
                     request.addRequestHeader("User-Agent", userAgent);
                     request.setNotificationVisibility(
                         DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                    request.setTitle("E.V-MARK-X download");
+                    request.setTitle("E.V-MARK-XI Platinum download");
                     request.setDescription("Downloading your file");
                     request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
                         "EV-MARK-X-" + System.currentTimeMillis());
@@ -193,7 +193,7 @@ public class MainActivity extends Activity {
         errorPanel.setPadding(dp(28), dp(24), dp(28), dp(24));
         errorPanel.setBackgroundColor(Color.rgb(8, 13, 25));
         TextView title = new TextView(this);
-        title.setText("E.V-MARK-X");
+        title.setText("E.V-MARK-XI Platinum");
         title.setTextColor(Color.WHITE);
         title.setTextSize(25);
         title.setTypeface(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD);
