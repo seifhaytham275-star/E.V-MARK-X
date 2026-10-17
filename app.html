@@ -51,7 +51,7 @@
   }
   function hideNotice(){ $("configNotice").classList.add("hidden"); }
   function updateSend(){
-    $("send").disabled = busy || !$("prompt").value.trim();
+    $("send").disabled = busy || (!$("prompt").value.trim() && pendingParts.length === 0);
   }
   function refreshKeyStatus(){
     $("model").value = MODEL_ID;
