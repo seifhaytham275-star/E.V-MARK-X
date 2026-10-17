@@ -14,7 +14,7 @@
 <div class="profile"><div class="avatar" id="avatar">EV</div><div class="usertext"><strong id="userName">Signed-in user</strong><small id="userEmail">Google account</small></div><button class="btn" id="signOut" title="Sign out" style="padding:8px">↗</button></div>
 </aside>
 <main class="main">
-<header class="topbar"><div class="mobile-brand"><span class="logo">EV</span>E.V-MARK-X</div><div class="crumb">AI Workspace <span class="muted">/ Chat</span></div><div class="top-actions"><span class="badge">GEMINI POWERED</span><a href="index.html" class="btn">Home</a><button class="btn" id="settingsBtn">⚙ Settings</button><button class="btn" id="mobileSignOut">Sign out</button></div></header>
+<header class="topbar"><div class="mobile-brand"><span class="logo">EV</span>E.V-MARK-X</div><div class="crumb">AI Workspace <span class="muted">/ Chat</span></div><div class="top-actions"><span class="badge">GEMINI POWERED</span><a href="index.html" class="btn">Home</a><button class="btn" id="mobileNewChat">＋ New chat</button><button class="btn" id="settingsBtn">⚙ Settings</button><button class="btn" id="mobileSignOut">Sign out</button></div></header>
 <div class="settings-panel" id="settingsPanel"><div class="settings-card"><h2>⚙ Configuration</h2><p>Enter your own Gemini API key. It is saved only in this browser on this device and sent directly to Google Gemini. Use this only on a trusted personal device.</p><label for="geminiKey">Gemini API key</label><input class="key-input" id="geminiKey" type="password" autocomplete="off" placeholder="Enter your API key"><p>Your key is not committed to GitHub or sent to this project’s server. Browser storage is not a secure vault; remove the key when you are done on a shared device.</p><div class="settings-actions"><button class="btn" id="clearKeyBtn">Remove key</button><button class="btn" id="cancelSettings">Cancel</button><button class="btn primary" id="saveKeyBtn">Save API key</button></div><p id="keyStatus" aria-live="polite"></p></div></div><section class="content">
 <div id="configNotice" class="notice hidden"></div>
 <div class="welcome" id="welcome"><div class="eyebrow">Your ideas, accelerated</div><h1>What would you like to<br><span style="background:linear-gradient(90deg,#70d9f4,#6aaaff,#a79aff);color:transparent;background-clip:text">explore today?</span></h1><p>Ask a question, brainstorm a project, or turn a rough idea into a clear plan.</p></div>
@@ -24,7 +24,7 @@
 <button class="suggestion" data-prompt="Brainstorm ten creative ideas for a useful AI-powered web app."><span>⌘</span>Brainstorm new ideas</button>
 </div>
 <div id="chat" class="chat" aria-live="polite"></div>
-<div id="empty" class="empty">Your conversation will appear here. Choose a model and send your first message.</div>
+<div id="empty" class="empty">Your conversation will appear here. Send your first message to get started.</div>
 <div class="composer"><div class="composebox"><textarea id="prompt" rows="2" maxlength="12000" placeholder="Message E.V-MARK-X… (Enter to send, Shift+Enter for a new line)"></textarea><button id="send" class="btn primary" disabled>Send ↗</button></div><div class="hint"><span>AI can make mistakes. Verify important information.</span><span id="counter">0 / 12,000</span></div></div>
 <div class="foot">E.V-MARK-X is an independent project. Your prompts are sent to the configured AI provider.</div>
 </section>
@@ -32,40 +32,226 @@
 </div>
 <script>
 (function(){
- const $=id=>document.getElementById(id);
- let busy=false, history=[]; const KEY_STORAGE="ev_gemini_api_key"; function savedKey(){try{return localStorage.getItem(KEY_STORAGE)||""}catch(e){return ""}}
- function showNotice(text){$("configNotice").classList.remove("hidden");$("configNotice").textContent=text}
- $("userName").textContent="Personal workspace";$("userEmail").textContent="Using your own Gemini API key";
- $("signOut").style.display="none";$("mobileSignOut").style.display="none";
- const panel=$("settingsPanel"), keyInput=$("geminiKey"); $("settingsBtn").addEventListener("click",()=>{keyInput.value=savedKey();$("keyStatus").textContent="";panel.classList.add("open")}); $("cancelSettings").addEventListener("click",()=>panel.classList.remove("open")); panel.addEventListener("click",e=>{if(e.target===panel)panel.classList.remove("open")}); $("saveKeyBtn").addEventListener("click",()=>{const key=keyInput.value.trim();if(!key){$("keyStatus").textContent="Enter an API key first.";return}try{localStorage.setItem(KEY_STORAGE,key);panel.classList.remove("open");loadModels()}catch(e){$("keyStatus").textContent="Could not save key in this browser."}}); $("clearKeyBtn").addEventListener("click",()=>{localStorage.removeItem(KEY_STORAGE);keyInput.value="";$("model").innerHTML="<option>Add API key in Settings</option>";showNotice("Add your Gemini API key in Settings to use AI features.")});
- async function loadModels(){
-  const key=savedKey(), select=$("model");
-  if(!key){showNotice("Add your Gemini API key in Settings to load models and use AI features.");select.innerHTML="<option value=''>Add API key in Settings</option>";updateSend();return}
-  try{const response=await fetch("https://generativelanguage.googleapis.com/v1beta/models?key="+encodeURIComponent(key));const data=await response.json();if(!response.ok)throw new Error(data.error?.message||"Could not load Gemini models.");
-   const wantedModel={id:"gemini-3.5-flash-lite",label:"Gemini 3.5 Flash-Lite"};
-   const available=(data.models||[])
-    .filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent"))
-    .map(m=>({...m,shortName:m.name.replace(/^models\\//,"")}));
-   const found=available.find(m=>m.shortName.toLowerCase()===wantedModel.id);
-   select.value=wantedModel.id;
-   if(!found){showNotice("Gemini 3.5 Flash-Lite was not returned as available for this API key. Check model access in Google AI Studio.");}
-   else{$("configNotice").classList.add("hidden");}
-   updateSend();
-  }catch(e){select.innerHTML="<option value=''>Models unavailable</option>";showNotice(e.message+" Check the key and its Google AI Studio permissions.");updateSend()}
- }
- function updateSend(){$("send").disabled=busy||!$("prompt").value.trim()||!$("model").value}
- function addMessage(role,text){const node=document.createElement("article");node.className="message "+role;const who=document.createElement("div");who.className="who";who.textContent=role==="user"?"You":"E.V-MARK-X";const body=document.createElement("div");body.textContent=text;node.append(who,body);$("chat").appendChild(node);$("empty").classList.add("hidden");$("welcome").classList.add("hidden");$("suggestions").classList.add("hidden");node.scrollIntoView({behavior:"smooth",block:"nearest"});return body}
- async function sendMessage(text){
-  text=(text||$("prompt").value).trim();if(!text||busy)return;
-  if(!savedKey()){showNotice("Add your Gemini API key in Settings first.");return} if(!$("model").value){showNotice("No Gemini model is available. Check your API key in Settings.");return}
-  busy=true;$("prompt").value="";$("counter").textContent="0 / 12,000";updateSend();addMessage("user",text);const reply=addMessage("assistant","Thinking…");reply.classList.add("loading");
-  try{const key=savedKey(), model=$("model").value;const response=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(model)+":generateContent?key="+encodeURIComponent(key),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{role:"user",parts:[{text}]}]})});const data=await response.json();if(!response.ok)throw new Error(data.error?.message||"Gemini request failed.");const answer=(data.candidates||[]).map(c=>(c.content?.parts||[]).map(p=>p.text||"").join("")).join("\n").trim()||"No response was returned.";reply.textContent=answer;reply.classList.remove("loading");history.push({role:"user",text},{role:"assistant",text:answer});}
-  catch(e){const message=e.message||"Gemini request failed.";reply.textContent="Error: "+message;reply.classList.remove("loading");if(/quota|rate limit|billing|free_tier_requests|limit: 0/i.test(message)){showNotice("Google Gemini quota is unavailable for this model/key right now. This is an API quota or billing restriction, not a sign-in issue. Try another model only if your key has quota for it, or check Google AI Studio usage and billing.");}else if(/no longer available|not found|deprecated|unsupported/i.test(message)){showNotice("This Gemini model is unavailable. Choose another text-chat model from the model list.");loadModels();}else{showNotice("Gemini request failed. Check the API key, selected model, and Google AI Studio status.");}}
-  finally{busy=false;updateSend();$("prompt").focus()}
- }
- $("send").addEventListener("click",()=>sendMessage());$("prompt").addEventListener("input",()=>{$("counter").textContent=$("prompt").value.length.toLocaleString()+" / 12,000";updateSend()});$("prompt").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage()}});
- document.querySelectorAll("[data-prompt]").forEach(b=>b.addEventListener("click",()=>{if(busy)return;$("prompt").value=b.dataset.prompt;$("counter").textContent=$("prompt").value.length.toLocaleString()+" / 12,000";updateSend();sendMessage(b.dataset.prompt)}));
- $("newChat").addEventListener("click",()=>{history=[];$("chat").innerHTML="";$("empty").classList.remove("hidden");$("welcome").classList.remove("hidden");$("suggestions").classList.remove("hidden");$("prompt").value="";$("counter").textContent="0 / 12,000";updateSend()});
- loadModels();
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const MODEL_ID = "gemini-3.5-flash-lite";
+  const MODEL_LABEL = "Gemini 3.5 Flash-Lite";
+  const KEY_STORAGE = "ev_gemini_api_key";
+  let busy = false;
+  let history = [];
+
+  function savedKey(){
+    try { return localStorage.getItem(KEY_STORAGE) || ""; }
+    catch (_) { return ""; }
+  }
+  function showNotice(message){
+    const notice = $("configNotice");
+    notice.textContent = message;
+    notice.classList.remove("hidden");
+  }
+  function hideNotice(){ $("configNotice").classList.add("hidden"); }
+  function updateSend(){
+    $("send").disabled = busy || !$("prompt").value.trim();
+  }
+  function refreshKeyStatus(){
+    $("model").value = MODEL_ID;
+    if(savedKey()) hideNotice();
+    else showNotice("Add your Gemini API key in Settings to use " + MODEL_LABEL + ".");
+    updateSend();
+  }
+
+  $("userName").textContent = "Personal workspace";
+  $("userEmail").textContent = "Gemini 3.5 Flash-Lite";
+  $("signOut").style.display = "none";
+  $("mobileSignOut").style.display = "none";
+
+  const panel = $("settingsPanel");
+  const keyInput = $("geminiKey");
+  $("settingsBtn").addEventListener("click", () => {
+    keyInput.value = savedKey();
+    $("keyStatus").textContent = "";
+    panel.classList.add("open");
+    keyInput.focus();
+  });
+  $("cancelSettings").addEventListener("click", () => panel.classList.remove("open"));
+  panel.addEventListener("click", event => {
+    if(event.target === panel) panel.classList.remove("open");
+  });
+  document.addEventListener("keydown", event => {
+    if(event.key === "Escape") panel.classList.remove("open");
+  });
+  $("saveKeyBtn").addEventListener("click", () => {
+    const key = keyInput.value.trim();
+    if(!key){
+      $("keyStatus").textContent = "Paste your Gemini API key first.";
+      keyInput.focus();
+      return;
+    }
+    try {
+      localStorage.setItem(KEY_STORAGE, key);
+      panel.classList.remove("open");
+      refreshKeyStatus();
+    } catch (_) {
+      $("keyStatus").textContent = "This browser could not save the key. Enable site storage or try a normal browser tab.";
+    }
+  });
+  $("clearKeyBtn").addEventListener("click", () => {
+    try { localStorage.removeItem(KEY_STORAGE); }
+    catch (_) { $("keyStatus").textContent = "The browser would not allow the saved key to be removed."; return; }
+    keyInput.value = "";
+    $("keyStatus").textContent = "API key removed from this browser.";
+    refreshKeyStatus();
+  });
+
+  function addMessage(role, text){
+    const node = document.createElement("article");
+    node.className = "message " + role;
+    const who = document.createElement("div");
+    who.className = "who";
+    who.textContent = role === "user" ? "You" : "E.V-MARK-X";
+    const body = document.createElement("div");
+    body.textContent = text;
+    node.append(who, body);
+    $("chat").appendChild(node);
+    $("empty").classList.add("hidden");
+    $("welcome").classList.add("hidden");
+    $("suggestions").classList.add("hidden");
+    node.scrollIntoView({behavior:"smooth", block:"nearest"});
+    return body;
+  }
+
+  function explainApiError(status, message){
+    const lower = (message || "").toLowerCase();
+    if(status === 400 && /api key|key not valid|invalid argument/i.test(message))
+      return "Google rejected the API key or request. Check the key in Settings and make sure the Gemini API is enabled.";
+    if(status === 401 || status === 403)
+      return "Google denied access. Check that this API key is valid and has permission to use Gemini 3.5 Flash-Lite.";
+    if(status === 404 || /not found|unknown model|model.*not available/i.test(lower))
+      return MODEL_LABEL + " is not available for this key/project right now. Check the exact model ID and model access in Google AI Studio.";
+    if(status === 429 || /quota|rate limit|billing|limit: 0|resource_exhausted/i.test(lower))
+      return "Google Gemini quota or rate limit reached for this key/model. Check usage and quota in Google AI Studio; changing the website cannot reset Google's quota.";
+    if(status >= 500)
+      return "Google's Gemini service returned a server error. Wait a little and try again.";
+    return message || "Gemini request failed. Check your connection and API key.";
+  }
+
+  async function sendMessage(rawText){
+    const text = (rawText || $("prompt").value).trim();
+    if(!text || busy) return;
+    const key = savedKey();
+    if(!key){
+      showNotice("Add your Gemini API key in Settings first.");
+      panel.classList.add("open");
+      keyInput.focus();
+      return;
+    }
+
+    busy = true;
+    $("prompt").value = "";
+    $("counter").textContent = "0 / 12,000";
+    updateSend();
+    addMessage("user", text);
+    const reply = addMessage("assistant", "Thinking…");
+    reply.classList.add("loading");
+
+    try {
+      const contents = history.map(item => ({
+        role: item.role,
+        parts: [{text: item.text}]
+      }));
+      contents.push({role:"user", parts:[{text}]});
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
+      let response;
+      try {
+        response = await fetch(
+          "https://generativelanguage.googleapis.com/v1beta/models/" +
+          encodeURIComponent(MODEL_ID) + ":generateContent",
+          {
+            method: "POST",
+            headers: {"Content-Type":"application/json", "x-goog-api-key":key},
+            body: JSON.stringify({
+              contents,
+              generationConfig: {temperature:0.7, maxOutputTokens:4096}
+            }),
+            signal: controller.signal
+          }
+        );
+      } finally {
+        clearTimeout(timeoutId);
+      }
+
+      const data = await response.json().catch(() => ({}));
+      if(!response.ok){
+        const apiMessage = data && data.error && data.error.message;
+        throw new Error(explainApiError(response.status, apiMessage || ("HTTP " + response.status)));
+      }
+      const candidate = data.candidates && data.candidates[0];
+      const answer = candidate && candidate.content && Array.isArray(candidate.content.parts)
+        ? candidate.content.parts.map(part => typeof part.text === "string" ? part.text : "").join("").trim()
+        : "";
+      if(!answer){
+        const reason = candidate && candidate.finishReason ? " (finish reason: " + candidate.finishReason + ")" : "";
+        throw new Error("Gemini returned no text" + reason + ". Try sending the message again.");
+      }
+
+      reply.textContent = answer;
+      reply.classList.remove("loading");
+      history.push({role:"user", text}, {role:"model", text:answer});
+      hideNotice();
+    } catch(error) {
+      const message = error && error.name === "AbortError"
+        ? "The request took too long. Check your connection and try again."
+        : (error && error.message) || "Gemini request failed.";
+      reply.textContent = "Error: " + message;
+      reply.classList.remove("loading");
+      $("prompt").value = text;
+      $("counter").textContent = text.length.toLocaleString() + " / 12,000";
+      showNotice(message);
+    } finally {
+      busy = false;
+      updateSend();
+      $("prompt").focus();
+    }
+  }
+
+  $("send").addEventListener("click", () => sendMessage());
+  $("prompt").addEventListener("input", () => {
+    $("counter").textContent = $("prompt").value.length.toLocaleString() + " / 12,000";
+    updateSend();
+  });
+  $("prompt").addEventListener("keydown", event => {
+    if(event.key === "Enter" && !event.shiftKey){
+      event.preventDefault();
+      sendMessage();
+    }
+  });
+  document.querySelectorAll("[data-prompt]").forEach(button => {
+    button.addEventListener("click", () => {
+      if(busy) return;
+      $("prompt").value = button.dataset.prompt;
+      $("counter").textContent = $("prompt").value.length.toLocaleString() + " / 12,000";
+      updateSend();
+      sendMessage(button.dataset.prompt);
+    });
+  });
+
+  function newChat(){
+    if(busy) return;
+    history = [];
+    $("chat").innerHTML = "";
+    $("empty").classList.remove("hidden");
+    $("welcome").classList.remove("hidden");
+    $("suggestions").classList.remove("hidden");
+    $("prompt").value = "";
+    $("counter").textContent = "0 / 12,000";
+    hideNotice();
+    updateSend();
+    $("prompt").focus();
+  }
+  $("newChat").addEventListener("click", newChat);
+  $("mobileNewChat").addEventListener("click", newChat);
+  refreshKeyStatus();
 })();
 </script></body></html>
