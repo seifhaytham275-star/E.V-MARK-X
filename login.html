@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080d19">
+<meta name="description" content="Sign in to E.V-MARK-XI Platinum with email or GitHub.">
+<title>Sign in — E.V-MARK-XI Platinum</title>
+<style>
+:root{color-scheme:dark;--bg:#080d19;--panel:#101a2d;--line:#293b5a;--text:#eff5ff;--muted:#a7b6d1;--blue:#65b4ff;--purple:#8d7cff}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:22px;background:radial-gradient(ellipse at 20% 0%,#173b6855,transparent 40%),radial-gradient(ellipse at 100% 100%,#39276544,transparent 40%),var(--bg);font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--text)}a{color:#a9d7ff;text-decoration:none}.shell{width:min(460px,100%)}.brand{display:flex;align-items:center;justify-content:center;gap:12px;font-weight:900;font-size:18px;margin-bottom:24px}.logo{width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(135deg,#247cf0,#6656df 70%,#63e0f2);box-shadow:0 0 28px #418cff35}.panel{border:1px solid var(--line);border-radius:24px;background:linear-gradient(145deg,#121f36f5,#0c1425f8);padding:28px;box-shadow:0 25px 80px #0004}.tag{font-size:10px;letter-spacing:1.5px;color:#a9d7ff;text-transform:uppercase;font-weight:900}.panel h1{font-size:30px;line-height:1.2;margin:10px 0}.muted{color:var(--muted);font-size:13px;line-height:1.65}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;background:#09111f;border:1px solid #263753;border-radius:13px;margin:22px 0}.tabs button,.btn{font:inherit;font-weight:800;cursor:pointer;border-radius:10px;padding:11px;border:1px solid transparent;color:var(--text);background:transparent}.tabs button.active{background:#1a2e4d;border-color:#365781}.field{display:block;font-size:12px;font-weight:800;margin:14px 0 6px}.input{width:100%;padding:13px 14px;border:1px solid #2b3e5e;border-radius:12px;background:#0a1323;color:var(--text);font:inherit;outline:none}.input:focus{border-color:#65b4ff;box-shadow:0 0 0 3px #65b4ff20}.btn{width:100%;display:flex;justify-content:center;align-items:center;gap:8px;margin-top:12px;background:#14223a;border-color:#344966}.btn.primary{background:linear-gradient(110deg,#247bf0,#625ef0);border:0}.btn:disabled{opacity:.5;cursor:not-allowed}.or{display:flex;align-items:center;gap:12px;color:#8092b0;font-size:11px;margin:17px 0}.or:before,.or:after{content:"";height:1px;background:#2b3b57;flex:1}.notice{display:none;border:1px solid #345781;background:#122540;padding:12px;border-radius:12px;font-size:12px;line-height:1.6;margin-top:14px;overflow-wrap:anywhere}.notice.error{border-color:#774b58;background:#2a1722}.fine{font-size:11px;color:#8192ad;text-align:center;margin-top:18px}.links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-top:20px;font-size:12px}@media(max-width:420px){.panel{padding:22px}.panel h1{font-size:26px}}
+</style>
+</head>
+<body><main class="shell">
+<a class="brand" href="index.html"><span class="logo">E.V</span><span>E.V-MARK-XI <span style="color:#8fcaff">PLATINUM</span></span></a>
+<section class="panel"><span class="tag">Developer workspace</span><h1 id="heading">Welcome back.</h1><p class="muted" id="subheading">Sign in to continue to E.V Studio and Data Intelligence.</p>
+<div class="tabs" role="tablist"><button id="signinTab" class="active" type="button">Sign in</button><button id="signupTab" type="button">Create account</button></div>
+<form id="authForm">
+<label class="field" for="email">Email address</label><input class="input" id="email" type="email" autocomplete="email" required placeholder="you@example.com">
+<div id="passwordWrap"><label class="field" for="password">Password</label><input class="input" id="password" type="password" autocomplete="current-password" minlength="8" placeholder="At least 8 characters"></div>
+<button class="btn primary" id="submitBtn" type="submit">Sign in with email</button>
+</form>
+<button class="btn" id="magicBtn" type="button">Email me a sign-in link</button>
+<div class="or">OR CONTINUE WITH</div>
+<button class="btn" id="githubBtn" type="button"><span aria-hidden="true">⌘</span> Continue with GitHub</button>
+<div class="notice" id="notice" role="status" aria-live="polite"></div>
+<p class="fine">Authentication only becomes active after the project owner configures Supabase and GitHub OAuth. Never enter a Gemini API key or GitHub personal access token here.</p>
+</section>
+<div class="links"><a href="index.html">Home</a><a href="pricing.html">Plans & pricing</a><a href="about.html">Privacy</a></div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script>
+<script>
+(()=> {
+ const cfg=window.EV_CONFIG||{};
+ const ready=!!(cfg.SUPABASE_URL&&cfg.SUPABASE_ANON_KEY&&window.supabase?.createClient);
+ const client=ready?window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY):null;
+ let mode="signin";
+ const $=id=>document.getElementById(id);
+ const notice=(message,error=false)=>{const n=$("notice");n.textContent=message;n.className="notice"+(error?" error":"");n.style.display="block"};
+ const setMode=next=>{mode=next;const signup=mode==="signup";$("signinTab").classList.toggle("active",!signup);$("signupTab").classList.toggle("active",signup);$("heading").textContent=signup?"Create your E.V account.":"Welcome back.";$("subheading").textContent=signup?"Create an account for your developer workspace.":"Sign in to continue to E.V Studio and Data Intelligence.";$("passwordWrap").style.display="block";$("submitBtn").textContent=signup?"Create account":"Sign in with email";$("password").autocomplete=signup?"new-password":"current-password";$("notice").style.display="none"};
+ $("signinTab").addEventListener("click",()=>setMode("signin"));$("signupTab").addEventListener("click",()=>setMode("signup"));
+ const check=()=>{if(!ready){notice("Sign-in is not connected yet. The site owner must add the Supabase project URL and public anon key in config.js, enable Email auth, and configure the GitHub provider. No credentials were sent.",true);return false}return true};
+ $("authForm").addEventListener("submit",async e=>{e.preventDefault();if(!check())return;const email=$("email").value.trim(),password=$("password").value;const btn=$("submitBtn");btn.disabled=true;btn.textContent="Please wait…";try{const result=mode==="signup"?await client.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname.replace(/[^/]*$/,"")+"app.html"}}):await client.auth.signInWithPassword({email,password});if(result.error)throw result.error;if(mode==="signup"&&!result.data.session)notice("Account request received. Check your email to confirm your address.");else{notice("Signed in successfully. Opening E.V…");setTimeout(()=>location.href="app.html",500)}}catch(err){notice(err.message||"Authentication failed.",true)}finally{btn.disabled=false;btn.textContent=mode==="signup"?"Create account":"Sign in with email"}});
+ $("magicBtn").addEventListener("click",async()=>{if(!check())return;const email=$("email").value.trim();if(!email){notice("Enter your email address first.",true);return}try{const {error}=await client.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+location.pathname.replace(/[^/]*$/,"")+"app.html"}});if(error)throw error;notice("If the address is eligible, a sign-in link will arrive by email.")}catch(err){notice(err.message||"Could not send the email.",true)}});
+ $("githubBtn").addEventListener("click",async()=>{if(!check())return;try{const {error}=await client.auth.signInWithOAuth({provider:"github",options:{redirectTo:location.origin+location.pathname.replace(/[^/]*$/,"")+"app.html"}});if(error)throw error}catch(err){notice(err.message||"GitHub sign-in failed.",true)}});
+ const params=new URLSearchParams(location.search);if(params.get("error_description"))notice(params.get("error_description"),true);
+})();
+</script></body></html>
