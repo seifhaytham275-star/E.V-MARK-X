@@ -7,7 +7,7 @@ The public website is static GitHub Pages. The new `login.html` supports email/p
 ## 1. Authentication backend
 
 1. Create a Supabase project owned/managed by the project owner and a parent/guardian where required.
-2. In Supabase Authentication > URL Configuration, set the Site URL to `https://seifhaytham275-star.github.io` and add the allowed redirect URL `https://seifhaytham275-star.github.io/E.V-MARK-X/app.html` plus `https://seifhaytham275-star.github.io/E.V-MARK-X/login.html`.
+2. In Supabase Authentication > URL Configuration, set the Site URL to `https://seifhaytham275-star.github.io/E.V-MARK-X/` and add the allowed redirect URLs `https://seifhaytham275-star.github.io/E.V-MARK-X/app.html` and `https://seifhaytham275-star.github.io/E.V-MARK-X/login.html`.
 3. In Authentication > Providers, enable Email. Configure email confirmation and password rules.
 4. Register a GitHub OAuth app. Set its authorization callback URL to the callback URL displayed by Supabase for the project, then enter the GitHub client ID and client secret in Supabase's GitHub provider settings. Never put the GitHub client secret in this repository.
 5. Copy the Supabase project URL and the **public anon/publishable key** into `config.js` as `SUPABASE_URL` and `SUPABASE_ANON_KEY`. These are browser client settings; do not use a service-role key here.
