@@ -4,9 +4,20 @@ const fs = require("node:fs");
 const vm = require("node:vm");
 
 const html = fs.readFileSync("app.html", "utf8");
+const android = fs.readFileSync("app/src/main/java/com/ev/aisystem/MainActivity.java", "utf8");
 const scriptMatch = html.match(/<script>\s*([\s\S]*?)\s*<\/script>/);
 assert.ok(scriptMatch, "app.html must contain the application script");
 const script = scriptMatch[1];
+
+
+test("Android app uses the same single fixed Gemini model", () => {
+  assert.match(android, /private static final String MODEL_ID = "gemini-3\.5-flash-lite"/);
+  assert.match(android, /String model = MODEL_ID/);
+  assert.match(android, /askGemini\(key, planPrompt, MODEL_ID\)/);
+  assert.doesNotMatch(android, /modelPicker|selected_model|MODEL SELECTOR|REFRESH AVAILABLE MODELS|fetchModels\(/);
+  assert.match(android, /ACTIVE MODEL/);
+  assert.match(android, /Gemini 3\.5 Flash-Lite/);
+});
 
 test("workspace JavaScript parses", () => {
   assert.doesNotThrow(() => new vm.Script(script));
