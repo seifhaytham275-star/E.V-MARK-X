@@ -21,7 +21,6 @@ The APK is an Android WebView wrapper around the same live `app.html` workspace.
 
 - `index.html` — public landing page.
 - `app.html` — responsive AI workspace, fixed to Gemini 3.5 Flash-Lite.
-- `business.html` — E.V Business Desk preview for customer contacts, phone numbers, sales pipeline, and follow-up tasks (browser-local storage only).
 - `about.html` — project, privacy, and security notes.
 - `config.js` — optional public configuration; never place API secrets here.
 - `server/` — optional backend for Google credential verification and server-side Gemini requests.
