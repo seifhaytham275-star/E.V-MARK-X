@@ -15,7 +15,6 @@ test("WhatsApp webhook is mounted before JSON parsing so signature verification 
 });
 
 test("WhatsApp webhook validates Meta signatures and subscription challenges", () => {
-  assert.match(adapter, /X/); // Source assertions below use the actual header lookup.
   assert.match(adapter, /x-hub-signature-256/);
   assert.match(adapter, /createHmac\("sha256", APP_SECRET\)/);
   assert.match(adapter, /timingSafeEqual/);
