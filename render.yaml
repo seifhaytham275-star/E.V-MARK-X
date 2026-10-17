@@ -7,6 +7,8 @@ services:
     startCommand: npm start
     healthCheckPath: /health
     envVars:
+      - key: INTEGRATIONS_ENABLED
+        value: "false"
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GEMINI_API_KEY
@@ -17,3 +19,13 @@ services:
         value: ""
       - key: MODELS_CACHE_SECONDS
         value: "300"
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+      - key: WHATSAPP_APP_SECRET
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: META_GRAPH_VERSION
+        value: "v23.0"

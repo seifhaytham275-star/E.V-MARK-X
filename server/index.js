@@ -28,6 +28,10 @@ app.use((req, res, next) => {
   if (req.method === "OPTIONS") return res.sendStatus(origin && ALLOWED_ORIGINS.has(origin) ? 204 : 403);
   next();
 });
+const { router: whatsappRouter } = require("./whatsapp");
+// WhatsApp signature verification requires the exact raw request bytes, so mount before JSON parsing.
+app.use("/api/webhooks/whatsapp", express.raw({ type: "application/json", limit: "1mb" }), whatsappRouter);
+
 app.use(express.json({ limit: "32kb" }));
 
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: "draft-7", legacyHeaders: false });

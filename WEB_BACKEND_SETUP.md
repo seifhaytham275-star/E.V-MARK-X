@@ -47,3 +47,35 @@ Commit the changes. Wait for the GitHub Pages deployment to finish, then open th
 ## Current security boundaries
 
 The backend verifies Google ID tokens, uses a server-side Gemini key, applies rate limits, validates input sizes and model names, and restricts browser CORS origins. This is a starter backend, not a complete multi-tenant SaaS: it does not include a database, persistent user profiles, per-account quotas, payments, or abuse analytics. Add those before scaling to a large public audience. Rate limiting is not a guarantee against all abuse.
+
+
+## E. External integrations are paused by default
+
+The external integration code and configuration are intentionally retained in this repository, but integrations are **disabled by default**. Set `INTEGRATIONS_ENABLED=true` in the backend host only when you are ready to configure and test the required credentials. Until then, WhatsApp webhook requests return HTTP 503 and no automated replies are processed. Keep it set to `false` while waiting for credentials. This flag does not disable the ordinary E.V website chat.
+
+## F. WhatsApp Business Cloud API (inbound text replies)
+
+The repository includes a server-side WhatsApp webhook adapter at `/api/webhooks/whatsapp`. It verifies Meta's `X-Hub-Signature-256` using the raw request body, validates webhook subscription challenges, ignores non-text messages, deduplicates recent message IDs in memory, and uses the fixed `gemini-3.5-flash-lite` model for text replies. It does not log message bodies, phone numbers, access tokens, or provider response bodies.
+
+1. Create/configure a Meta app and WhatsApp Business Account in Meta for Developers.
+2. Configure the WhatsApp product and webhook callback URL as `https://YOUR-BACKEND-HOST/api/webhooks/whatsapp`.
+3. Subscribe to the `messages` webhook field.
+4. Set these secrets in the backend host's environment settings (never in GitHub Pages or source control):
+   - `WHATSAPP_VERIFY_TOKEN`: a long random value you choose and enter in Meta's webhook setup.
+   - `WHATSAPP_APP_SECRET`: the Meta app secret used to verify webhook signatures.
+   - `WHATSAPP_ACCESS_TOKEN`: a valid server-side WhatsApp Cloud API access token.
+   - `WHATSAPP_PHONE_NUMBER_ID`: the WhatsApp phone-number ID from Meta, not the displayed phone number.
+   - `GEMINI_API_KEY`: server-side Gemini API key.
+   - Optional `META_GRAPH_VERSION`: the supported Graph API version for your Meta app.
+5. When all credentials are ready, set `INTEGRATIONS_ENABLED=true`, deploy, then open `/api/webhooks/whatsapp/status` to confirm the server reports whether required values are present. The status endpoint reveals only boolean configuration state, not secrets.
+6. Test with a number allowed by the Meta test setup before inviting real users. Confirm Meta's current message window, template, opt-in, business verification, and Egypt-specific account/number rules before production use.
+
+This first adapter supports **incoming text messages and automated text replies only**. It does not implement outbound campaigns, media messages, persistence-based deduplication, or voice/telephone calls. Voice calling and ordinary Egyptian mobile calls require a separately selected, region-eligible provider and additional consent/cost controls. The status endpoint is informational; it is not a substitute for securing the backend with authentication and provider controls.
+
+## Integration status
+
+- External integrations: paused by default with `INTEGRATIONS_ENABLED=false`; code remains in the repository.
+- WhatsApp webhook: code scaffolded; requires Meta credentials and a deployed backend for live verification.
+- GitHub: no live OAuth/App installation is configured by this change.
+- Gmail and Google Drive: require a separate Google OAuth authorization-code flow with least-privilege scopes and a secure token store; Google sign-in alone does not grant mailbox/Drive API access.
+- Web Search: the existing workspace's optional Gemini Google Search grounding remains separate from third-party web-search providers.
