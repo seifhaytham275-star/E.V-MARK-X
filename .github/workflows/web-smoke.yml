@@ -1,0 +1,24 @@
+name: Web smoke tests
+
+on:
+  push:
+    paths:
+      - "app.html"
+      - "tests/**"
+      - ".github/workflows/web-smoke.yml"
+  pull_request:
+    paths:
+      - "app.html"
+      - "tests/**"
+      - ".github/workflows/web-smoke.yml"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run static workspace tests
+        run: node --test tests/web-smoke.test.cjs
