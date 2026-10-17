@@ -10,17 +10,35 @@ assert.ok(scriptMatch, "app.html must contain the application script");
 const script = scriptMatch[1];
 
 
-test("Android app uses the same single fixed Gemini model", () => {
-  assert.match(android, /private static final String MODEL_ID = "gemini-3\.5-flash-lite"/);
-  assert.match(android, /String model = MODEL_ID/);
-  assert.match(android, /askGemini\(key, planPrompt, MODEL_ID\)/);
-  assert.doesNotMatch(android, /modelPicker|selected_model|MODEL SELECTOR|REFRESH AVAILABLE MODELS|fetchModels\(/);
-  assert.match(android, /ACTIVE MODEL/);
-  assert.match(android, /Gemini 3\.5 Flash-Lite/);
+test("Android wrapper loads the same hosted workspace and keeps navigation constrained", () => {
+  assert.match(android, /HOME_URL = "https:\/\/seifhaytham275-star\.github\.io\/E\.V-MARK-X\/app\.html"/);
+  assert.match(android, /webView\.loadUrl\(HOME_URL\)/);
+  assert.match(android, /HOME_HOST = "seifhaytham275-star\.github\.io"/);
+  assert.match(android, /settings\.setJavaScriptEnabled\(true\)/);
+  assert.match(android, /settings\.setDomStorageEnabled\(true\)/);
+  assert.match(android, /settings\.setAllowFileAccess\(false\)/);
+  assert.match(android, /webView\.setDownloadListener/);
+  assert.match(android, /onShowFileChooser/);
+  assert.match(android, /onBackPressed/);
+  assert.match(script, /const MODEL_ID = "gemini-3\.5-flash-lite"/);
 });
 
 test("workspace JavaScript parses", () => {
   assert.doesNotThrow(() => new vm.Script(script));
+});
+
+test("protocol buttons are registered once at startup, independent of API-key saving", () => {
+  const saveHandler = script.indexOf('$("saveKeyBtn").addEventListener("click", () => {');
+  const protocolHandler = script.indexOf('document.querySelectorAll(".protocol-launch").forEach');
+  const libraryHandler = script.indexOf('document.querySelectorAll(".library-item").forEach');
+  const clearKeyHandler = script.indexOf('$("clearKeyBtn").addEventListener("click", () => {');
+  assert.ok(saveHandler >= 0 && protocolHandler > saveHandler && libraryHandler > protocolHandler);
+  assert.ok(clearKeyHandler > libraryHandler);
+  assert.ok(!script.slice(saveHandler, protocolHandler).includes('querySelectorAll(".protocol-launch")'));
+  assert.ok(!script.slice(saveHandler, protocolHandler).includes('querySelectorAll(".library-item")'));
+  assert.match(script, /data: "Activate Data Intelligence/);
+  assert.match(script, /studio: "\/studio Build a complete responsive website/);
+  assert.match(script, /if \(mode === "web"\) document\.getElementById\("webSearchToggle"\)\.checked = true/);
 });
 
 test("model remains fixed to Gemini 3.5 Flash-Lite", () => {
