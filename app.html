@@ -291,6 +291,10 @@
         : (error && error.message) || "Gemini request failed.";
       reply.textContent = "Error: " + message;
       reply.classList.remove("loading");
+      pendingParts = userParts.slice(1);
+      pendingNames = sentNames;
+      pendingBytes = pendingParts.reduce((sum, part) => sum + (part.inline_data && part.inline_data.data ? Math.floor(part.inline_data.data.length * 3 / 4) : (part.text || "").length), 0);
+      $("attachmentStatus").textContent = pendingNames.length ? "Attachments restored for retry: " + pendingNames.join(", ") : "";
       $("prompt").value = text;
       $("counter").textContent = text.length.toLocaleString() + " / 12,000";
       showNotice(message);
