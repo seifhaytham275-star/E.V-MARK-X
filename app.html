@@ -215,6 +215,22 @@
     return "E.V Studio preview is open in a sandboxed window. You can test the page or download its HTML. The preview cannot access this app's storage or make network requests.";
   }
 
+  async function searchWebTool(query,key){
+    const data=await callGemini({
+      contents:[{role:"user",parts:[{text:"Search the web for this question and answer using current sources: "+String(query||"").slice(0,1000)}]}],
+      tools:[{google_search:{}}],
+      generationConfig:{maxOutputTokens:1800}
+    },key);
+    const candidate=data.candidates&&data.candidates[0];
+    const sources=[];
+    const chunks=candidate&&candidate.groundingMetadata&&Array.isArray(candidate.groundingMetadata.groundingChunks)?candidate.groundingMetadata.groundingChunks:[];
+    chunks.forEach(chunk=>{
+      const web=chunk&&chunk.web;
+      if(web&&typeof web.uri==="string"&&/^https?:\/\//i.test(web.uri)&&!sources.some(source=>source.url===web.uri))sources.push({url:web.uri,title:web.title||web.uri});
+    });
+    return {answer:candidateText(candidate)||"No grounded answer was returned.",sources};
+  }
+
   const AGENT_DECLARATIONS=[
     {name:"calculate",description:"Calculate a basic arithmetic expression using +, -, *, /, %, ^ and parentheses.",parameters:{type:"OBJECT",properties:{expression:{type:"STRING",description:"A basic arithmetic expression without variables or functions."}},required:["expression"]}},
     {name:"get_current_time",description:"Get the current date and local time from the user's browser.",parameters:{type:"OBJECT",properties:{}}},
