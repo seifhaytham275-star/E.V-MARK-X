@@ -651,4 +651,24 @@
   $("mobileNewChat").addEventListener("click", newChat);
   refreshKeyStatus();
 })();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async()=>{
+  const cfg=window.EV_CONFIG||{};
+  if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY||!window.supabase?.createClient)return;
+  try{
+    const authClient=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
+    const {data,error}=await authClient.auth.getSession();
+    if(error||!data?.session){location.replace("login.html?next=app");return;}
+    window.EV_AUTH={client:authClient,session:data.session};
+    const user=data.session.user;
+    const profile=document.querySelector(".profile");
+    if(profile){
+      const text=profile.querySelector(".usertext");
+      if(text){const strong=text.querySelector("strong");const small=text.querySelector("small");if(strong)strong.textContent=user.user_metadata?.user_name||user.user_metadata?.name||user.email||"Signed-in developer";if(small)small.textContent="Account connected";}
+      const logout=document.createElement("button");logout.type="button";logout.className="btn";logout.textContent="Sign out";logout.style.marginTop="8px";logout.style.width="100%";logout.addEventListener("click",async()=>{await authClient.auth.signOut();location.replace("login.html");});profile.insertAdjacentElement("afterend",logout);
+    }
+  }catch(e){location.replace("login.html?next=app");}
+})();
 </script></body></html>
