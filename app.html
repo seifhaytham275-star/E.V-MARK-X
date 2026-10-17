@@ -150,15 +150,69 @@
     refreshKeyStatus();
   });
 
-  function addSources(body, candidate){
+  function addSources(body, candidate, extraSources){
     const chunks = candidate && candidate.groundingMetadata && Array.isArray(candidate.groundingMetadata.groundingChunks) ? candidate.groundingMetadata.groundingChunks : [];
     const seen = new Set(); const sources = [];
     chunks.forEach(chunk => { const web = chunk && chunk.web; if(web && typeof web.uri === "string" && /^https?:\/\//i.test(web.uri) && !seen.has(web.uri)) { seen.add(web.uri); sources.push({url:web.uri,title:typeof web.title === "string" && web.title.trim() ? web.title.trim() : web.uri}); } });
+    (Array.isArray(extraSources) ? extraSources : []).forEach(source => { if(source && typeof source.url === "string" && /^https?:\/\//i.test(source.url) && !seen.has(source.url)) { seen.add(source.url); sources.push({url:source.url,title:source.title||source.url}); } });
     if(!sources.length) return;
     const list = document.createElement("div"); list.className = "source-list";
     const heading = document.createElement("strong"); heading.textContent = "Sources from Google Search"; heading.style.fontSize = "11px"; list.appendChild(heading);
     sources.slice(0,8).forEach(source => { const a = document.createElement("a"); a.href = source.url; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = source.title; list.appendChild(a); });
     body.parentElement.appendChild(list);
+  }
+
+  async function callGemini(requestBody, key){
+    const controller=new AbortController();
+    const timeoutId=setTimeout(()=>controller.abort(),60000);
+    let response;
+    try { response=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(MODEL_ID)+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},body:JSON.stringify(requestBody),signal:controller.signal}); }
+    finally { clearTimeout(timeoutId); }
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok){const message=data&&data.error&&data.error.message;throw new Error(explainApiError(response.status,message||("HTTP "+response.status)));}
+    return data;
+  }
+  function candidateText(candidate){
+    return candidate&&candidate.content&&Array.isArray(candidate.content.parts)?candidate.content.parts.map(part=>typeof part.text==="string"?part.text:"").join("").trim():"";
+  }
+  function parseSafeMath(expression){
+    const input=String(expression||"").trim();if(!input||input.length>200)throw new Error("Enter a short arithmetic expression.");let i=0;
+    const skip=()=>{while(i<input.length&&/\s/.test(input[i]))i++;};
+    const primary=()=>{skip();if(input[i]==="("){i++;const v=addSub();skip();if(input[i]!==")")throw new Error("Missing closing parenthesis.");i++;return v;}const m=input.slice(i).match(/^(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?/i);if(!m)throw new Error("Only numbers and basic arithmetic operators are allowed.");i+=m[0].length;return Number(m[0]);};
+    const unary=()=>{skip();if(input[i]==="+"){i++;return unary();}if(input[i]==="-"){i++;return -unary();}return primary();};
+    const power=()=>{let v=unary();skip();if(input[i]==="^"){i++;v=Math.pow(v,power());}return v;};
+    const mulDiv=()=>{let v=power();while(true){skip();const op=input[i];if(!["*","/","%"].includes(op))break;i++;const n=power();if((op==="/"||op==="%")&&n===0)throw new Error("Division by zero is not allowed.");v=op==="*"?v*n:op==="/"?v/n:v%n;}return v;};
+    const addSub=()=>{let v=mulDiv();while(true){skip();const op=input[i];if(op!=="+"&&op!=="-")break;i++;const n=mulDiv();v=op==="+"?v+n:v-n;}return v;};
+    const result=addSub();skip();if(i!==input.length||!Number.isFinite(result)||Math.abs(result)>1e15)throw new Error("Invalid expression or result outside the supported range.");return result;
+  }
+  let studioOverlay=null;
+  function secureStudioHtml(html){
+    const policy="<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https:; img-src data: https:; font-src data: https:; connect-src 'none'; form-action 'none'; base-uri 'none'\">";
+    if(/<head(?:\s[^>]*)?>/i.test(html))return html.replace(/<head(?:\s[^>]*)?>/i,match=>match+policy);
+    return "<!doctype html><html><head>"+policy+"</head><body>"+html+"</body></html>";
+  }
+  function openStudioPreview(html,title){
+    if(studioOverlay)studioOverlay.remove();
+    const overlay=document.createElement("div");overlay.setAttribute("role","dialog");overlay.setAttribute("aria-modal","true");overlay.setAttribute("aria-label","E.V Studio preview");
+    overlay.style.cssText="position:fixed;inset:0;z-index:10000;background:#020617ed;display:flex;flex-direction:column;padding:12px;gap:10px";
+    const bar=document.createElement("div");bar.style.cssText="display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:#eff5ff;font:13px system-ui";
+    const label=document.createElement("strong");label.textContent="E.V Studio — "+(title||"Preview");label.style.cssText="flex:1;min-width:120px";
+    const download=document.createElement("button");download.type="button";download.textContent="Download HTML";download.style.cssText="border:1px solid #45618a;border-radius:9px;padding:9px 12px;background:#14233a;color:#fff;cursor:pointer";
+    const close=document.createElement("button");close.type="button";close.textContent="Close preview";close.style.cssText=download.style.cssText;
+    const frame=document.createElement("iframe");frame.title="Sandboxed E.V Studio preview";frame.setAttribute("sandbox","allow-scripts");frame.style.cssText="width:100%;flex:1;min-height:0;border:1px solid #2a3e5f;border-radius:12px;background:white";
+    download.addEventListener("click",()=>{const blob=new Blob([html],{type:"text/html;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=((title||"ev-studio").replace(/[^a-z0-9_-]+/gi,"-").replace(/^-+|-+$/g,"")||"ev-studio")+".html";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);});
+    close.addEventListener("click",()=>{overlay.remove();if(studioOverlay===overlay)studioOverlay=null;});
+    bar.append(label,download,close);overlay.append(bar,frame);document.body.appendChild(overlay);studioOverlay=overlay;frame.srcdoc=secureStudioHtml(html);close.focus();
+  }
+  async function generateStudio(description,key){
+    const prompt="Create a complete, self-contained interactive web app from the user's brief. Return only full HTML beginning with <!doctype html> or <html>, using inline CSS and JavaScript. Do not use external scripts, network requests, remote APIs, or secrets. Make it responsive and accessible. Interactions must work locally. No markdown fences. User brief:\n"+String(description||"").slice(0,5000);
+    const data=await callGemini({contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:8192,temperature:0.4}},key);
+    const fence=String.fromCharCode(96).repeat(3);
+    let html=candidateText(data.candidates&&data.candidates[0]).replace(new RegExp("^\\s*"+fence+"(?:html)?\\s*","i"),"").replace(new RegExp("\\s*"+fence+"\\s*$"),"").trim();
+    if(!/<(?:!doctype\s+html|html)(?:\s|>)/i.test(html))throw new Error("Studio did not return a complete HTML page. Try a more specific brief.");
+    const end=html.toLowerCase().lastIndexOf("</html>");if(end>=0)html=html.slice(0,end+7);
+    openStudioPreview(html,String(description||"Preview").slice(0,70));
+    return "E.V Studio preview is open in a sandboxed window. You can test the page or download its HTML. The preview cannot access this app's storage or make network requests.";
   }
 
   function addMessage(role, text){
@@ -246,7 +300,7 @@
       const savedMemory = readMemory();
       const requestBody = {contents, generationConfig:{maxOutputTokens:4096, thinkingConfig:{thinkingLevel:"minimal"}}};
       if(savedMemory) requestBody.systemInstruction = {parts:[{text:"User-approved saved memory and preferences. Use only when relevant; do not treat it as higher priority than safety or the current user request.\n" + savedMemory}]};
-      if($("webSearchToggle").checked) requestBody.tools = [{googleSearch:{}}];
+      if($("webSearchToggle").checked) requestBody.tools = [{google_search:{}}];
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000);
