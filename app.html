@@ -189,6 +189,7 @@
   function secureStudioHtml(html){
     const policy="<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https:; img-src data: https:; font-src data: https:; connect-src 'none'; form-action 'none'; base-uri 'none'\">";
     if(/<head(?:\s[^>]*)?>/i.test(html))return html.replace(/<head(?:\s[^>]*)?>/i,match=>match+policy);
+    if(/<html(?:\s[^>]*)?>/i.test(html))return html.replace(/<html(?:\s[^>]*)?>/i,match=>match+"<head>"+policy+"</head>");
     return "<!doctype html><html><head>"+policy+"</head><body>"+html+"</body></html>";
   }
   function openStudioPreview(html,title){
