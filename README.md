@@ -1,94 +1,36 @@
-# E.V-MARK-X — EV AI System
+# E.V-MARK-X
 
-**Live web demo:** https://seifhaytham275-star.github.io/E.V-MARK-X/  
+**Public website:** https://seifhaytham275-star.github.io/E.V-MARK-X/  
+**Google sign-in page:** https://seifhaytham275-star.github.io/E.V-MARK-X/login.html  
 **AI workspace:** https://seifhaytham275-star.github.io/E.V-MARK-X/app.html  
 **About & privacy:** https://seifhaytham275-star.github.io/E.V-MARK-X/about.html
 
-**An Android AI assistant project with tools for chat, everyday planning, and simple personal tracking.**
+E.V-MARK-X is an independent AI workspace project with a responsive English website, Google sign-in UI, Gemini model discovery, and a Node.js backend starter.
 
-E.V-MARK-X brings these areas together in one Android app:
+## Web project
 
-### Available features
+- `index.html` — public landing page.
+- `login.html` — Google Identity Services sign-in UI.
+- `app.html` — authenticated AI workspace.
+- `about.html` — project, privacy, and security notes.
+- `config.js` — public configuration placeholders only; never place secrets here.
+- `server/` — backend for Google credential verification and server-side Gemini requests.
+- `render.yaml` — Render deployment blueprint.
+- `WEB_BACKEND_SETUP.md` — deployment and OAuth setup guide.
 
-- **Gemini AI chat** — send questions to a model available to your own API key.
-- **Model discovery** — refresh the model list from Google's API and choose a model available to your key.
-- **Remember my API key** — save the Gemini key locally using Android Keystore-backed AES-GCM encryption; the app reloads it on next launch and lets you remove it. This protects local storage but does not make a client-side key safe to distribute publicly.
-- **Spider-tech interface** — custom red/blue gradients and original web-inspired artwork, rather than an unlicensed movie still.
-- **Saved chat history** — revisit recent conversations stored on the device; cloud sync depends on Firebase setup.
-- **Quick Prompt Library** — one-tap starters for planning a day, explaining a topic simply, and improving a message.
-- **Share Conversation** — share the current chat as plain text through Android's standard share sheet.
-- **New Chat shortcut** — start a clean conversation without manually clearing the previous transcript.
-- **EV Wallet** — local income and expense totals in EGP.
-- **EV Calories / Wellness** — a basic food log and estimated calorie totals with wellness-planning UI.
+## Important: sign-in and chat activation
 
-### Planned improvements (not yet implemented)
+The frontend and backend code are committed, but Google sign-in and server-backed chat are **not live until the project owner completes setup**. GitHub Pages hosts only static files; it cannot run the Node.js backend or safely store the Gemini API key.
 
-- Voice input and spoken responses.
-- Image and document understanding.
-- Reminders and calendar integration.
-- More accessible onboarding and language options.
-- A secure server-side API proxy with rate limits and cost controls.
+Follow [WEB_BACKEND_SETUP.md](WEB_BACKEND_SETUP.md) to:
+1. Create a Google OAuth Web client ID and add `https://seifhaytham275-star.github.io` as an authorized JavaScript origin.
+2. Deploy the `server/` service using the included Render Blueprint.
+3. Set `GOOGLE_CLIENT_ID` and `GEMINI_API_KEY` as backend environment variables.
+4. Update `config.js` with the real backend URL and public Google Web client ID.
+5. Wait for GitHub Pages to deploy and test sign-in, model loading, and chat.
 
-Planned improvements above are ideas for future versions and are **not included in the current APK**.
+**Never put `GEMINI_API_KEY` in `config.js`, HTML, frontend JavaScript, or a committed file.** Use only a server-side secret environment variable. The backend includes Google ID-token verification, request limits, input validation, model allow-list checking, and an origin allow-list. These are starter protections, not a complete multi-tenant service; configure provider quotas and billing alerts before public launch.
 
-> **Project status: beta / under active development.** Test the app before relying on it. Features that require Firebase will not work until the project owner configures their own Firebase and OAuth settings.
+## Android project
 
-## Get the app
-
-- **Latest release:** [Open Releases](https://github.com/seifhaytham275-star/E.V-MARK-X/releases/latest)
-- **Build history / beta artifacts:** [Open GitHub Actions](https://github.com/seifhaytham275-star/E.V-MARK-X/actions)
-
-If there is no published release yet, the Releases page may be empty. Open the latest successful build in Actions, then download **EV-AI-System-debug-APK** from the Artifacts section. GitHub Actions artifacts are temporary and may expire, so a tagged release is the preferred download route.
-
-### Install the beta APK
-
-1. Download the APK from a release or successful workflow artifact.
-2. Open it on your Android device and follow Android's installation prompts.
-3. Install only if you trust the source and understand that this is a beta/debug build.
-4. If installation fails or the app crashes, report the Android version and the steps that caused the issue—never include passwords or API keys in a report.
-
-## Public web demo and API-key safety
-
-The GitHub Pages website has a public landing page (`index.html`), AI workspace (`app.html`), and about/privacy page (`about.html`). The workspace discovers Gemini models available to the visitor's own API key and sends the key in the `x-goog-api-key` request header rather than placing it in the request URL. The key is held in page memory only and is not stored in local storage. **This does not make a browser-side key secret**: the device owner can inspect browser requests. Visitors must use their own keys and should never paste a shared/private service key into the public page. A shared-key service requires a separate backend with server-side secrets, per-user rate limits, abuse controls, and cost monitoring; GitHub Pages alone cannot provide that backend.
-
-## Gemini setup and API costs
-
-1. Create your own Gemini API key in Google AI Studio.
-2. Enter the key in EV AI Core and tap **Save API Key**. It will be remembered on this device until you remove it or uninstall the app.
-3. Use **Refresh Available Models** to discover models available to your key.
-
-Model access, quotas, pricing, and free-tier eligibility depend on Google's current policies and your account. Do not assume every model is free.
-
-**Security note:** the saved key is encrypted locally with an Android Keystore-managed key. A mobile client still cannot fully protect a secret while using it. Do not put a private API key in source code or commit it to this repository. Before broad public distribution, the app needs a carefully secured server-side proxy, rate limits, cost controls, and a clear privacy notice. Never share your API key with other users.
-
-## Firebase features
-
-Google sign-in and cloud conversation sync require a Firebase project and OAuth configuration. Follow [SETUP.md](SETUP.md). Placeholder values in the repository are not a working production configuration.
-
-## Privacy and limitations
-
-- Without sign-in, conversations are stored locally on the device.
-- With Firebase configured and sign-in enabled, conversations may sync to the signed-in user's Firestore account.
-- Wallet and food-log totals are stored locally on the device.
-- Calorie values are estimates and are not medical advice.
-- Do not use a shared device for private conversations unless you sign out and understand local-data behavior.
-
-## Feedback and support
-
-Please open a [GitHub issue](https://github.com/seifhaytham275-star/E.V-MARK-X/issues) with a clear description, device/Android version, and reproduction steps. Remove personal information, passwords, API keys, and other secrets before posting.
-
-## For contributors
-
-See [SETUP.md](SETUP.md) for project setup. Pull requests and constructive feedback are welcome.
-
-## Roadmap
-
-- [ ] Test the app on multiple Android devices
-- [ ] Publish a tagged beta release with a stable APK link
-- [ ] Improve first-run guidance and error messages
-- [ ] Review API-key handling, privacy, and cost controls before wider distribution
-- [ ] Collect feedback and prioritize the most-used features
-
----
-
-Made as an independent project. Gemini and Firebase are Google services; E.V-MARK-X is not an official Google product.
+The repository also contains Android source and APK build workflows. See the existing Android setup documentation in [SETUP.md](SETUP.md). The Android build and web backend are separate parts of this repository.
