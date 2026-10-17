@@ -1,11 +1,11 @@
-# E.V-MARK-7 Platinum
+# E.V-MARK-XI Platinum
 
 **Live website:** https://seifhaytham275-star.github.io/E.V-MARK-X/  
 **Open the AI workspace:** https://seifhaytham275-star.github.io/E.V-MARK-X/app.html  
 **About & privacy:** https://seifhaytham275-star.github.io/E.V-MARK-X/about.html  
 **Source repository:** https://github.com/seifhaytham275-star/E.V-MARK-X
 
-E.V-MARK-7 Platinum is the refreshed workspace name for this E.V-MARK-X project: a responsive AI workspace with chat, study and writing workflows, a browser-based Studio, and a limited tool-using Agent. The web workspace uses the configured Gemini 3.5 Flash-Lite model. Google sign-in is not required for the GitHub Pages version.
+E.V-MARK-XI Platinum is the refreshed workspace name for this E.V-MARK-X project: a responsive AI workspace with chat, study and writing workflows, a browser-based Studio, and a limited tool-using Agent. The web workspace uses the configured Gemini 3.5 Flash-Lite model. Google sign-in is not required for the GitHub Pages version.
 
 ## Get the Android APK
 
@@ -64,4 +64,4 @@ node --test tests/web-smoke.test.cjs
 
 The same tests run in GitHub Actions. They do not replace testing with a real Gemini API key or testing the APK on a physical Android device.
 
-The current workspace brand is **E.V-MARK-7 Platinum**. The existing repository URL remains unchanged so current links continue working. See [FEATURE_ROADMAP.md](FEATURE_ROADMAP.md) for planned work.
+The current workspace brand is **E.V-MARK-XI Platinum**. The existing repository URL remains unchanged so current links continue working. See [FEATURE_ROADMAP.md](FEATURE_ROADMAP.md) for planned work.
