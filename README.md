@@ -34,6 +34,9 @@ The current web workspace includes opt-in Google Search grounding with returned 
 - Saved memory, projects, and the Gemini API key remain in browser storage on that device. Browser storage is not a secure vault; use a trusted device and do not save secrets in memory.
 - **E.V Studio:** type `/studio build a to-do app with filters and local saving` in the existing message box. The generated page opens in a sandboxed preview; use Download HTML to save it.
 - **Agent Mode:** type `/agent research the latest changes in a topic and summarize the sources` or `/agent calculate 123*456 and explain the result`. Agent Mode uses an allowlisted set of tools and is limited to four tool calls per task.
+- **70+ slash-command workflows:** the same message box now supports commands for summaries, translation, quizzes, flashcards, writing, study planning, code generation/review/debugging, requirements, test cases, security, accessibility, documentation, and more. Type `/help` or `/commands` to see the full list. These workflows still use the fixed Gemini model and your configured key.
+- **Local utilities (no API request):** `/math 12*(3+4)`, `/wordcount paste text`, `/reverse text`, `/upper text`, `/lower text`, `/date`, and `/time`. `/export` downloads the visible conversation as a text file.
+- Unknown slash-prefixed messages are treated as normal chat rather than silently discarding the command text. All additions use the existing composer; no visible UI controls or styling were added.
 - Studio and Agent Mode are implemented in code but still need a live Gemini API test with your key. Their operation depends on the fixed model and Google API access.
 - Voice, image generation, DOCX/XLSX parsing, and a real isolated code-execution environment remain future work.
 - Roadmap: [FEATURE_ROADMAP.md](FEATURE_ROADMAP.md).
