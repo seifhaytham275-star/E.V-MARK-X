@@ -47,9 +47,9 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          name: E.V-MARK-X ${{ github.ref_name }} beta
+          name: E.V-MARK-7 Platinum ${{ github.ref_name }} beta
           body: |
-            ## E.V-MARK-X beta
+            ## E.V-MARK-7 Platinum beta
 
             This is a **debug/beta build** for testing, not a production-signed release.
 
