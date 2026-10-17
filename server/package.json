@@ -1,0 +1,15 @@
+{
+  "name": "ev-mark-x-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Secure backend proxy for E.V-MARK-X Google sign-in and Gemini requests",
+  "main": "index.js",
+  "scripts": { "start": "node index.js", "dev": "node --watch index.js" },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "google-auth-library": "^9.15.1",
+    "helmet": "^8.0.0"
+  }
+}
