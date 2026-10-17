@@ -436,8 +436,9 @@
     const commandMatch = text.match(/^\/([a-z][a-z0-9_-]*)(?:\s+([\s\S]*))?$/i);
     const commandName = commandMatch ? commandMatch[1].toLowerCase() : "";
     const mode = commandName === "agent" || commandName === "studio" ? commandName : "chat";
-    const taskText = commandMatch ? (commandMatch[2] || "").trim() : text;
     const featurePrompt = FEATURE_COMMANDS[commandName];
+    const recognizedCommand = mode === "agent" || mode === "studio" || Boolean(featurePrompt);
+    const taskText = commandMatch && recognizedCommand ? (commandMatch[2] || "").trim() : text;
     const requestText = featurePrompt
       ? featurePrompt + "\n\nUser request / source material:\n" + (taskText || "Use the conversation context where relevant.")
       : taskText || (mode === "studio" ? "Create a polished interactive web app starter." : mode === "agent" ? "Help me plan and complete my next task." : text);
