@@ -226,3 +226,48 @@ test("unknown slash-prefixed text remains ordinary chat", () => {
   assert.match(script, /const recognizedCommand = mode === "agent" \|\| mode === "studio" \|\| Boolean\(featurePrompt\)/);
   assert.match(script, /commandMatch && recognizedCommand \? \(commandMatch\[2\] \|\| ""\)\.trim\(\) : text/);
 });
+
+
+const dataLab = fs.readFileSync("data-lab.html", "utf8");
+const dataLabScriptMatch = dataLab.match(/<script>\\s*([\\s\\S]*?)\\s*<\\/script>/);
+assert.ok(dataLabScriptMatch, "data-lab.html must contain its application script");
+const dataLabScript = dataLabScriptMatch[1];
+
+test("Data Intelligence Lab JavaScript parses and keeps supported files local", () => {
+  assert.doesNotThrow(() => new vm.Script(dataLabScript));
+  assert.match(dataLab, /CSV, TSV, and JSON files are processed in this browser/);
+  assert.match(dataLab, /file.size>5\*1024\*1024/);
+  assert.match(dataLab, /id="downloadClean"/);
+  assert.match(dataLab, /id="downloadReport"/);
+  assert.match(dataLab, /id="copyReport"/);
+  assert.match(dataLab, /id="numericSelect"/);
+  assert.match(dataLab, /id="categorySelect"/);
+  assert.match(dataLab, /function parseDelimited\(text,delimiter\)/);
+  assert.match(dataLab, /function duplicateCount\(\)/);
+});
+
+test("Data Intelligence Lab parses quoted CSV and preserves escaped quotes", () => {
+  const start = dataLabScript.indexOf("function parseDelimited");
+  const end = dataLabScript.indexOf("function parseFileText");
+  assert.ok(start >= 0 && end > start, "CSV helper functions should be present");
+  const context = vm.createContext({});
+  vm.runInContext(dataLabScript.slice(start, end), context);
+  const parsed = context.parseDelimited('name,note\r\n"Studio, Pro","She said ""hello"""\r\n', ",");
+  assert.deepEqual(JSON.parse(JSON.stringify(parsed)), [
+    ["name", "note"],
+    ["Studio, Pro", 'She said "hello"']
+  ]);
+  assert.throws(() => context.parseDelimited('a,b\n"unfinished,2', ","), /quoted field/);
+});
+
+test("Data Intelligence Lab normalizes JSON objects into a stable table", () => {
+  const start = dataLabScript.indexOf("function parseDelimited");
+  const end = dataLabScript.indexOf("function parseFileText");
+  const context = vm.createContext({});
+  vm.runInContext(dataLabScript.slice(start, end), context);
+  const normalized = context.normalizeRecords([{ name: "E.V", score: 9 }, { name: "Studio", language: "JS" }]);
+  assert.deepEqual(JSON.parse(JSON.stringify(normalized)), {
+    headers: ["name", "score", "language"],
+    rows: [["E.V", "9", ""], ["Studio", "", "JS"]]
+  });
+});
