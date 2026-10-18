@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "app.html"
+      - "data-lab.html"
       - "tests/**"
       - ".github/workflows/web-smoke.yml"
   pull_request:
