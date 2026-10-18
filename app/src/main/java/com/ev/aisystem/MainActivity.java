@@ -42,7 +42,7 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
-        getWindow().setStatusBarColor(Color.rgb(8, 13, 25));
+        getWindow().setStatusBarColor(Color.rgb(9, 7, 7));
         getWindow().setNavigationBarColor(Color.rgb(8, 13, 25));
         getWindow().getDecorView().setSystemUiVisibility(0);
 
@@ -58,8 +58,8 @@ public class MainActivity extends Activity {
         progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
         progress.setMax(100);
         progress.setProgress(0);
-        progress.setProgressTintList(android.content.res.ColorStateList.valueOf(Color.rgb(92, 156, 255)));
-        progress.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(24, 37, 58)));
+        progress.setProgressTintList(android.content.res.ColorStateList.valueOf(Color.rgb(255, 52, 64)));
+        progress.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(54, 24, 26)));
         shell.addView(progress, new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, dp(3)));
 
@@ -211,7 +211,7 @@ public class MainActivity extends Activity {
         retry.setText("Try again");
         retry.setTextColor(Color.WHITE);
         retry.setAllCaps(false);
-        retry.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(45, 111, 224)));
+        retry.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(190, 28, 40)));
         LinearLayout.LayoutParams retryParams = new LinearLayout.LayoutParams(-1, dp(48));
         retryParams.topMargin = dp(20);
         errorPanel.addView(retry, retryParams);
