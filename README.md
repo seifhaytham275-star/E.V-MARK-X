@@ -20,7 +20,7 @@ The APK is an Android WebView wrapper around the same live `app.html` workspace.
 ## Web project
 
 - `index.html` — public landing page.
-- `app.html` — responsive AI workspace, fixed to Gemini 3.5 Flash-Lite.
+- `app.html` — responsive AI workspace, fixed to Gemini 3.5 Flash-Lite.\n- `data-lab.html` — local CSV/TSV/JSON data profiling, quality checks, statistics, category exploration, and report export; dataset contents stay in the browser.
 - `about.html` — project, privacy, and security notes.
 - `config.js` — optional public configuration; never place API secrets here.
 - `server/` — optional backend for Google credential verification and server-side Gemini requests.
@@ -49,7 +49,7 @@ GitHub Pages serves static files only. The browser-based setup does not need Goo
 ## Limitations and privacy
 
 - Studio and Agent Mode still require a live Gemini API test with a valid key. Static tests do not prove API access, quotas, or model availability.
-- Built-in voice, image generation, and a real isolated code-execution environment are not implemented yet. DOCX/XLSX parsing uses pinned browser libraries loaded from jsDelivr, so those formats need an internet connection.
+- Built-in voice, image generation, and a real isolated code-execution environment are not implemented yet. The Data Intelligence Lab is a browser-based descriptive profiler, not a replacement for a full statistical notebook or domain-specific validation. DOCX/XLSX parsing uses pinned browser libraries loaded from jsDelivr, so those formats need an internet connection.
 - Saved memory, projects, and the Gemini API key remain in browser storage in the browser-based configuration. Do not save secrets in memory and do not use a shared device for a personal API key.
 - The APK loads the hosted website and is online-first; it does not bundle the whole workspace for offline use.
 - The Android source includes Firebase dependencies, but Google sign-in/cloud sync need a real Firebase project configuration. See [SETUP.md](SETUP.md).
@@ -71,7 +71,7 @@ The current workspace brand is **E.V-MARK-XI Platinum**. The existing repository
 E.V is focused on **programmers and developers**, not business CRM users. The core product areas are:
 
 - **E.V Studio:** create a standalone HTML prototype from a prompt, preview it in a sandboxed frame, and download the result.
-- **Data Intelligence:** inspect supported documents and structured data, summarize findings, and help reason about data. Visualizations and deeper analysis depend on the supported input and current implementation.
+- **Data Intelligence:** inspect supported documents and structured data, summarize findings, and help reason about data.\n- **Data Intelligence Lab:** analyze CSV, TSV, and JSON locally in the browser; view row/column counts, missing cells, exact duplicate rows, heuristic column types, numeric summaries, value distributions, and downloadable CSV/text reports without uploading the dataset.
 - **Agent Mode:** bounded tool-assisted workflows for research, calculations, and development tasks.
 - **Developer workflows:** code generation, review, debugging, documentation, test planning, and accessibility/security checklists through the command system.
 
