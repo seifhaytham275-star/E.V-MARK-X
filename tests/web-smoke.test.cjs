@@ -229,7 +229,7 @@ test("unknown slash-prefixed text remains ordinary chat", () => {
 
 
 const dataLab = fs.readFileSync("data-lab.html", "utf8");
-const dataLabScriptMatch = dataLab.match(/<script>\\s*([\\s\\S]*?)\\s*<\\/script>/);
+const dataLabScriptMatch = dataLab.match(/<script>\s*([\s\S]*?)\s*<\/script>/);
 assert.ok(dataLabScriptMatch, "data-lab.html must contain its application script");
 const dataLabScript = dataLabScriptMatch[1];
 
