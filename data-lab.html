@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080d19">
+<meta name="description" content="E.V Data Intelligence Lab — inspect CSV, TSV, and JSON data locally, review quality, explore statistics, and export reports.">
+<title>Data Intelligence Lab — E.V-MARK-XI Platinum</title>
+<style>
+:root{color-scheme:dark;--bg:#080d19;--panel:#101a2d;--line:#263754;--text:#eff5ff;--muted:#a5b5d0;--blue:#65b4ff;--cyan:#64e5f3;--purple:#8e80ff;--green:#65e3b0;--amber:#f1ca80}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 80% 0%,#17315a55,transparent 38%),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;line-height:1.6}button,input,select{font:inherit}a{color:inherit}.wrap{width:min(1180px,calc(100% - 28px));margin:auto}.nav{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:20px 0;border-bottom:1px solid #202d45}.brand{display:flex;align-items:center;gap:10px;font-weight:900;text-decoration:none}.logo{width:40px;height:40px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(135deg,#247cf0,#5b4ed8 70%,#63e3f4);font-weight:950}.navlinks{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.btn{display:inline-flex;justify-content:center;align-items:center;gap:8px;padding:10px 14px;border:1px solid #30415f;border-radius:11px;background:#111e33;color:#e8f2ff;text-decoration:none;cursor:pointer;font-size:12px;font-weight:800}.btn:hover{border-color:#65b4ff}.btn.primary{border-color:transparent;background:linear-gradient(110deg,#247bf0,#625ef0)}.btn:disabled{opacity:.45;cursor:not-allowed}.hero{padding:32px 0 20px;display:flex;justify-content:space-between;align-items:flex-end;gap:20px}.eyebrow{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#9fcaff;font-weight:900}.hero h1{font-size:clamp(29px,5vw,45px);line-height:1.12;letter-spacing:-1.4px;margin:8px 0}.gradient{background:linear-gradient(95deg,#77dff7,#65a9ff 48%,#a99aff);color:transparent;background-clip:text}.hero p{max-width:720px;color:var(--muted);font-size:13px;margin:0}.status{display:flex;align-items:center;gap:7px;color:#9ddfc7;font-size:11px;white-space:nowrap}.status:before{content:"";width:7px;height:7px;border-radius:50%;background:#65e3b0;box-shadow:0 0 12px #65e3b0}.privacy{border:1px solid #3b4d68;background:#0e192b;padding:11px 14px;border-radius:12px;color:#b5c5df;font-size:11px;margin:10px 0 16px}.privacy strong{color:#e5efff}.drop{border:1px dashed #3d6592;border-radius:18px;padding:25px 18px;text-align:center;background:linear-gradient(145deg,#10213a88,#0c1423);transition:.15s}.drop.drag{border-color:#64e5f3;background:#123247}.drop h2{font-size:17px;margin:8px 0 4px}.drop p{color:var(--muted);font-size:12px;margin:0 0 14px}.drop-icon{font-size:26px;color:#8ed8ff}.drop-actions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}.filemeta{font-size:11px;color:#91a6c6;margin-top:12px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}.metric,.panel{border:1px solid var(--line);border-radius:15px;background:linear-gradient(155deg,#111c31ef,#0b1221f2);padding:16px;min-width:0}.metric span{display:block;color:#93a8c9;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px}.metric strong{display:block;font-size:25px;margin-top:5px;overflow-wrap:anywhere}.metric small{display:block;color:#758cad;font-size:10px;margin-top:2px}.grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:14px}.panel{margin-bottom:14px}.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:13px}.panel h2{font-size:15px;margin:0}.panel p{font-size:11px;color:var(--muted);margin:4px 0 0}.controls{display:flex;gap:8px;flex-wrap:wrap}.field{min-width:0;border:1px solid #2a3d5d;border-radius:10px;background:#0c1627;color:var(--text);padding:9px 10px;font-size:11px}.search{flex:1;min-width:150px}.tablewrap{overflow:auto;border:1px solid #22334e;border-radius:11px;max-height:430px}table{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap}th,td{text-align:left;padding:9px 11px;border-bottom:1px solid #1d2b43;max-width:250px;overflow:hidden;text-overflow:ellipsis}th{position:sticky;top:0;background:#15233a;color:#b8d5fa;font-weight:850}td{color:#c6d4e9}tbody tr:hover{background:#14213a}tbody tr:last-child td{border-bottom:0}.tiny{font-size:10px;color:#8095b6}.columns{display:grid;gap:9px}.column{border:1px solid #243650;border-radius:11px;padding:11px;background:#0d1728}.column-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.column strong{font-size:12px;overflow-wrap:anywhere}.type{font-size:9px;padding:3px 6px;border:1px solid #35557b;border-radius:99px;color:#9dd6ff;white-space:nowrap}.column p{margin:6px 0 0;font-size:10px;color:#94a8c7}.barlist{display:grid;gap:9px;margin-top:12px}.barrow{display:grid;grid-template-columns:minmax(70px,1fr) 2fr auto;gap:9px;align-items:center;font-size:10px}.barlabel{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#c6d7ed}.bartrack{height:8px;background:#1a2940;border-radius:99px;overflow:hidden}.barfill{height:100%;border-radius:99px;background:linear-gradient(90deg,#23a7c8,#70dce8)}.barvalue{color:#a6bedf;font-variant-numeric:tabular-nums}.quality-list{display:grid;gap:9px}.quality-item{display:flex;align-items:flex-start;gap:9px;font-size:11px;color:#c3d3e9}.quality-mark{width:22px;height:22px;display:grid;place-items:center;border-radius:7px;background:#17372f;color:#7ce2b6;flex-shrink:0}.quality-mark.warn{background:#392c1b;color:var(--amber)}.empty{color:#7f94b4;font-size:11px;padding:20px;text-align:center}.report{white-space:pre-wrap;overflow-wrap:anywhere;color:#b8cbe5;font-size:11px;line-height:1.8;max-height:280px;overflow:auto}.footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:20px 0 30px;color:#7286a6;font-size:10px}.hidden{display:none!important}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.hero{display:block}.status{margin-top:14px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.nav{align-items:flex-start}.navlinks{justify-content:flex-end}}
+@media(max-width:480px){.wrap{width:calc(100% - 20px)}.nav{gap:8px}.brand span:last-child{max-width:155px;font-size:12px}.navlinks .hide-mobile{display:none}.metrics{gap:8px}.metric{padding:12px}.metric strong{font-size:22px}.panel{padding:12px}.panel-head{flex-direction:column}.barrow{grid-template-columns:minmax(55px,1fr) 1.3fr auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="nav"><a class="brand" href="index.html"><span class="logo">EV</span><span>E.V-MARK-XI Platinum</span></a><nav class="navlinks"><a class="btn hide-mobile" href="app.html">AI Workspace</a><a class="btn" href="index.html">Home</a></nav></header>
+<main>
+<section class="hero"><div><div class="eyebrow">E.V SYSTEMS / ANALYTICS ENGINE</div><h1>Data <span class="gradient">Intelligence Lab</span></h1><p>Profile a dataset, catch common quality issues, explore numeric summaries, inspect category frequencies, and export a shareable report — right in your browser.</p></div><div class="status">Local processing</div></section>
+<div class="privacy"><strong>Privacy by design:</strong> CSV, TSV, and JSON files are processed in this browser and are not uploaded to E.V or an AI provider. Keep sensitive files on a trusted device.</div>
+<section class="drop" id="drop" aria-label="Dataset upload area"><div class="drop-icon">▤</div><h2>Drop a dataset to begin</h2><p>Supported: CSV, TSV, JSON · Maximum 5 MB · First row is treated as column headers for tabular files</p><div class="drop-actions"><label class="btn primary" for="file">Choose dataset</label><input class="hidden" type="file" id="file" accept=".csv,.tsv,.txt,.json,text/csv,text/tab-separated-values,application/json"><button class="btn" id="sample">Load sample dataset</button></div><div class="filemeta" id="filemeta" aria-live="polite">No dataset loaded</div></section>
+<section class="metrics hidden" id="metrics" aria-label="Dataset summary"><div class="metric"><span>Rows</span><strong id="rowCount">0</strong><small>Records detected</small></div><div class="metric"><span>Columns</span><strong id="columnCount">0</strong><small>Fields detected</small></div><div class="metric"><span>Missing cells</span><strong id="missingCount">0</strong><small id="missingRate">0% of all cells</small></div><div class="metric"><span>Duplicate rows</span><strong id="duplicateCount">0</strong><small>Exact row matches</small></div></section>
+<div class="grid hidden" id="results">
+<div>
+<section class="panel"><div class="panel-head"><div><h2>Dataset preview</h2><p id="previewSummary">First records in the current dataset.</p></div><div class="controls"><input class="field search" id="search" placeholder="Filter visible rows…" aria-label="Filter visible rows"><button class="btn" id="downloadClean">Export CSV</button></div></div><div class="tablewrap"><table id="preview"><thead></thead><tbody></tbody></table></div><div class="tiny" id="previewFoot"></div></section>
+<section class="panel"><div class="panel-head"><div><h2>Numeric distribution</h2><p>Range and average for detected numeric columns.</p></div><select class="field" id="numericSelect" aria-label="Choose numeric column"></select></div><div id="numericStats" class="empty">Load data to inspect numeric statistics.</div><div id="histogram" class="barlist"></div></section>
+</div>
+<div>
+<section class="panel"><div class="panel-head"><div><h2>Column profile</h2><p>Detected types, completeness, and summary stats.</p></div></div><div class="columns" id="columns"></div></section>
+<section class="panel"><div class="panel-head"><div><h2>Data quality</h2><p>Automated checks, not a substitute for domain review.</p></div></div><div class="quality-list" id="quality"></div></section>
+<section class="panel"><div class="panel-head"><div><h2>Category explorer</h2><p>Most common values for a text-like column.</p></div><select class="field" id="categorySelect" aria-label="Choose categorical column"></select></div><div id="categories" class="empty">Load data to explore categories.</div></section>
+<section class="panel"><div class="panel-head"><div><h2>Analysis report</h2><p>Copy or download this summary.</p></div><div class="controls"><button class="btn" id="copyReport">Copy</button><button class="btn" id="downloadReport">Download</button></div></div><div class="report" id="report">Your report will appear here after a dataset is loaded.</div><div class="tiny" id="copyStatus" aria-live="polite"></div></section>
+</div>
+</div>
+</main>
+<footer class="footer"><span>E.V-MARK-XI Platinum · Data Intelligence Lab</span><span>Client-side processing · No analytics upload · <a href="https://github.com/seifhaytham275-star/E.V-MARK-X" target="_blank" rel="noopener noreferrer">Open source repository ↗</a></span></footer>
+</div>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+let headers=[],rows=[],filename="dataset.csv",numericColumns=[],categoryColumns=[],lastReport="";
+function parseDelimited(text,delimiter){
+  const records=[];let row=[],cell="",quoted=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(quoted){if(ch==='"'&&text[i+1]==='"'){cell+='"';i++;}else if(ch==='"'){quoted=false;}else{cell+=ch;}}
+    else if(ch==='"'&&cell===""){quoted=true;}
+    else if(ch===delimiter){row.push(cell);cell="";}
+    else if(ch==="\n"){row.push(cell.replace(/\r$/,""));records.push(row);row=[];cell="";}
+    else cell+=ch;
+  }
+  if(quoted)throw new Error("The file ends inside a quoted field. Check the CSV formatting.");
+  if(cell.length||row.length){row.push(cell.replace(/\r$/,""));records.push(row);}
+  return records.filter(r=>r.some(v=>String(v).trim()!==""));
+}
+function normalizeRecords(records){
+  if(!Array.isArray(records)||!records.length)throw new Error("No records were found in this file.");
+  if(records.every(item=>item&&typeof item==="object"&&!Array.isArray(item))){
+    const keys=[...new Set(records.flatMap(item=>Object.keys(item)))];
+    return {headers:keys,rows:records.map(item=>keys.map(key=>formatValue(item[key])))};
+  }
+  if(!records.every(Array.isArray))throw new Error("JSON must contain an array of objects or arrays.");
+  const cols=records[0].map((v,i)=>String(v||"").trim()||"Column "+(i+1));
+  const width=Math.max(...records.map(r=>r.length));
+  while(cols.length<width)cols.push("Column "+(cols.length+1));
+  return {headers:cols,rows:records.slice(1).map(r=>Array.from({length:width},(_,i)=>formatValue(r[i])))};
+}
+function formatValue(v){if(v===null||v===undefined)return "";if(typeof v==="object")return JSON.stringify(v);return String(v);}
+function csvEscape(value){const s=String(value??"");return /[",\r\n\t]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
+function parseFileText(text,name){
+  if(!text.trim())throw new Error("This file is empty.");
+  let result;
+  if(/\.json$/i.test(name)){
+    let json;try{json=JSON.parse(text);}catch(e){throw new Error("Invalid JSON: "+e.message);}
+    if(!Array.isArray(json))throw new Error("JSON must be an array of objects or arrays.");
+    result=normalizeRecords(json);
+  }else{
+    const delimiter=/\.tsv$/i.test(name)?"\t":",";
+    result=normalizeRecords(parseDelimited(text.replace(/^\uFEFF/,""),delimiter));
+  }
+  const cleanHeaders=result.headers.map((h,i)=>String(h||"Column "+(i+1)).trim()||"Column "+(i+1));
+  const unique=[];const seen=new Map();
+  cleanHeaders.forEach((h,i)=>{const n=(seen.get(h)||0)+1;seen.set(h,n);unique.push(n===1?h:h+" ("+n+")");});
+  headers=unique;rows=result.rows.map(row=>Array.from({length:headers.length},(_,i)=>String(row[i]??"")));
+  filename=name;
+  if(!rows.length)throw new Error("Headers were found, but there are no data rows.");
+  renderAll();
+}
+function isMissing(v){return v===null||v===undefined||String(v).trim()==="";}
+function numericValues(index){return rows.map(r=>r[index]).filter(v=>!isMissing(v)).map(v=>String(v).trim()).filter(v=>/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(v)).map(Number).filter(Number.isFinite);}
+function typeFor(index){
+  const vals=rows.map(r=>r[index]).filter(v=>!isMissing(v));
+  if(!vals.length)return "Empty";
+  const nums=numericValues(index);
+  if(nums.length/vals.length>=.85)return "Numeric";
+  const dates=vals.filter(v=>!Number.isNaN(Date.parse(v))&&/[\/-]/.test(v));
+  if(dates.length/vals.length>=.85)return "Date-like";
+  const unique=new Set(vals.map(v=>v.trim().toLowerCase())).size;
+  return unique<=Math.min(20,Math.max(5,Math.ceil(vals.length*.2)))?"Category":"Text";
+}
+function median(nums){if(!nums.length)return null;const s=[...nums].sort((a,b)=>a-b),m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;}
+function fmt(n){if(n===null||n===undefined||!Number.isFinite(n))return "—";return n.toLocaleString(undefined,{maximumFractionDigits:3});}
+function esc(s){return String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));}
+function countMissing(){let n=0;rows.forEach(r=>headers.forEach((_,i)=>{if(isMissing(r[i]))n++;}));return n;}
+function duplicateCount(){const seen=new Set();let count=0;rows.forEach(r=>{const k=JSON.stringify(r);if(seen.has(k))count++;else seen.add(k);});return count;}
+function profile(index){
+  const vals=rows.map(r=>r[index]),present=vals.filter(v=>!isMissing(v)),nums=numericValues(index),unique=new Set(present.map(v=>v.trim())).size;
+  return {name:headers[index],type:typeFor(index),missing:vals.length-present.length,unique,present,nums};
+}
+function renderAll(){
+  $("metrics").classList.remove("hidden");$("results").classList.remove("hidden");
+  const missing=countMissing(),total=rows.length*headers.length,dupes=duplicateCount();
+  $("rowCount").textContent=rows.length.toLocaleString();$("columnCount").textContent=headers.length.toLocaleString();$("missingCount").textContent=missing.toLocaleString();$("missingRate").textContent=(total?(100*missing/total).toFixed(1):"0")+"% of all cells";$("duplicateCount").textContent=dupes.toLocaleString();
+  $("filemeta").textContent=filename+" · "+rows.length.toLocaleString()+" rows · "+headers.length+" columns";
+  $("columns").innerHTML=headers.map((_,i)=>{const p=profile(i),totalRows=rows.length;let detail=p.unique+" unique · "+p.missing+" missing";if(p.type==="Numeric"&&p.nums.length){detail+=" · min "+fmt(Math.min(...p.nums))+" · median "+fmt(median(p.nums))+" · max "+fmt(Math.max(...p.nums));}return '<article class="column"><div class="column-top"><strong>'+esc(p.name)+'</strong><span class="type">'+esc(p.type)+'</span></div><p>'+esc(detail)+' · '+(totalRows?Math.round(100*(totalRows-p.missing)/totalRows):0)+'% complete</p></article>';}).join("");
+  const checks=[];
+  checks.push({warn:missing>0,title:missing?fmt(missing)+" missing cells found":"No missing cells detected",detail:missing?"Review empty values before modeling or reporting.":"Every cell contains a value."});
+  checks.push({warn:dupes>0,title:dupes?fmt(dupes)+" duplicate rows found":"No exact duplicate rows",detail:dupes?"Confirm whether repeated records should be kept.":"No exact repeated records were detected."});
+  const duplicateNames=headers.length-new Set(headers).size;
+  checks.push({warn:false,title:"Column names normalized",detail:"Blank and repeated header names were made unique for analysis."});
+  const constants=headers.filter((_,i)=>new Set(rows.map(r=>r[i]).filter(v=>!isMissing(v))).size<=1);
+  checks.push({warn:constants.length>0,title:constants.length?constants.length+" constant or empty columns":"No constant columns",detail:constants.length?"Consider whether these columns add analytical value: "+constants.join(", "):"Each column has more than one non-empty value."});
+  $("quality").innerHTML=checks.map(c=>'<div class="quality-item"><span class="quality-mark '+(c.warn?"warn":"")+'">'+(c.warn?"!":"✓")+'</span><div><strong>'+esc(c.title)+'</strong><div class="tiny">'+esc(c.detail)+'</div></div></div>').join("");
+  numericColumns=headers.map((h,i)=>({h,i})).filter(x=>typeFor(x.i)==="Numeric");categoryColumns=headers.map((h,i)=>({h,i})).filter(x=>["Category","Text","Date-like"].includes(typeFor(x.i)));
+  fillSelect("numericSelect",numericColumns,"No numeric columns");fillSelect("categorySelect",categoryColumns,"No category columns");
+  renderPreview();renderNumeric();renderCategories();buildReport();
+}
+function fillSelect(id,items,emptyLabel){const el=$(id);el.innerHTML=items.length?items.map(x=>'<option value="'+x.i+'">'+esc(x.h)+'</option>').join(""):'<option value="">'+emptyLabel+'</option>';el.disabled=!items.length;}
+function renderPreview(){
+  const q=$("search").value.trim().toLowerCase(),filtered=rows.map((r,i)=>({r,i})).filter(o=>!q||o.r.some(v=>String(v).toLowerCase().includes(q)));
+  $("preview").querySelector("thead").innerHTML="<tr><th>#</th>"+headers.map(h=>"<th>"+esc(h)+"</th>").join("")+"</tr>";
+  $("preview").querySelector("tbody").innerHTML=filtered.slice(0,150).map(o=>"<tr><td>"+(o.i+1)+"</td>"+headers.map((_,i)=>"<td title=\""+esc(o.r[i])+"\">"+(isMissing(o.r[i])?'<span class="tiny">∅ empty</span>':esc(o.r[i]))+"</td>").join("")+"</tr>").join("");
+  $("previewSummary").textContent=filtered.length.toLocaleString()+" matching rows · showing "+Math.min(filtered.length,150)+" maximum";
+  $("previewFoot").textContent=filtered.length>150?"Preview limited to the first 150 matching rows; exports include all records.":"Preview shows all matching rows.";
+}
+function renderNumeric(){
+  const index=Number($("numericSelect").value);if(!numericColumns.length){$("numericStats").textContent="No numeric columns detected. Check that numeric values are consistently formatted."; $("numericStats").className="empty";$("histogram").innerHTML="";return;}
+  const nums=numericValues(index);if(!nums.length){$("numericStats").textContent="No valid numeric values in this column.";return;}
+  const sum=nums.reduce((a,b)=>a+b,0),mean=sum/nums.length,sorted=[...nums].sort((a,b)=>a-b);
+  $("numericStats").className="quality-list";$("numericStats").innerHTML='<div class="quality-item"><span class="quality-mark">∑</span><div><strong>'+esc(headers[index])+'</strong><div class="tiny">Valid numeric values: '+nums.length+' / '+rows.length+'</div><div class="tiny">Mean: '+fmt(mean)+' · Median: '+fmt(median(nums))+'</div><div class="tiny">Min: '+fmt(sorted[0])+' · Max: '+fmt(sorted[sorted.length-1])+' · Range: '+fmt(sorted[sorted.length-1]-sorted[0])+'</div></div></div>';
+  const min=sorted[0],max=sorted[sorted.length-1],bins=Array.from({length:Math.min(8,Math.max(3,Math.ceil(Math.sqrt(nums.length))))},()=>0);
+  nums.forEach(v=>{const idx=max===min?0:Math.min(bins.length-1,Math.floor((v-min)/(max-min)*bins.length));bins[idx]++;});
+  $("histogram").innerHTML=bins.map((count,i)=>{const lo=min+(max-min)*i/bins.length,hi=min+(max-min)*(i+1)/bins.length;return '<div class="barrow"><span class="barlabel">'+fmt(lo)+(i===bins.length-1?"–"+fmt(hi):"")+'</span><div class="bartrack"><div class="barfill" style="width:'+(count/Math.max(...bins)*100)+'%"></div></div><span class="barvalue">'+count+'</span></div>';}).join("");
+}
+function renderCategories(){
+  const index=Number($("categorySelect").value);if(!categoryColumns.length){$("categories").textContent="No text-like columns detected.";return;}
+  const counts=new Map();rows.forEach(r=>{const v=String(r[index]??"").trim();if(v)counts.set(v,(counts.get(v)||0)+1);});
+  const list=[...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,10);if(!list.length){$("categories").textContent="No non-empty values in this column.";return;}
+  const max=list[0][1];$("categories").className="barlist";$("categories").innerHTML=list.map(([label,n])=>'<div class="barrow"><span class="barlabel" title="'+esc(label)+'">'+esc(label)+'</span><div class="bartrack"><div class="barfill" style="width:'+(n/max*100)+'%"></div></div><span class="barvalue">'+n+'</span></div>').join("");
+}
+function buildReport(){
+  const missing=countMissing(),dupes=duplicateCount(),total=rows.length*headers.length;
+  const lines=["E.V DATA INTELLIGENCE REPORT","Dataset: "+filename,"Generated: "+new Date().toLocaleString(),"","OVERVIEW","Rows: "+rows.length,"Columns: "+headers.length,"Missing cells: "+missing+" ("+(total?(100*missing/total).toFixed(1):0)+"%)","Exact duplicate rows: "+dupes,"","COLUMN PROFILES"];
+  headers.forEach((h,i)=>{const p=profile(i),nums=p.nums;lines.push("- "+h+" ["+p.type+"] — "+p.unique+" unique, "+p.missing+" missing"+(nums.length?" | mean "+fmt(nums.reduce((a,b)=>a+b,0)/nums.length)+", median "+fmt(median(nums))+", min "+fmt(Math.min(...nums))+", max "+fmt(Math.max(...nums)):""));});
+  lines.push("","QUALITY NOTES");if(!missing&&!dupes)lines.push("- No missing cells or exact duplicate rows were detected.");if(missing)lines.push("- Review "+missing+" missing cells.");if(dupes)lines.push("- Review "+dupes+" repeated rows.");lines.push("- Type detection is heuristic; validate meaning and units before drawing conclusions.","- All processing was performed locally in the browser.");
+  lastReport=lines.join("\n");$("report").textContent=lastReport;
+}
+function download(name,content,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function csvOutput(){return [headers,...rows].map(r=>r.map(csvEscape).join(",")).join("\r\n");}
+$("file").addEventListener("change",async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;if(file.size>5*1024*1024){$("filemeta").textContent="File exceeds the 5 MB limit.";return;}try{parseFileText(await file.text(),file.name);}catch(err){$("filemeta").textContent="Could not analyze file: "+err.message;}finally{e.target.value="";}});
+$("drop").addEventListener("dragover",e=>{e.preventDefault();$("drop").classList.add("drag");});
+$("drop").addEventListener("dragleave",()=> $("drop").classList.remove("drag"));
+$("drop").addEventListener("drop",async e=>{e.preventDefault();$("drop").classList.remove("drag");const file=e.dataTransfer.files&&e.dataTransfer.files[0];if(!file)return;if(file.size>5*1024*1024){$("filemeta").textContent="File exceeds the 5 MB limit.";return;}try{parseFileText(await file.text(),file.name);}catch(err){$("filemeta").textContent="Could not analyze file: "+err.message;}});
+$("sample").addEventListener("click",()=>{const sample="Project,Language,Hours,Score,Status\nE.V Studio,JavaScript,18,92,Active\nData Lab,Python,12,87,Active\nAgent Mode,JavaScript,15,89,Review\nUI Refresh,CSS,7,81,Active\nAPI Tests,JavaScript,9,95,Complete\nData Lab,Python,12,87,Active\nDocs,Markdown,,84,Complete\n";parseFileText(sample,"sample-developer-projects.csv");});
+$("search").addEventListener("input",renderPreview);$("numericSelect").addEventListener("change",renderNumeric);$("categorySelect").addEventListener("change",renderCategories);
+$("downloadClean").addEventListener("click",()=>{if(rows.length)download("ev-cleaned-"+filename.replace(/\.[^.]+$/,"")+".csv",csvOutput(),"text/csv;charset=utf-8");});
+$("downloadReport").addEventListener("click",()=>{if(lastReport)download("ev-data-report.txt",lastReport,"text/plain;charset=utf-8");});
+$("copyReport").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(lastReport);$("copyStatus").textContent="Report copied to clipboard.";}catch(_){$("copyStatus").textContent="Clipboard access unavailable. Use Download instead.";}});
+})();
+</script>
+</body></html>
