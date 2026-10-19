@@ -110,3 +110,15 @@ aside:after{content:"";position:absolute;top:0;right:0;bottom:0;width:1px;backgr
   .content{padding:24px 14px 18px!important}
   .composer{z-index:5!important}
 }
+
+/* Supplied Spider-Man poster composition for the E.V workspace. */
+.spider-hero{width:100%;max-width:920px;margin:0 auto 24px;position:relative;border:1px solid #4d2931;border-radius:18px;overflow:hidden;background:#080608;box-shadow:0 18px 50px #0008}
+.spider-hero-art{min-height:260px;aspect-ratio:16/7;position:relative;display:flex;align-items:flex-start;justify-content:center;overflow:hidden;background:radial-gradient(ellipse at 50% 75%,#7e1019 0,transparent 52%),linear-gradient(180deg,#050505 0%,#100609 48%,#30070b 100%)}
+.spider-hero-art:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#030303dd 0%,#03030355 28%,#03030322 52%,#03030388 100%),repeating-linear-gradient(0deg,transparent 0 42px,#ffffff08 43px),repeating-linear-gradient(90deg,transparent 0 64px,#ffffff07 65px)}
+.spider-hero-art:after{content:"";position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(0deg,#030303e8,transparent)}
+.spider-hero-copy{z-index:1;text-align:center;padding:24px 16px 0;text-shadow:0 2px 12px #000;letter-spacing:.04em}
+.spider-hero-copy span{font-size:10px;letter-spacing:.22em;color:#d6c7c7}
+.spider-hero-copy h2{font-size:clamp(20px,3.2vw,32px);line-height:1.12;margin:10px 0 8px;color:#f3e9e9}
+.spider-hero-copy h2 b{color:#ff3949}
+.spider-hero-copy p{font-size:9px;letter-spacing:.22em;color:#d5a4a8;margin:0}
+@media(max-width:850px){.spider-hero{margin-bottom:20px}.spider-hero-art{aspect-ratio:4/3;min-height:220px}.spider-hero-copy{padding-top:22px}}
