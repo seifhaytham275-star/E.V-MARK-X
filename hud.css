@@ -84,3 +84,29 @@ aside:after{content:"";position:absolute;top:0;right:0;bottom:0;width:1px;backgr
 .notice{background:#201a14!important;border-color:#75603a!important}
 @media(max-width:780px){.hero:before{inset:0}.orbit{filter:saturate(1.08)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
+
+/* Tablet/desktop composition tuned to the supplied E.V workspace reference. */
+@media(min-width:851px){
+  .layout{grid-template-columns:322px minmax(0,1fr)!important}
+  aside{padding:24px 18px!important;gap:18px!important}
+  .topbar{height:80px!important;padding:0 30px!important}
+  .content{width:100%!important;max-width:none!important;padding:34px 32px 22px!important}
+  .protocol-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:14px!important}
+  .protocol-card{min-height:350px;padding:20px!important}
+  .protocol-card p{font-size:12px!important}
+  .protocol-card li{font-size:11px!important}
+  .protocol-library{margin-top:22px!important}
+  .composer{position:sticky!important;bottom:0!important;z-index:5!important;padding:12px 0 0!important;background:linear-gradient(0deg,#080a10 82%,#080a10e0 94%,transparent)!important}
+}
+@media(min-width:851px) and (max-width:1150px){
+  .layout{grid-template-columns:260px minmax(0,1fr)!important}
+  .content{padding-left:20px!important;padding-right:20px!important}
+  .protocol-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .protocol-card:last-child{grid-column:1/-1}
+}
+@media(max-width:850px){
+  .protocol-grid{grid-template-columns:1fr!important}
+  .protocol-card{min-height:0!important}
+  .content{padding:24px 14px 18px!important}
+  .composer{z-index:5!important}
+}
