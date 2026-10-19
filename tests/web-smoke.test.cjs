@@ -20,7 +20,7 @@ test("Android wrapper loads the same hosted workspace and keeps navigation const
   assert.match(android, /webView\.setDownloadListener/);
   assert.match(android, /onShowFileChooser/);
   assert.match(android, /onBackPressed/);
-  assert.match(script, /const MODEL_ID = "gemini-3\.8-flash"/);
+  assert.match(script, /const MODEL_ID = "gemini-3\.1-pro-preview"/);
 });
 
 test("workspace JavaScript parses", () => {
@@ -42,8 +42,8 @@ test("protocol buttons are registered once at startup, independent of API-key sa
 });
 
 test("model remains fixed to Gemini 3.1 Pro Preview", () => {
-  assert.match(script, /const MODEL_ID = "gemini-3\.8-flash"/);
-  assert.match(html, /id="model" value="gemini-3\.8-flash"/);
+  assert.match(script, /const MODEL_ID = "gemini-3\.1-pro-preview"/);
+  assert.match(html, /id="model" value="gemini-3\.1-pro-preview"/);
   assert.doesNotMatch(html, /<select[^>]+id=["']model["']/i);
 });
 
@@ -144,7 +144,7 @@ test("Agent and Studio commands preserve the fixed model and existing UI", () =>
   assert.match(script, /commandMatch = text\.match/);
   assert.match(script, /mode==="studio"/);
   assert.match(script, /mode==="agent"/);
-  assert.match(script, /const MODEL_ID = "gemini-3\.8-flash"/);
+  assert.match(script, /const MODEL_ID = "gemini-3\.1-pro-preview"/);
   assert.doesNotMatch(html, /<select[^>]+id=["']model["']/i);
 });
 
@@ -158,7 +158,7 @@ test("70+ new workflow commands are available without changing the UI", () => {
   }
   assert.match(script, /runLocalCommand\(text\)/);
   assert.match(script, /recognizedCommand/);
-  assert.match(script, /const MODEL_ID = "gemini-3\.8-flash"/);
+  assert.match(script, /const MODEL_ID = "gemini-3\.1-pro-preview"/);
   assert.doesNotMatch(html, /<select[^>]+id=["']model["']/i);
 });
 
