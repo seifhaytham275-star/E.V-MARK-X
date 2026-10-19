@@ -5,7 +5,7 @@
 **About & privacy:** https://seifhaytham275-star.github.io/E.V-MARK-X/about.html  \n**Sign in:** https://seifhaytham275-star.github.io/E.V-MARK-X/login.html  \n**Proposed plans:** https://seifhaytham275-star.github.io/E.V-MARK-X/pricing.html  
 **Source repository:** https://github.com/seifhaytham275-star/E.V-MARK-X
 
-E.V-MARK-XI Platinum is the refreshed workspace name for this E.V-MARK-X project: a responsive AI workspace with chat, study and writing workflows, a browser-based Studio, and a limited tool-using Agent. The web workspace uses the configured Gemini 3.1 Pro Preview model. Google sign-in is not required for the GitHub Pages version.
+E.V-MARK-XI Platinum is the refreshed workspace name for this E.V-MARK-X project: a responsive AI workspace with chat, study and writing workflows, a browser-based Studio, and a limited tool-using Agent. The web workspace uses the configured Grok 3 model. Google sign-in is not required for the GitHub Pages version.
 
 ## Get the Android APK
 
@@ -20,10 +20,10 @@ The APK is an Android WebView wrapper around the same live `app.html` workspace.
 ## Web project
 
 - `index.html` — public landing page.
-- `app.html` — responsive AI workspace, fixed to Gemini 3.1 Pro Preview.\n- `data-lab.html` — local CSV/TSV/JSON data profiling, quality checks, statistics, category exploration, and report export; dataset contents stay in the browser.
+- `app.html` — responsive AI workspace, fixed to Grok 3.\n- `data-lab.html` — local CSV/TSV/JSON data profiling, quality checks, statistics, category exploration, and report export; dataset contents stay in the browser.
 - `about.html` — project, privacy, and security notes.
 - `config.js` — optional public configuration; never place API secrets here.
-- `server/` — optional backend for Google credential verification and server-side Gemini requests.
+- `server/` — optional backend for Google credential verification and server-side Grok requests.
 - `render.yaml` and `WEB_BACKEND_SETUP.md` — optional backend deployment setup.
 - `app/` — Android project source.
 - `.github/workflows/build-apk.yml` — Android debug APK build workflow.
@@ -31,14 +31,14 @@ The APK is an Android WebView wrapper around the same live `app.html` workspace.
 
 ## GitHub Pages setup (no sign-in)
 
-Open the website and choose **Open Workspace**. In **Settings**, enter your own Gemini API key to chat. In this static-browser configuration, the key is saved in local browser storage on that device and sent directly from the browser to Google Gemini; it is not committed to this repository or sent to the optional backend. Browser storage is not a secure vault: use a trusted personal device and remove the key before sharing that device. Never commit a Gemini API key or other secret.
+Open the website and choose **Open Workspace**. In **Settings**, enter your own xAI API key to chat. In this static-browser configuration, the key is saved in local browser storage on that device and sent directly from the browser to xAI Grok; it is not committed to this repository or sent to the optional backend. Browser storage is not a secure vault: use a trusted personal device and remove the key before sharing that device. Never commit a xAI API key or other secret.
 
 GitHub Pages serves static files only. The browser-based setup does not need Google OAuth or the Node.js backend. The optional `server/` backend and [WEB_BACKEND_SETUP.md](WEB_BACKEND_SETUP.md) are available for a server-backed configuration.
 
 ## Workspace features
 
-- Gemini chat with optional Google Search grounding and returned source links.
-- PDF, image, text/code, DOCX, and XLSX attachments (up to 10 MB total per message). DOCX and XLSX files are converted to text in the browser before being sent to Gemini; workbook sheets are flattened to CSV-style text and capped at 120,000 characters per file.
+- Grok chat with optional Google Search grounding and returned source links.
+- PDF, image, text/code, DOCX, and XLSX attachments (up to 10 MB total per message). DOCX and XLSX files are converted to text in the browser before being sent to Grok; workbook sheets are flattened to CSV-style text and capped at 120,000 characters per file.
 - Browser-local editable memory and save/load for text conversation projects.
 - **E.V Studio:** type `/studio build a to-do app with filters and local saving` in the message box to create a sandboxed HTML preview; use Download HTML to save it.
 - **Agent Mode:** type `/agent calculate 123*456 and explain the result` or `/agent research the latest changes in a topic and summarize the sources`. The Agent has an allowlisted tool set and a limit of four tool calls per task.
@@ -48,9 +48,9 @@ GitHub Pages serves static files only. The browser-based setup does not need Goo
 
 ## Limitations and privacy
 
-- Studio and Agent Mode still require a live Gemini API test with a valid key. Static tests do not prove API access, quotas, or model availability.
+- Studio and Agent Mode still require a live Grok API test with a valid key. Static tests do not prove API access, quotas, or model availability.
 - Built-in voice, image generation, and a real isolated code-execution environment are not implemented yet. The Data Intelligence Lab is a browser-based descriptive profiler, not a replacement for a full statistical notebook or domain-specific validation. DOCX/XLSX parsing uses pinned browser libraries loaded from jsDelivr, so those formats need an internet connection.
-- Saved memory, projects, and the Gemini API key remain in browser storage in the browser-based configuration. Do not save secrets in memory and do not use a shared device for a personal API key.
+- Saved memory, projects, and the xAI API key remain in browser storage in the browser-based configuration. Do not save secrets in memory and do not use a shared device for a personal API key.
 - The APK loads the hosted website and is online-first; it does not bundle the whole workspace for offline use.
 - The Android source includes Firebase dependencies, but Google sign-in/cloud sync need a real Firebase project configuration. See [SETUP.md](SETUP.md).
 
@@ -62,7 +62,7 @@ Run the static regression tests locally with:
 node --test tests/web-smoke.test.cjs
 ```
 
-The same tests run in GitHub Actions. They do not replace testing with a real Gemini API key or testing the APK on a physical Android device.
+The same tests run in GitHub Actions. They do not replace testing with a real xAI API key or testing the APK on a physical Android device.
 
 The current workspace brand is **E.V-MARK-XI Platinum**. The existing repository URL remains unchanged so current links continue working. See [FEATURE_ROADMAP.md](FEATURE_ROADMAP.md) for planned work.
 
