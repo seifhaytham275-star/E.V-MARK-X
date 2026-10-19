@@ -14,12 +14,12 @@
 <aside>
 <a href="index.html" class="brand" style="text-decoration:none;color:inherit"><span class="logo">EV</span><span>E.V-MARK-XI Platinum</span></a>
 <button class="btn primary" id="newChat">＋ New chat</button>
-<input type="hidden" id="model" value="gemini-3.1-pro-preview"><div class="muted" style="font-size:11px;line-height:1.6;padding:0 7px">Model: Gemini 3.1 Pro Preview</div>
-<div class="profile"><div class="avatar" id="avatar">EV</div><div class="usertext"><strong id="userName">Signed-in user</strong><small id="userEmail">Google account</small></div><button class="btn" id="signOut" title="Sign out" style="padding:8px">↗</button></div>
+<input type="hidden" id="model" value="gemini-3.1-pro-preview"><div class="muted" style="font-size:11px;line-height:1.6;padding:0 7px">Model: Grok 3</div>
+<div class="profile"><div class="avatar" id="avatar">EV</div><div class="usertext"><strong id="userName">Signed-in user</strong><small id="userEmail">Grok API</small></div><button class="btn" id="signOut" title="Sign out" style="padding:8px">↗</button></div>
 </aside>
 <main class="main">
-<header class="topbar"><div class="mobile-brand"><span class="logo">EV</span>E.V-MARK-XI Platinum</div><div class="crumb">AI Workspace <span class="muted">/ Chat</span></div><div class="top-actions"><span class="badge">GEMINI 3.1 PRO PREVIEW</span><a href="index.html" class="btn">Home</a><button class="btn" id="mobileNewChat">＋ New chat</button><button class="btn" id="settingsBtn">⚙ Settings</button><button class="btn" id="mobileSignOut">Sign out</button></div></header>
-<div class="settings-panel" id="settingsPanel"><div class="settings-card"><h2>⚙ Configuration</h2><p>Enter your own Gemini API key. It is saved only in this browser on this device and sent directly to Google Gemini. Use this only on a trusted personal device.</p><label for="geminiKey">Gemini API key</label><input class="key-input" id="geminiKey" type="password" autocomplete="off" placeholder="Enter your API key"><p>Your key is not committed to GitHub or sent to this project’s server. Browser storage is not a secure vault; remove the key when you are done on a shared device.</p><label for="userMemory">My saved memory (optional)</label><textarea class="memory-input" id="userMemory" maxlength="3000" placeholder="Preferences or project context E.V should remember. Avoid passwords or sensitive information."></textarea><p>Memory stays in this browser. Edit or clear it any time; it is included with requests to Gemini while saved.</p><div class="settings-actions"><button class="btn" id="clearMemoryBtn">Clear memory</button><button class="btn" id="saveMemoryBtn">Save memory</button><button class="btn" id="clearKeyBtn">Remove key</button><button class="btn" id="cancelSettings">Cancel</button><button class="btn primary" id="saveKeyBtn">Save API key</button></div><p id="keyStatus" aria-live="polite"></p></div></div><section class="content">
+<header class="topbar"><div class="mobile-brand"><span class="logo">EV</span>E.V-MARK-XI Platinum</div><div class="crumb">AI Workspace <span class="muted">/ Chat</span></div><div class="top-actions"><span class="badge">GROK 3</span><a href="index.html" class="btn">Home</a><button class="btn" id="mobileNewChat">＋ New chat</button><button class="btn" id="settingsBtn">⚙ Settings</button><button class="btn" id="mobileSignOut">Sign out</button></div></header>
+<div class="settings-panel" id="settingsPanel"><div class="settings-card"><h2>⚙ Configuration</h2><p>Enter your xAI API key for Grok. It is saved only in this browser on this device and sent directly to xAI. Use this only on a trusted personal device.</p><label for="geminiKey">xAI API key</label><input class="key-input" id="geminiKey" type="password" autocomplete="off" placeholder="Enter your API key"><p>Your key is not committed to GitHub or sent to this project’s server. Browser storage is not a secure vault; remove the key when you are done on a shared device.</p><label for="userMemory">My saved memory (optional)</label><textarea class="memory-input" id="userMemory" maxlength="3000" placeholder="Preferences or project context E.V should remember. Avoid passwords or sensitive information."></textarea><p>Memory stays in this browser. Edit or clear it any time; it is included with requests to Grok while saved.</p><div class="settings-actions"><button class="btn" id="clearMemoryBtn">Clear memory</button><button class="btn" id="saveMemoryBtn">Save memory</button><button class="btn" id="clearKeyBtn">Remove key</button><button class="btn" id="cancelSettings">Cancel</button><button class="btn primary" id="saveKeyBtn">Save API key</button></div><p id="keyStatus" aria-live="polite"></p></div></div><section class="content">
 <div id="configNotice" class="notice hidden"></div>
 <section class="spider-hero" aria-label="Spider-Man themed E.V interface">
   <div class="spider-hero-art" role="img" aria-label="Spider-Man artwork from the supplied reference image">
@@ -58,10 +58,10 @@
 (function(){
   "use strict";
   const $ = id => document.getElementById(id);
-  const MODEL_ID = "gemini-3.1-pro-preview";
-  const MODEL_LABEL = "Gemini 3.1 Pro Preview";
+  const MODEL_ID = "grok-3";
+  const MODEL_LABEL = "Grok 3";
   const PERSONA_INSTRUCTION = "You are E.V, an AI assistant with a feminine identity and voice. Refer to yourself with feminine grammatical forms when speaking languages that mark gender, including Arabic. In Egyptian Arabic, naturally use feminine self-reference such as أنا جاهزة and أنا فاهمة when appropriate. Keep a warm, confident, witty, capable assistant personality. Do not claim to be a human; you are an AI. Match the user\u0027s language and prioritize the current request.";
-  const KEY_STORAGE = "ev_gemini_api_key";
+  const KEY_STORAGE = "ev_xai_api_key";
   const MEMORY_STORAGE = "ev_user_memory";
   const PROJECTS_STORAGE = "ev_saved_projects";
   const MAX_FILE_BYTES = 10 * 1024 * 1024;
@@ -97,7 +97,7 @@
   function refreshKeyStatus(){
     $("model").value = MODEL_ID;
     if(savedKey()) hideNotice();
-    else showNotice("Add your Gemini API key in Settings to use " + MODEL_LABEL + ".");
+    else showNotice("Add your xAI API key in Settings to use " + MODEL_LABEL + ".");
     updateSend();
   }
 
@@ -154,7 +154,7 @@
   $("saveKeyBtn").addEventListener("click", () => {
     const key = keyInput.value.trim();
     if(!key){
-      $("keyStatus").textContent = "Paste your Gemini API key first.";
+      $("keyStatus").textContent = "Paste your xAI API key first.";
       keyInput.focus();
       return;
     }
@@ -227,13 +227,35 @@
 
   async function callGemini(requestBody, key){
     const controller=new AbortController();
-    const timeoutId=setTimeout(()=>controller.abort(),60000);
+    const timer=setTimeout(()=>controller.abort(),60000);
+    const messages=[];
+    if(requestBody.systemInstruction&&requestBody.systemInstruction.parts) messages.push({role:"system",content:requestBody.systemInstruction.parts.map(p=>p.text||"").join("\n")});
+    for(const item of (requestBody.contents||[])){
+      const parts=Array.isArray(item.parts)?item.parts:[];
+      const content=parts.map(p=>{
+        if(typeof p.text==="string")return p.text;
+        if(p.inline_data)return "[Image/file attachment included; support depends on the selected Grok model.]";
+        if(p.file_data)return "[Attached file: "+(p.file_data.file_uri||"file")+"]";
+        if(p.functionResponse)return "Tool result for "+(p.functionResponse.name||"tool")+": "+JSON.stringify(p.functionResponse.response||{});
+        return "";
+      }).filter(Boolean).join("\n");
+      const calls=parts.filter(p=>p.functionCall).map(p=>({id:"call_"+Math.random().toString(36).slice(2,10),type:"function",function:{name:p.functionCall.name,arguments:JSON.stringify(p.functionCall.args||{})}}));
+      if(calls.length)messages.push({role:"assistant",content:content||null,tool_calls:calls});
+      else if(content)messages.push({role:item.role==="model"?"assistant":"user",content});
+    }
+    const tools=[];
+    for(const tool of (requestBody.tools||[])) for(const d of (tool.functionDeclarations||[])) tools.push({type:"function",function:{name:d.name,description:d.description||"",parameters:d.parameters||{type:"object",properties:{}}}});
+    const payload={model:MODEL_ID,messages,temperature:(requestBody.generationConfig&&requestBody.generationConfig.temperature)||0.4,max_tokens:(requestBody.generationConfig&&requestBody.generationConfig.maxOutputTokens)||4096};
+    if(tools.length){payload.tools=tools;payload.tool_choice="auto";}
     let response;
-    try { response=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(MODEL_ID)+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},body:JSON.stringify(requestBody),signal:controller.signal}); }
-    finally { clearTimeout(timeoutId); }
+    try {response=await fetch("https://api.x.ai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify(payload),signal:controller.signal});}
+    finally {clearTimeout(timer);}
     const data=await response.json().catch(()=>({}));
-    if(!response.ok){const message=data&&data.error&&data.error.message;throw new Error(explainApiError(response.status,message||("HTTP "+response.status)));}
-    return data;
+    if(!response.ok){const message=data&&data.error&&data.error.message||data.message||("HTTP "+response.status);throw new Error("Grok API error ("+response.status+"): "+message+". Check the xAI API key, billing, and model access.");}
+    const choice=data.choices&&data.choices[0], msg=choice&&choice.message, out=[];
+    if(msg&&typeof msg.content==="string"&&msg.content.trim())out.push({text:msg.content});
+    for(const call of (msg&&msg.tool_calls)||[])if(call.type==="function"&&call.function){let args={};try{args=JSON.parse(call.function.arguments||"{}")}catch(_){}out.push({functionCall:{name:call.function.name,args}});}
+    return {candidates:[{content:{role:"model",parts:out},finishReason:choice&&choice.finish_reason||"stop"}]};
   }
   function candidateText(candidate){
     return candidate&&candidate.content&&Array.isArray(candidate.content.parts)?candidate.content.parts.map(part=>typeof part.text==="string"?part.text:"").join("").trim():"";
@@ -384,16 +406,16 @@
   function explainApiError(status, message){
     const lower = (message || "").toLowerCase();
     if(status === 400 && /api key|key not valid|invalid argument/i.test(message))
-      return "Google rejected the API key or request. Check the key in Settings and make sure the Gemini API is enabled.";
+      return "Grok rejected the request. Check your xAI API key and model access in Settings.";
     if(status === 401 || status === 403)
-      return "Google denied access. Check that this API key is valid, the project has Gemini API access, and the model is available for this account.";
+      return "xAI denied access. Check that your API key is valid and the selected Grok model is available.";
     if(status === 404 || /not found|unknown model|model.*not available/i.test(lower))
       return MODEL_LABEL + " is not available for this key/project right now. Check the exact model ID and model access in Google AI Studio.";
     if(status === 429 || /quota|rate limit|billing|limit: 0|resource_exhausted/i.test(lower))
-      return "Google Gemini quota or rate limit reached for this key/model. Check usage and quota in Google AI Studio; changing the website cannot reset Google's quota.";
+      return "Grok quota or rate limit reached for this key/model. Check usage and quota in Google AI Studio; changing the website cannot reset Google's quota.";
     if(status >= 500)
       return "Google's Gemini service returned a server error. Wait a little and try again.";
-    return message || "Gemini request failed. Check your connection and API key.";
+    return message || "Grok request failed. Check your connection and API key.";
   }
 
   function fileToBase64(file){
@@ -518,7 +540,7 @@
     let result="";
     try{
       if(command==="help"||command==="commands"){
-        result="E.V-MARK-XI Platinum commands\n\nLocal: /math 12*(3+4), /wordcount text, /reverse text, /upper text, /lower text, /date, /time, /export\n\nAI workflows: "+Object.keys(FEATURE_COMMANDS).map(name=>"/"+name).join(", ")+"\n\nExisting modes: /agent task and /studio describe an app. AI workflows require your Gemini API key.";
+        result="E.V-MARK-XI Platinum commands\n\nLocal: /math 12*(3+4), /wordcount text, /reverse text, /upper text, /lower text, /date, /time, /export\n\nAI workflows: "+Object.keys(FEATURE_COMMANDS).map(name=>"/"+name).join(", ")+"\n\nExisting modes: /agent task and /studio describe an app. AI workflows require your xAI API key.";
       }else if(command==="math"){result=String(parseSafeMath(arg));}
       else if(command==="wordcount"){result="Words: "+(arg.trim()?arg.trim().split(/\s+/).length:0)+"\nCharacters: "+arg.length+"\nCharacters without spaces: "+arg.replace(/\s/g,"").length;}
       else if(command==="reverse"){result=Array.from(arg).reverse().join("");}
@@ -551,7 +573,7 @@
       : taskText || (mode === "studio" ? "Create a polished interactive web app starter." : mode === "agent" ? "Help me plan and complete my next task." : text);
     const key = savedKey();
     if(!key){
-      showNotice("Add your Gemini API key in Settings first.");
+      showNotice("Add your xAI API key in Settings first.");
       panel.classList.add("open");
       keyInput.focus();
       return;
@@ -583,9 +605,9 @@
         const data=await callGemini(requestBody,key);
         candidate=data.candidates&&data.candidates[0];
         answer=candidateText(candidate);
-        if(!answer){const reason=candidate&&candidate.finishReason?" (finish reason: "+candidate.finishReason+")":"";throw new Error("Gemini returned no text"+reason+". Try sending the message again.");}
+        if(!answer){const reason=candidate&&candidate.finishReason?" (finish reason: "+candidate.finishReason+")":"";throw new Error("Grok returned no text"+reason+". Try sending the message again.");}
       }
-      if(!answer)throw new Error("Gemini returned no text. Try sending the request again.");
+      if(!answer)throw new Error("Grok returned no text. Try sending the request again.");
       reply.textContent=answer;
       reply.classList.remove("loading");
       addSources(reply,candidate,extraSources);
@@ -601,7 +623,7 @@
     } catch(error) {
       const message = error && error.name === "AbortError"
         ? "The request took too long. Check your connection and try again."
-        : (error && error.message) || "Gemini request failed.";
+        : (error && error.message) || "Grok request failed.";
       reply.textContent = "Error: " + message;
       reply.classList.remove("loading");
       pendingParts = userParts.slice(1);
