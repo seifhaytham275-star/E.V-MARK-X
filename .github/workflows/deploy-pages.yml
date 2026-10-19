@@ -5,6 +5,7 @@ on:
     paths:
       - "index.html"
       - "app.html"
+      - "hud.css"
       - "data-lab.html"
       - "login.html"
       - "about.html"
