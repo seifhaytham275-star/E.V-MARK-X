@@ -41,7 +41,7 @@ test("protocol buttons are registered once at startup, independent of API-key sa
   assert.match(script, /if \(mode === "web"\) document\.getElementById\("webSearchToggle"\)\.checked = true/);
 });
 
-test("model remains fixed to Gemini 3.8 Flash", () => {
+test("model remains fixed to Gemini 3.1 Pro Preview", () => {
   assert.match(script, /const MODEL_ID = "gemini-3\.8-flash"/);
   assert.match(html, /id="model" value="gemini-3\.8-flash"/);
   assert.doesNotMatch(html, /<select[^>]+id=["']model["']/i);
