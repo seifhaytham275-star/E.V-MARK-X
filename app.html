@@ -14,11 +14,11 @@
 <aside>
 <a href="index.html" class="brand" style="text-decoration:none;color:inherit"><span class="logo">EV</span><span>E.V-MARK-XI Platinum</span></a>
 <button class="btn primary" id="newChat">＋ New chat</button>
-<input type="hidden" id="model" value="grok-3"><div class="muted" style="font-size:11px;line-height:1.6;padding:0 7px">Model: Grok 3</div>
+<input type="hidden" id="model" value="grok-4.7"><div class="muted" style="font-size:11px;line-height:1.6;padding:0 7px">Model: Grok 4.7</div>
 <div class="profile"><div class="avatar" id="avatar">EV</div><div class="usertext"><strong id="userName">Signed-in user</strong><small id="userEmail">Grok API</small></div><button class="btn" id="signOut" title="Sign out" style="padding:8px">↗</button></div>
 </aside>
 <main class="main">
-<header class="topbar"><div class="mobile-brand"><span class="logo">EV</span>E.V-MARK-XI Platinum</div><div class="crumb">AI Workspace <span class="muted">/ Chat</span></div><div class="top-actions"><span class="badge">GROK 3</span><a href="index.html" class="btn">Home</a><button class="btn" id="mobileNewChat">＋ New chat</button><button class="btn" id="settingsBtn">⚙ Settings</button><button class="btn" id="mobileSignOut">Sign out</button></div></header>
+<header class="topbar"><div class="mobile-brand"><span class="logo">EV</span>E.V-MARK-XI Platinum</div><div class="crumb">AI Workspace <span class="muted">/ Chat</span></div><div class="top-actions"><span class="badge">GROK 4.7</span><a href="index.html" class="btn">Home</a><button class="btn" id="mobileNewChat">＋ New chat</button><button class="btn" id="settingsBtn">⚙ Settings</button><button class="btn" id="mobileSignOut">Sign out</button></div></header>
 <div class="settings-panel" id="settingsPanel"><div class="settings-card"><h2>⚙ Configuration</h2><p>Enter your xAI API key for Grok. It is saved only in this browser on this device and sent directly to xAI. Use this only on a trusted personal device.</p><label for="geminiKey">xAI API key</label><input class="key-input" id="geminiKey" type="password" autocomplete="off" placeholder="Enter your API key"><p>Your key is not committed to GitHub or sent to this project’s server. Browser storage is not a secure vault; remove the key when you are done on a shared device.</p><label for="userMemory">My saved memory (optional)</label><textarea class="memory-input" id="userMemory" maxlength="3000" placeholder="Preferences or project context E.V should remember. Avoid passwords or sensitive information."></textarea><p>Memory stays in this browser. Edit or clear it any time; it is included with requests to Grok while saved.</p><div class="settings-actions"><button class="btn" id="clearMemoryBtn">Clear memory</button><button class="btn" id="saveMemoryBtn">Save memory</button><button class="btn" id="clearKeyBtn">Remove key</button><button class="btn" id="cancelSettings">Cancel</button><button class="btn primary" id="saveKeyBtn">Save API key</button></div><p id="keyStatus" aria-live="polite"></p></div></div><section class="content">
 <div id="configNotice" class="notice hidden"></div>
 <section class="spider-hero" aria-label="Spider-Man themed E.V interface">
@@ -58,8 +58,8 @@
 (function(){
   "use strict";
   const $ = id => document.getElementById(id);
-  const MODEL_ID = "grok-3";
-  const MODEL_LABEL = "Grok 3";
+  const MODEL_ID = "grok-4.7";
+  const MODEL_LABEL = "Grok 4.7";
   const PERSONA_INSTRUCTION = "You are E.V, an AI assistant with a feminine identity and voice. Refer to yourself with feminine grammatical forms when speaking languages that mark gender, including Arabic. In Egyptian Arabic, naturally use feminine self-reference such as أنا جاهزة and أنا فاهمة when appropriate. Keep a warm, confident, witty, capable assistant personality. Do not claim to be a human; you are an AI. Match the user\u0027s language and prioritize the current request.";
   const KEY_STORAGE = "ev_xai_api_key";
   const MEMORY_STORAGE = "ev_user_memory";
@@ -245,7 +245,7 @@
     }
     const tools=[];
     for(const tool of (requestBody.tools||[])) for(const d of (tool.functionDeclarations||[])) tools.push({type:"function",function:{name:d.name,description:d.description||"",parameters:d.parameters||{type:"object",properties:{}}}});
-    const payload={model:MODEL_ID,messages,temperature:(requestBody.generationConfig&&requestBody.generationConfig.temperature)||0.4,max_tokens:(requestBody.generationConfig&&requestBody.generationConfig.maxOutputTokens)||4096};
+    const payload={model:MODEL_ID,messages,temperature:(requestBody.generationConfig&&requestBody.generationConfig.temperature)??0.4,max_tokens:(requestBody.generationConfig&&requestBody.generationConfig.maxOutputTokens)||4096};
     if(tools.length){payload.tools=tools;payload.tool_choice="auto";}
     let response;
     try {response=await fetch("https://api.x.ai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify(payload),signal:controller.signal});}
@@ -405,17 +405,19 @@
 
   function explainApiError(status, message){
     const lower = (message || "").toLowerCase();
-    if(status === 400 && /api key|key not valid|invalid argument/i.test(message))
-      return "Grok rejected the request. Check your xAI API key and model access in Settings.";
-    if(status === 401 || status === 403)
-      return "xAI denied access. Check that your API key is valid and the selected Grok model is available.";
+    if(status === 400 && /api key|key not valid|invalid argument/i.test(message || ""))
+      return "xAI rejected the request. Check the API key, request format, and model ID.";
+    if(status === 401)
+      return "xAI authentication failed (401). Check that you entered an xAI API key, not a Google/Gemini key.";
+    if(status === 403)
+      return "xAI denied access (403). Check API access, account permissions, and billing status.";
     if(status === 404 || /not found|unknown model|model.*not available/i.test(lower))
-      return MODEL_LABEL + " is not available for this key/project right now. Check the exact model ID and model access in Google AI Studio.";
-    if(status === 429 || /quota|rate limit|billing|limit: 0|resource_exhausted/i.test(lower))
-      return "Grok quota or rate limit reached for this key/model. Check usage and quota in Google AI Studio; changing the website cannot reset Google's quota.";
+      return "The requested Grok model was not found or is unavailable to this API key. Check the model list available to your xAI account.";
+    if(status === 429 || /quota|rate limit|billing|resource_exhausted/i.test(lower))
+      return "xAI rate limit or usage limit reached. Check your xAI console usage and billing.";
     if(status >= 500)
-      return "Google's Gemini service returned a server error. Wait a little and try again.";
-    return message || "Grok request failed. Check your connection and API key.";
+      return "xAI returned a server error. Wait a little and try again.";
+    return message || "Grok request failed. Check the network connection and xAI API key.";
   }
 
   function fileToBase64(file){
