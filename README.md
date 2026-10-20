@@ -2,7 +2,9 @@
 
 **Live website:** https://seifhaytham275-star.github.io/E.V-MARK-X/  
 **Open the AI workspace:** https://seifhaytham275-star.github.io/E.V-MARK-X/app.html  
-**About & privacy:** https://seifhaytham275-star.github.io/E.V-MARK-X/about.html  \n**Sign in:** https://seifhaytham275-star.github.io/E.V-MARK-X/login.html  \n**Proposed plans:** https://seifhaytham275-star.github.io/E.V-MARK-X/pricing.html  
+**About & privacy:** https://seifhaytham275-star.github.io/E.V-MARK-X/about.html    
+**Sign in:** https://seifhaytham275-star.github.io/E.V-MARK-X/login.html    
+**Proposed plans:** https://seifhaytham275-star.github.io/E.V-MARK-X/pricing.html  
 **Source repository:** https://github.com/seifhaytham275-star/E.V-MARK-X
 
 E.V-MARK-XI Platinum is the refreshed workspace name for this E.V-MARK-X project: a responsive AI workspace with chat, study and writing workflows, a browser-based Studio, and a limited tool-using Agent. The web workspace uses the configured Gemini 3.5 Flash-Lite model. Google sign-in is not required for the GitHub Pages version.
@@ -20,7 +22,8 @@ The APK is an Android WebView wrapper around the same live `app.html` workspace.
 ## Web project
 
 - `index.html` — public landing page.
-- `app.html` — responsive AI workspace, fixed to Google Gemini 3.5 Flash-Lite.\n- `data-lab.html` — local CSV/TSV/JSON data profiling, quality checks, statistics, category exploration, and report export; dataset contents stay in the browser.
+- `app.html` — responsive AI workspace, fixed to Google Gemini 3.5 Flash-Lite.  
+- `data-lab.html` — local CSV/TSV/JSON data profiling, quality checks, statistics, category exploration, and report export; dataset contents stay in the browser.
 - `about.html` — project, privacy, and security notes.
 - `config.js` — optional public configuration; never place API secrets here.
 - `server/` — optional backend for Google credential verification and server-side Gemini requests.
@@ -33,7 +36,7 @@ The APK is an Android WebView wrapper around the same live `app.html` workspace.
 
 Open the website and choose **Open Workspace**. In **Settings**, enter your own Google Gemini API key to chat. In this static-browser configuration, the key is saved in local browser storage on that device and sent directly from the browser to Google Gemini Gemini; it is not committed to this repository or sent to the optional backend. Browser storage is not a secure vault: use a trusted personal device and remove the key before sharing that device. Never commit a Google Gemini API key or other secret.
 
-GitHub Pages serves static files only. The browser-based setup does not need Google OAuth or the Node.js backend. The optional `server/` backend and [WEB_BACKEND_SETUP.md](WEB_BACKEND_SETUP.md) are available for a server-backed configuration.
+GitHub Pages serves static files only. The browser-based setup does not need Google OAuth or the Node.js backend. The Settings panel includes a Test connection action that checks the API using a tiny prompt; this confirms connectivity, not every tool or attachment feature. The optional `server/` backend and [WEB_BACKEND_SETUP.md](WEB_BACKEND_SETUP.md) are available for a server-backed configuration.
 
 ## Workspace features
 
@@ -71,7 +74,8 @@ The current workspace brand is **E.V-MARK-XI Platinum**. The existing repository
 E.V is focused on **programmers and developers**, not business CRM users. The core product areas are:
 
 - **E.V Studio:** create a standalone HTML prototype from a prompt, preview it in a sandboxed frame, and download the result.
-- **Data Intelligence:** inspect supported documents and structured data, summarize findings, and help reason about data.\n- **Data Intelligence Lab:** analyze CSV, TSV, and JSON locally in the browser; view row/column counts, missing cells, exact duplicate rows, heuristic column types, numeric summaries, value distributions, and downloadable CSV/text reports without uploading the dataset.
+- **Data Intelligence:** inspect supported documents and structured data, summarize findings, and help reason about data.  
+- **Data Intelligence Lab:** analyze CSV, TSV, and JSON locally in the browser; view row/column counts, missing cells, exact duplicate rows, heuristic column types, numeric summaries, value distributions, and downloadable CSV/text reports without uploading the dataset.
 - **Agent Mode:** bounded tool-assisted workflows for research, calculations, and development tasks.
 - **Developer workflows:** code generation, review, debugging, documentation, test planning, and accessibility/security checklists through the command system.
 
