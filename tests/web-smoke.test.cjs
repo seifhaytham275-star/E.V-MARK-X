@@ -194,7 +194,7 @@ test("Studio HTML receives a restrictive CSP in every document shape", () => {
 test("Grok requests have a timeout and do not expose the API key in the URL", () => {
   assert.match(script, /new AbortController\(\)/);
   assert.match(script, /setTimeout\(\(\)=>controller\.abort\(\),60000\)/);
-  assert.match(script, /headers:\{\"Content-Type\":\"application\/json\",\"x-goog-api-key\":key\}/);
+  assert.match(script, /Authorization.*Bearer.*key/);
   assert.doesNotMatch(script, /generativelanguage\.googleapis\.com[^\n]*[?&]key=/i);
 });
 
