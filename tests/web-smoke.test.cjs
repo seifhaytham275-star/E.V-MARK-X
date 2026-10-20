@@ -20,7 +20,7 @@ test("Android wrapper loads the same hosted workspace and keeps navigation const
   assert.match(android, /webView\.setDownloadListener/);
   assert.match(android, /onShowFileChooser/);
   assert.match(android, /onBackPressed/);
-  assert.match(script, /const MODEL_ID = "grok-4.7"/);
+  assert.match(script, /const MODEL_ID = "gemini-2.5-flash-lite"/);
 });
 
 test("workspace JavaScript parses", () => {
@@ -41,9 +41,9 @@ test("protocol buttons are registered once at startup, independent of API-key sa
   assert.match(script, /if \(mode === "web"\) document\.getElementById\("webSearchToggle"\)\.checked = true/);
 });
 
-test("model remains fixed to Grok 4.7", () => {
-  assert.match(script, /const MODEL_ID = "grok-4.7"/);
-  assert.match(html, /id="model" value="grok-4.7"/);
+test("model remains fixed to Gemini 2.5 Flash-Lite", () => {
+  assert.match(script, /const MODEL_ID = "gemini-2.5-flash-lite"/);
+  assert.match(html, /id="model" value="gemini-2.5-flash-lite"/);
   assert.doesNotMatch(html, /<select[^>]+id=["']model["']/i);
 });
 
@@ -144,7 +144,7 @@ test("Agent and Studio commands preserve the fixed model and existing UI", () =>
   assert.match(script, /commandMatch = text\.match/);
   assert.match(script, /mode==="studio"/);
   assert.match(script, /mode==="agent"/);
-  assert.match(script, /const MODEL_ID = "grok-4.7"/);
+  assert.match(script, /const MODEL_ID = "gemini-2.5-flash-lite"/);
   assert.doesNotMatch(html, /<select[^>]+id=["']model["']/i);
 });
 
@@ -158,7 +158,7 @@ test("70+ new workflow commands are available without changing the UI", () => {
   }
   assert.match(script, /runLocalCommand\(text\)/);
   assert.match(script, /recognizedCommand/);
-  assert.match(script, /const MODEL_ID = "grok-4.7"/);
+  assert.match(script, /const MODEL_ID = "gemini-2.5-flash-lite"/);
   assert.doesNotMatch(html, /<select[^>]+id=["']model["']/i);
 });
 
@@ -191,11 +191,11 @@ test("Studio HTML receives a restrictive CSP in every document shape", () => {
   assert.equal((existingPolicy.match(/Content-Security-Policy/g) || []).length, 2, "existing policies should remain while the restrictive policy is added");
 });
 
-test("Grok requests have a timeout and do not expose the API key in the URL", () => {
+test("Gemini requests have a timeout and do not expose the API key in the URL", () => {
   assert.match(script, /new AbortController\(\)/);
   assert.match(script, /setTimeout\(\(\)=>controller\.abort\(\),60000\)/);
-  assert.match(script, /Authorization.*Bearer.*key/);
-  assert.doesNotMatch(script, /generativelanguage\.googleapis\.com[^\n]*[?&]key=/i);
+  assert.match(script, /x-goog-api-key.*key/);
+  assert.match(script, /generativelanguage\.googleapis\.com/);
 });
 
 test("conversation context is bounded and prior binary attachments are not resent", () => {
@@ -270,4 +270,11 @@ test("Data Intelligence Lab normalizes JSON objects into a stable table", () => 
     headers: ["name", "score", "language"],
     rows: [["E.V", "9", ""], ["Studio", "", "JS"]]
   });
+});
+
+test("Gemini adapter uses the native generateContent endpoint and keeps the API key out of the URL", () => {
+  assert.ok(script.includes('encodeURIComponent(MODEL_ID)+":generateContent'));
+  assert.match(script, /"x-goog-api-key":key/);
+  assert.doesNotMatch(script, /generativelanguage\.googleapis\.com[^\n]*\?key=/i);
+  assert.match(script, /Gemini API error/);
 });
