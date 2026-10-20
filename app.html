@@ -243,7 +243,7 @@
     const data=await response.json().catch(()=>({}));
     if(!response.ok){
       const message=data&&data.error&&data.error.message||("HTTP "+response.status);
-      throw new Error("Gemini API error ("+response.status+"): "+message+". Check that the API key is valid, quota is available, and the model is enabled for your key.");
+      throw new Error("Gemini API error ("+response.status+"): "+message+". Check API key validity, quota, and model access.");
     }
     return data;
   }
