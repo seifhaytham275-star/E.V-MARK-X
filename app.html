@@ -19,7 +19,7 @@
 </aside>
 <main class="main">
 <header class="topbar"><div class="mobile-brand"><span class="logo">EV</span>E.V-MARK-XI Platinum</div><div class="crumb">AI Workspace <span class="muted">/ Chat</span></div><div class="top-actions"><span class="badge">GEMINI 3.5 FLASH-LITE</span><a href="index.html" class="btn">Home</a><button class="btn" id="mobileNewChat">＋ New chat</button><button class="btn" id="settingsBtn">⚙ Settings</button><button class="btn" id="mobileSignOut">Sign out</button></div></header>
-<div class="settings-panel" id="settingsPanel"><div class="settings-card"><h2>⚙ Configuration</h2><p>Enter your Gemini API key. It is saved only in this browser on this device and sent directly to Google Gemini. Use this only on a trusted personal device.</p><label for="geminiKey">Gemini API key</label><input class="key-input" id="geminiKey" type="password" autocomplete="off" placeholder="Enter your API key"><p>Your key is not committed to GitHub or sent to this project’s server. Browser storage is not a secure vault; remove the key when you are done on a shared device.</p><label for="userMemory">My saved memory (optional)</label><textarea class="memory-input" id="userMemory" maxlength="3000" placeholder="Preferences or project context E.V should remember. Avoid passwords or sensitive information."></textarea><p>Memory stays in this browser. Edit or clear it any time; it is included with requests to Gemini while saved.</p><div class="settings-actions"><button class="btn" id="clearMemoryBtn">Clear memory</button><button class="btn" id="saveMemoryBtn">Save memory</button><button class="btn" id="clearKeyBtn">Remove key</button><button class="btn" id="cancelSettings">Cancel</button><button class="btn primary" id="saveKeyBtn">Save API key</button></div><p id="keyStatus" aria-live="polite"></p></div></div><section class="content">
+<div class="settings-panel" id="settingsPanel"><div class="settings-card"><h2>⚙ Configuration</h2><p>Enter your Gemini API key. It is saved only in this browser on this device and sent directly to Google Gemini. Use this only on a trusted personal device.</p><label for="geminiKey">Gemini API key</label><input class="key-input" id="geminiKey" type="password" autocomplete="off" placeholder="Enter your API key"><p>Your key is not committed to GitHub or sent to this project’s server. Browser storage is not a secure vault; remove the key when you are done on a shared device.</p><label for="userMemory">My saved memory (optional)</label><textarea class="memory-input" id="userMemory" maxlength="3000" placeholder="Preferences or project context E.V should remember. Avoid passwords or sensitive information."></textarea><p>Memory stays in this browser. Edit or clear it any time; it is included with requests to Gemini while saved.</p><div class="settings-actions"><button class="btn" id="clearMemoryBtn">Clear memory</button><button class="btn" id="saveMemoryBtn">Save memory</button><button class="btn" id="clearKeyBtn">Remove key</button><button class="btn" id="cancelSettings">Cancel</button><button class="btn primary" id="testKeyBtn">Test connection</button><button class="btn primary" id="saveKeyBtn">Save API key</button></div><p id="keyStatus" aria-live="polite"></p></div></div><section class="content">
 <div id="configNotice" class="notice hidden"></div>
 <section class="spider-hero" aria-label="Spider-Man themed E.V interface">
   <div class="spider-hero-art" role="img" aria-label="Spider-Man artwork from the supplied reference image">
@@ -151,6 +151,22 @@
   document.addEventListener("keydown", event => {
     if(event.key === "Escape") panel.classList.remove("open");
   });
+  $("testKeyBtn").addEventListener("click", async () => {
+    const key = keyInput.value.trim() || savedKey();
+    if(!key){ $("keyStatus").textContent = "Enter your Gemini API key first."; keyInput.focus(); return; }
+    const button = $("testKeyBtn");
+    button.disabled = true;
+    $("keyStatus").textContent = "Testing Gemini connection…";
+    try {
+      const result = await callGemini({contents:[{role:"user",parts:[{text:"Reply with exactly: E.V connection OK"}]}],generationConfig:{maxOutputTokens:32,thinkingConfig:{thinkingLevel:"minimal"}}},key);
+      const answer = candidateText(result.candidates && result.candidates[0]);
+      if(!answer) throw new Error("The API responded but returned no text.");
+      $("keyStatus").textContent = "Connection successful — Gemini replied.";
+    } catch(error) {
+      $("keyStatus").textContent = error && error.message ? error.message : "Connection test failed. Check your key and network.";
+    } finally { button.disabled = false; }
+  });
+
   $("saveKeyBtn").addEventListener("click", () => {
     const key = keyInput.value.trim();
     if(!key){
@@ -398,7 +414,7 @@
     if(status === 400 && /api key|key not valid|invalid argument/i.test(message || ""))
       return "Google Gemini rejected the request. Check the API key, request format, and model ID.";
     if(status === 401)
-      return "Google Gemini authentication failed (401). Check that you entered an Gemini API key, not a Google/Gemini key.";
+      return "Google Gemini authentication failed (401). Check that you entered a Gemini API key, not a Google account password.";
     if(status === 403)
       return "Google Gemini denied access (403). Check API access, account permissions, and billing status.";
     if(status === 404 || /not found|unknown model|model.*not available/i.test(lower))
