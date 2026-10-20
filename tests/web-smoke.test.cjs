@@ -20,7 +20,7 @@ test("Android wrapper loads the same hosted workspace and keeps navigation const
   assert.match(android, /webView\.setDownloadListener/);
   assert.match(android, /onShowFileChooser/);
   assert.match(android, /onBackPressed/);
-  assert.match(script, /const MODEL_ID = "grok-3"/);
+  assert.match(script, /const MODEL_ID = "grok-4.7"/);
 });
 
 test("workspace JavaScript parses", () => {
@@ -41,9 +41,9 @@ test("protocol buttons are registered once at startup, independent of API-key sa
   assert.match(script, /if \(mode === "web"\) document\.getElementById\("webSearchToggle"\)\.checked = true/);
 });
 
-test("model remains fixed to Grok 3", () => {
-  assert.match(script, /const MODEL_ID = "grok-3"/);
-  assert.match(html, /id="model" value="grok-3"/);
+test("model remains fixed to Grok 4.7", () => {
+  assert.match(script, /const MODEL_ID = "grok-4.7"/);
+  assert.match(html, /id="model" value="grok-4.7"/);
   assert.doesNotMatch(html, /<select[^>]+id=["']model["']/i);
 });
 
@@ -144,7 +144,7 @@ test("Agent and Studio commands preserve the fixed model and existing UI", () =>
   assert.match(script, /commandMatch = text\.match/);
   assert.match(script, /mode==="studio"/);
   assert.match(script, /mode==="agent"/);
-  assert.match(script, /const MODEL_ID = "grok-3"/);
+  assert.match(script, /const MODEL_ID = "grok-4.7"/);
   assert.doesNotMatch(html, /<select[^>]+id=["']model["']/i);
 });
 
@@ -158,7 +158,7 @@ test("70+ new workflow commands are available without changing the UI", () => {
   }
   assert.match(script, /runLocalCommand\(text\)/);
   assert.match(script, /recognizedCommand/);
-  assert.match(script, /const MODEL_ID = "grok-3"/);
+  assert.match(script, /const MODEL_ID = "grok-4.7"/);
   assert.doesNotMatch(html, /<select[^>]+id=["']model["']/i);
 });
 
