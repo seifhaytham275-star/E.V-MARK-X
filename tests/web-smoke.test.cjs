@@ -278,3 +278,5 @@ test("Gemini adapter uses the native generateContent endpoint and keeps the API 
   assert.doesNotMatch(script, /generativelanguage\.googleapis\.com[^\n]*\?key=/i);
   assert.match(script, /Gemini API error/);
 });
+
+test("Test connection button uses the shared API adapter", () => { assert.match(html, /id="testKeyBtn"/); assert.match(script, /addEventListener\("click", async \(\) => \{/); assert.match(script, /E\.V connection OK/); });
