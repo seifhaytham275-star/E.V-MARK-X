@@ -1,4 +1,4 @@
-name: Web smoke tests
+name: Web and Worker smoke tests
 
 on:
   push:
@@ -6,11 +6,13 @@ on:
       - "app.html"
       - "data-lab.html"
       - "tests/**"
+      - "cloudflare-worker/**"
       - ".github/workflows/web-smoke.yml"
   pull_request:
     paths:
       - "app.html"
       - "tests/**"
+      - "cloudflare-worker/**"
       - ".github/workflows/web-smoke.yml"
 
 jobs:
@@ -21,5 +23,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Run static workspace tests
-        run: node --test tests/web-smoke.test.cjs
+      - name: Check Cloudflare Worker syntax
+        run: node --check cloudflare-worker/src/index.js
+      - name: Run workspace and Worker smoke tests
+        run: node --test tests/web-smoke.test.cjs cloudflare-worker/test/worker.test.mjs
