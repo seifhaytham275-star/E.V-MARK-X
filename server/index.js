@@ -7,7 +7,6 @@ const app = express();
 const PORT = Number(process.env.PORT || 8080);
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
-const MODEL_ID = "gemini-3.1-flash-lite";
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "https://seifhaytham275-star.github.io";
 const EXTRA_ALLOWED_ORIGINS = (process.env.EXTRA_ALLOWED_ORIGINS || "").split(",").map(x => x.trim()).filter(Boolean);
 const ALLOWED_ORIGINS = new Set([FRONTEND_ORIGIN, ...EXTRA_ALLOWED_ORIGINS]);
@@ -81,7 +80,7 @@ async function getModels(apiKey = GEMINI_API_KEY) {
   const models = (data.models || [])
     .filter(m => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes("generateContent"))
     .map(m => ({ name: (m.name || "").replace(/^models\//, ""), displayName: m.displayName || m.name || "Gemini model", description: m.description || "" }))
-    .filter(m => m.name === MODEL_ID);
+    .filter(m => /^gemini-/i.test(m.name));
   models.sort((a, b) => {
     const rank = n => { n = n.toLowerCase(); if (n.includes("flash-lite")) return 2; if (n.includes("flash")) return 0; if (n.includes("pro")) return 1; return 3; };
     return rank(a.name) - rank(b.name) || a.name.localeCompare(b.name);
@@ -100,8 +99,9 @@ app.get("/api/models", apiLimiter, verifyGoogleCredential, async (req, res) => {
 app.post("/api/chat", chatLimiter, verifyGoogleCredential, async (req, res) => {
   const apiKey = (req.get("x-ev-gemini-key") || GEMINI_API_KEY || "").trim();
   if (!apiKey) return res.status(400).json({ error: "Add your Gemini API key in Settings." });
-  const model = MODEL_ID;
+  const model = typeof req.body?.model === "string" ? req.body.model.trim() : "";
   const prompt = typeof req.body?.prompt === "string" ? req.body.prompt.trim() : "";
+  if (!model) return res.status(400).json({ error: "Choose a model before starting the chat." });
   if (!prompt || prompt.length > 12000) return res.status(400).json({ error: "Enter a message up to 12,000 characters." });
   try {
     const models = await getModels(apiKey);
