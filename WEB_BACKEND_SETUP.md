@@ -47,3 +47,29 @@ Commit the changes. Wait for the GitHub Pages deployment to finish, then open th
 ## Current security boundaries
 
 The backend verifies Google ID tokens, uses a server-side Gemini key, applies rate limits, validates input sizes and model names, and restricts browser CORS origins. This is a starter backend, not a complete multi-tenant SaaS: it does not include a database, persistent user profiles, per-account quotas, payments, or abuse analytics. Add those before scaling to a large public audience. Rate limiting is not a guarantee against all abuse.
+
+
+## E. Enable the E.V GitHub Agent (optional)
+
+The backend includes restricted GitHub Agent endpoints for this repository. GitHub credentials are read only from backend environment variables; they are never returned to the browser.
+
+1. Create a **fine-grained personal access token** for only `seifhaytham275-star/E.V-MARK-X`.
+2. Grant **Contents: Read and write**, **Metadata: Read-only**, and **Actions: Read-only**. The Agent does not need Admin permissions. Keep the token's expiry short enough to review and rotate it regularly.
+3. In Render → your `ev-mark-x-api` service → **Environment**, set:
+   - `GITHUB_TOKEN`: the token value (secret; never commit it).
+   - `GITHUB_ALLOWED_EMAILS`: the exact Google sign-in email(s) permitted to use this GitHub Agent, comma-separated. Keep this to your own verified account.
+   - `GITHUB_REPOSITORY`: `seifhaytham275-star/E.V-MARK-X` (already set by the Blueprint).
+4. Save changes and redeploy the service.
+5. Test `/api/github/status` after signing into E.V with an allowlisted Google account. This endpoint requires a valid Google ID token; opening it directly in a browser without the Authorization header is expected to fail.
+
+### Available backend endpoints
+
+- `GET /api/github/status` — checks access and reports the configured repository.
+- `GET /api/github/contents?path=app.html&branch=main` — reads one file.
+- `POST /api/github/branches` with JSON `{"name":"feature-name"}` — creates an `ev-agent/*` branch from the default branch or requested base.
+- `PUT /api/github/contents` with JSON `{"path":"app.html","content":"...","message":"Explain change","branch":"ev-agent/..." }` — creates/updates a file and commits it to an `ev-agent/*` branch.
+- `GET /api/github/actions?per_page=10` — lists recent workflow runs and status.
+
+All endpoints require a valid Google sign-in and an email listed in `GITHUB_ALLOWED_EMAILS`. The repository is fixed by backend configuration. Writes are blocked for `.github/**` and `server/**` paths; the Agent must not modify workflow/security/backend files through this API. Changes go to a dedicated `ev-agent/*` branch, not directly to the default branch. Actions access is read-only: this Agent can monitor workflows but cannot dispatch or rerun them.
+
+**Important status:** These are backend API endpoints. The current website UI does not yet contain a complete GitHub Agent panel to call them, and the Render environment values must be configured before they can work. Do not expose the token in `config.js`, client-side JavaScript, chat messages, or commits.
