@@ -11,6 +11,12 @@ services:
         sync: false
       - key: GEMINI_API_KEY
         sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: GITHUB_ALLOWED_EMAILS
+        sync: false
+      - key: GITHUB_REPOSITORY
+        value: seifhaytham275-star/E.V-MARK-X
       - key: FRONTEND_ORIGIN
         value: https://seifhaytham275-star.github.io
       - key: EXTRA_ALLOWED_ORIGINS
