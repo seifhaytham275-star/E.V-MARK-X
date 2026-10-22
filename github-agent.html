@@ -31,7 +31,7 @@
   const $ = id => document.getElementById(id);
   const status = (message, kind = "") => { $("status").textContent = message; $("status").className = "status " + kind; };
   const api = async (path, options = {}) => {
-    if (!apiBase) throw new Error("Backend is not configured. Set API_BASE_URL in config.js after deploying Render.");
+    if (!apiBase) throw new Error("Backend is not configured. Deploy the Cloudflare Worker, then set API_BASE_URL in config.js.");
     if (!credential) throw new Error("Sign in with the allowed Google account first.");
     const response = await fetch(apiBase + path, { ...options, headers: { Authorization: "Bearer " + credential, ...(options.body ? { "Content-Type": "application/json" } : {}), ...(options.headers || {}) } });
     const data = await response.json().catch(() => ({}));
