@@ -100,7 +100,7 @@ app.get("/api/models", apiLimiter, verifyGoogleCredential, async (req, res) => {
 app.post("/api/chat", chatLimiter, verifyGoogleCredential, async (req, res) => {
   const apiKey = (req.get("x-ev-gemini-key") || GEMINI_API_KEY || "").trim();
   if (!apiKey) return res.status(400).json({ error: "Add your Gemini API key in Settings." });
-  const model = typeof req.body?.model === "string" ? req.body.model.replace(/^models\//, "") : "";
+  const model = MODEL_ID;
   const prompt = typeof req.body?.prompt === "string" ? req.body.prompt.trim() : "";
   if (!prompt || prompt.length > 12000) return res.status(400).json({ error: "Enter a message up to 12,000 characters." });
   try {
