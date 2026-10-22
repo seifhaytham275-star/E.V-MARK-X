@@ -7,7 +7,7 @@
 **Proposed plans:** https://seifhaytham275-star.github.io/E.V-MARK-X/pricing.html  
 **Source repository:** https://github.com/seifhaytham275-star/E.V-MARK-X
 
-E.V-MARK-XI Platinum is the refreshed workspace name for this E.V-MARK-X project: a responsive AI workspace with chat, study and writing workflows, a browser-based Studio, and a limited tool-using Agent. The web workspace supports selecting from the Gemini models available to your API key. Choose a model before starting a chat, and use **Refresh models** to load the current models Google exposes to your key. Model availability depends on your Google AI Studio key, account, region, and API access. Google sign-in is not required for the GitHub Pages version.
+E.V-MARK-XI Platinum is the refreshed workspace name for this E.V-MARK-X project: a responsive AI workspace with chat, study and writing workflows, a browser-based Studio, and a limited tool-using Agent. The web workspace supports selecting from the Gemini models available to your API key. Choose a model before starting a chat, and use **Refresh models** to load the current models Google exposes to your key. It also includes a browser-local chat-to-PDF export and an isolated JavaScript sandbox. The sandbox runs JavaScript in the browser and cannot run Windows shell commands or access local files. Model availability depends on your Google AI Studio key, account, region, and API access. Google sign-in is not required for the GitHub Pages version.
 
 ## Get the Android APK
 
@@ -22,7 +22,7 @@ The APK is an Android WebView wrapper around the same live `app.html` workspace.
 ## Web project
 
 - `index.html` — public landing page.
-- `app.html` — responsive AI workspace with a required model picker and live Gemini model discovery.  
+- `app.html` — responsive AI workspace with required model selection, live Gemini model discovery, local PDF chat export, and an isolated browser JavaScript runner.  
 - `data-lab.html` — local CSV/TSV/JSON data profiling, quality checks, statistics, category exploration, and report export; dataset contents stay in the browser.
 - `about.html` — project, privacy, and security notes.
 - `config.js` — optional public configuration; never place API secrets here.
@@ -34,7 +34,7 @@ The APK is an Android WebView wrapper around the same live `app.html` workspace.
 
 ## GitHub Pages setup (no sign-in)
 
-Open the website and choose **Open Workspace**. In **Settings**, enter your own Google Gemini API key to chat. Select a model in the workspace before sending your first message. Use **Refresh models** to fetch the Gemini models available to that API key. In this static-browser configuration, the key is saved in local browser storage on that device and sent directly from the browser to Google Gemini Gemini; it is not committed to this repository or sent to the optional backend. Browser storage is not a secure vault: use a trusted personal device and remove the key before sharing that device. Never commit a Google Gemini API key or other secret.
+Open the website and choose **Open Workspace**. In **Settings**, enter your own Google Gemini API key to chat. Select a model in the workspace before sending your first message. Use **Refresh models** to fetch the Gemini models available to that API key. Use **Export chat PDF** to download the visible conversation as a PDF, or **Run code locally** to execute JavaScript in an isolated browser sandbox. This is not a full local operating-system terminal. In this static-browser configuration, the key is saved in local browser storage on that device and sent directly from the browser to Google Gemini Gemini; it is not committed to this repository or sent to the optional backend. Browser storage is not a secure vault: use a trusted personal device and remove the key before sharing that device. Never commit a Google Gemini API key or other secret.
 
 GitHub Pages serves static files only. The browser-based setup does not need Google OAuth or the Node.js backend. The Settings panel includes a Test connection action that checks the API using a tiny prompt; this confirms connectivity, not every tool or attachment feature. The optional `server/` backend and [WEB_BACKEND_SETUP.md](WEB_BACKEND_SETUP.md) are available for a server-backed configuration.
 
