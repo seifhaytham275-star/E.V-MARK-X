@@ -58,9 +58,7 @@
 (function(){
   "use strict";
   const $ = id => document.getElementById(id);
-  const DEFAULT_MODEL_ID = "";
   const MODEL_LABEL = "an AI model";
-  const MODEL_STORAGE = "ev_selected_gemini_model";
   const PERSONA_INSTRUCTION = "You are E.V, an AI assistant with a feminine identity and voice. Refer to yourself with feminine grammatical forms when speaking languages that mark gender, including Arabic. In Egyptian Arabic, naturally use feminine self-reference such as أنا جاهزة and أنا فاهمة when appropriate. Keep a warm, confident, witty, capable assistant personality. Do not claim to be a human; you are an AI. Match the user\u0027s language and prioritize the current request.";
   const KEY_STORAGE = "ev_gemini_api_key";
   const MEMORY_STORAGE = "ev_user_memory";
@@ -96,14 +94,13 @@
   }
 
   function refreshKeyStatus(){
-    const modelSelect = $("model");
-    try { const savedModel = localStorage.getItem(MODEL_STORAGE) || DEFAULT_MODEL_ID; if(savedModel && Array.from(modelSelect.options).some(o => o.value === savedModel)) modelSelect.value = savedModel; } catch (_) {}
+    $("model").value = "";
     if(savedKey()) hideNotice();
     else showNotice("Add your Gemini API key in Settings, then choose a model before sending your first message.");
     updateSend();
   }
 
-  $("model").addEventListener("change", () => { try { localStorage.setItem(MODEL_STORAGE, $("model").value); } catch (_) {} updateSend(); if ($("model").value) $("attachmentStatus").textContent = "Selected model: " + $("model").selectedOptions[0].textContent; });
+  $("model").addEventListener("change", () => { updateSend(); if ($("model").value) $("attachmentStatus").textContent = "Selected model: " + $("model").selectedOptions[0].textContent; });
 
   async function refreshAvailableModels(key, preserveSelection = true) {
     const select = $("model"); const previous = preserveSelection ? select.value : "";
@@ -119,7 +116,6 @@
       select.replaceChildren(new Option("Select a model before chatting…", ""));
       models.forEach(m => select.add(new Option(m.label + " · " + m.id, m.id)));
       if (previous && models.some(m => m.id === previous)) select.value = previous;
-      try { if (select.value) localStorage.setItem(MODEL_STORAGE, select.value); } catch (_) {}
       $("attachmentStatus").textContent = models.length + " available Gemini models loaded. Choose one before chatting.";
       updateSend();
     } catch (error) {
