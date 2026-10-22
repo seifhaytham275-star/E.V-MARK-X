@@ -1,75 +1,84 @@
-# E.V-MARK-X Web Backend Setup
+# E.V-MARK-X Backend Setup
 
-The static website can be hosted on GitHub Pages, but GitHub Pages cannot keep a Gemini API key secret or run an API server. The included Node.js backend verifies Google sign-in and proxies Gemini model/chat requests.
+The GitHub Pages website is static. The GitHub Agent needs a backend so the GitHub token stays server-side. The repository now contains a Cloudflare Workers version of the API in `cloudflare-worker/`, while the original Node/Express API in `server/` remains available as an alternative.
 
 ## A. Create Google OAuth credentials
 
 1. Open [Google Cloud Console](https://console.cloud.google.com/).
-2. Create/select a project and configure the Google Auth Platform / OAuth consent screen.
+2. Select or create a project and configure the Google Auth Platform / OAuth consent screen.
 3. Create an **OAuth client ID** with application type **Web application**.
 4. Add this exact **Authorized JavaScript origin**: `https://seifhaytham275-star.github.io` (no repository path).
-5. Copy the client ID. Do not put a client secret in the website. Google Identity Services uses the web client ID in the browser; the backend verifies the returned ID token.
-6. If the OAuth app is in Testing mode, add the Google accounts allowed to test it. For a public launch, review and publish the consent configuration as required by Google.
+5. Copy the client ID. The website uses the public client ID, not a client secret. The Worker verifies each Google ID token.
+6. If the OAuth app is in Testing mode, add the Google account allowed to test it.
 
-## B. Deploy the backend on Render
+## B. Deploy the Cloudflare Worker (recommended for the no-card goal)
 
-1. Sign in to [Render](https://render.com/) and choose **New → Blueprint**.
-2. Select this GitHub repository. Render should detect `render.yaml` and create the `ev-mark-x-api` web service.
-3. In the service's Environment settings, add:
-   - `GOOGLE_CLIENT_ID`: your Google OAuth **Web client ID**.
-   - `GEMINI_API_KEY`: the Gemini API key for the project.
-4. Deploy the service and open its `/health` endpoint. Confirm `authConfigured` and `geminiConfigured` are both `true`.
-5. Copy the service URL, e.g. `https://your-service.onrender.com`.
+1. Sign in at [Cloudflare Dashboard](https://dash.cloudflare.com/).
+2. Open **Workers & Pages** and select **Create application**.
+3. Choose **GitHub**, authorize the Cloudflare GitHub app if prompted, and select `seifhaytham275-star/E.V-MARK-X`.
+4. Set the project root directory to `cloudflare-worker` so Cloudflare reads `cloudflare-worker/wrangler.toml`. Keep the Worker name `ev-mark-x-api`, which must match the `name` in `wrangler.toml`.
+5. Save and deploy. Open the Worker URL plus `/health`; it should respond with JSON containing `"ok": true`. A false `authConfigured` value simply means you still need to set the Google client ID.
 
-Keep `GEMINI_API_KEY` only in the backend host's secret environment variables. Never commit it, paste it into GitHub Pages, or add it to `config.js`. Configure usage limits and billing alerts with Google.
+Cloudflare Workers Builds can deploy new commits automatically. If Cloudflare creates a blank Worker first, connect the Git repository under the Worker **Settings → Builds**, with `cloudflare-worker` as the root directory.
 
-## C. Connect GitHub Pages to the backend
+## C. Add Worker variables and secrets
 
-Edit the root `config.js` file in GitHub and replace the placeholders:
+Open **Workers & Pages → ev-mark-x-api → Settings → Variables and Secrets**. Add the items below, then deploy the changes.
+
+| Name | Type | Value |
+| --- | --- | --- |
+| `GOOGLE_CLIENT_ID` | Variable | Your Google OAuth Web client ID |
+| `GITHUB_TOKEN` | Secret | Your fine-grained GitHub token |
+| `GITHUB_ALLOWED_EMAILS` | Secret | The exact verified Google sign-in email allowed to use the GitHub Agent |
+| `GEMINI_API_KEY` | Secret (optional) | Only if you want the backend to supply a shared Gemini key |
+
+The repository and default CORS origin are already configured in `cloudflare-worker/wrangler.toml`. The E.V browser workspace can continue using a visitor's own Gemini key, so `GEMINI_API_KEY` may remain unset if that is your intended setup.
+
+**Never paste secrets into chat, `config.js`, or a committed file.** A fine-grained GitHub token should be limited to this repository with **Contents: Read and write**, **Metadata: Read-only**, and **Actions: Read-only**. Do not grant organization or administration permissions.
+
+## D. Connect the website to the Worker
+
+After deployment, copy the actual `.workers.dev` base URL from Cloudflare. Do not use an example URL; use the one shown in your dashboard.
+
+Edit the root-level `config.js` in GitHub and set its public configuration like this, using your real values:
 
 ```js
 window.EV_CONFIG = Object.freeze({
-  API_BASE_URL: "https://YOUR-ACTUAL-SERVICE.onrender.com",
-  GOOGLE_CLIENT_ID: "YOUR_ACTUAL_WEB_CLIENT_ID.apps.googleusercontent.com"
+  API_BASE_URL: "https://YOUR-ACTUAL-WORKER.workers.dev",
+  GOOGLE_CLIENT_ID: "YOUR_ACTUAL_WEB_CLIENT_ID.apps.googleusercontent.com",
+  SUPABASE_URL: "",
+  SUPABASE_ANON_KEY: ""
 });
 ```
 
-Commit the changes. Wait for the GitHub Pages deployment to finish, then open the public site and choose **Continue with Google**.
+Commit the update and wait for the GitHub Pages workflow. In Google Cloud Console, confirm the OAuth client's authorized JavaScript origin includes `https://seifhaytham275-star.github.io`. The Google client ID is public; the GitHub token is not.
 
-## D. Test before sharing
+## E. Test the GitHub Agent
 
-- `/health` returns `ok: true` and both configuration flags are true.
-- Google sign-in redirects to `app.html` after the backend verifies the credential.
-- The workspace loads the model list and returns a Gemini answer.
-- An unsigned request to `/api/models` returns HTTP 401.
-- A wrong Google client ID or missing Gemini key returns a setup error, not a key value.
+1. Open [the GitHub Agent console](https://seifhaytham275-star.github.io/E.V-MARK-X/github-agent.html).
+2. Sign in with the Google account that exactly matches `GITHUB_ALLOWED_EMAILS`.
+3. Click **Check connection**. The repository and permissions should appear.
+4. Create a working branch, read a file, and commit a small safe test change to that `ev-agent/*` branch.
+5. Click **Refresh Actions** to see recent workflow runs.
 
-## Current security boundaries
+A direct browser visit to `/api/github/status` is expected to require an Authorization header and does not by itself prove the UI is configured.
 
-The backend verifies Google ID tokens, uses a server-side Gemini key, applies rate limits, validates input sizes and model names, and restricts browser CORS origins. This is a starter backend, not a complete multi-tenant SaaS: it does not include a database, persistent user profiles, per-account quotas, payments, or abuse analytics. Add those before scaling to a large public audience. Rate limiting is not a guarantee against all abuse.
+## F. API routes and security boundaries
 
+- `GET /health`
+- `POST /api/auth/google`
+- `GET /api/models`
+- `POST /api/chat`
+- `GET /api/github/status`
+- `GET /api/github/contents?path=app.html&branch=main`
+- `POST /api/github/branches`
+- `PUT /api/github/contents`
+- `GET /api/github/actions?per_page=10`
 
-## E. Enable the E.V GitHub Agent (optional)
+Google ID tokens are verified against Google's rotating RSA signing keys using Web Crypto. GitHub changes are committed only to `ev-agent/*` branches. Writes to `.github/**`, `server/**`, and `cloudflare-worker/**` are blocked; Actions access is read-only. Review changes before merging them.
 
-The backend includes restricted GitHub Agent endpoints for this repository. GitHub credentials are read only from backend environment variables; they are never returned to the browser.
+The Cloudflare Worker Free plan has usage limits, including daily request and CPU limits. Check [Cloudflare's current limits](https://developers.cloudflare.com/workers/platform/limits/) before depending on it for high-volume use. This starter API is not yet a full SaaS backend: it does not provide subscription entitlements, persistent per-user quotas, a database, or abuse analytics.
 
-1. Create a **fine-grained personal access token** for only `seifhaytham275-star/E.V-MARK-X`.
-2. Grant **Contents: Read and write**, **Metadata: Read-only**, and **Actions: Read-only**. The Agent does not need Admin permissions. Keep the token's expiry short enough to review and rotate it regularly.
-3. In Render → your `ev-mark-x-api` service → **Environment**, set:
-   - `GITHUB_TOKEN`: the token value (secret; never commit it).
-   - `GITHUB_ALLOWED_EMAILS`: the exact Google sign-in email(s) permitted to use this GitHub Agent, comma-separated. Keep this to your own verified account.
-   - `GITHUB_REPOSITORY`: `seifhaytham275-star/E.V-MARK-X` (already set by the Blueprint).
-4. Save changes and redeploy the service.
-5. Test `/api/github/status` after signing into E.V with an allowlisted Google account. This endpoint requires a valid Google ID token; opening it directly in a browser without the Authorization header is expected to fail.
+## Alternative: deploy the original Node backend
 
-### Available backend endpoints
-
-- `GET /api/github/status` — checks access and reports the configured repository.
-- `GET /api/github/contents?path=app.html&branch=main` — reads one file.
-- `POST /api/github/branches` with JSON `{"name":"feature-name"}` — creates an `ev-agent/*` branch from the default branch or requested base.
-- `PUT /api/github/contents` with JSON `{"path":"app.html","content":"...","message":"Explain change","branch":"ev-agent/..." }` — creates/updates a file and commits it to an `ev-agent/*` branch.
-- `GET /api/github/actions?per_page=10` — lists recent workflow runs and status.
-
-All endpoints require a valid Google sign-in and an email listed in `GITHUB_ALLOWED_EMAILS`. The repository is fixed by backend configuration. Writes are blocked for `.github/**` and `server/**` paths; the Agent must not modify workflow/security/backend files through this API. Changes go to a dedicated `ev-agent/*` branch, not directly to the default branch. Actions access is read-only: this Agent can monitor workflows but cannot dispatch or rerun them.
-
-**Important status:** These are backend API endpoints. The current website UI does not yet contain a complete GitHub Agent panel to call them, and the Render environment values must be configured before they can work. Do not expose the token in `config.js`, client-side JavaScript, chat messages, or commits.
+The original Express backend and `render.yaml` remain in the repository. That setup is documented in the Render-specific configuration, but use the Cloudflare Worker steps above for this no-card deployment attempt. Do not enter payment details just to continue this setup.
