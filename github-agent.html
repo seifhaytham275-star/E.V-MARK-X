@@ -38,7 +38,7 @@
     if (!response.ok) throw new Error(data.error || "Request failed (" + response.status + ").");
     return data;
   };
-  const setBusy = busy => ["checkBtn","actionsBtn","branchBtn","readBtn","commitBtn"].forEach(id => $(id).disabled = busy || !credential);
+  const setBusy = busy => { ["checkBtn","actionsBtn"].forEach(id => $(id).disabled = busy); ["branchBtn","readBtn"].forEach(id => $(id).disabled = busy || !credential); $("commitBtn").disabled = busy || !credential || !workingBranch; };
   const showError = e => status(e.message || String(e), "warn");
   const renderRuns = runs => {
     const root = $("runs"); root.replaceChildren();
