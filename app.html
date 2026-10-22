@@ -113,7 +113,7 @@
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error?.message || "Could not retrieve models.");
       const models = (data.models || []).filter(m => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes("generateContent") && typeof m.name === "string" && m.name.startsWith("models/"))
-        .map(m => ({id:m.name.replace(/^models\\//,""), label:m.displayName || m.name.replace(/^models\\//,"")}))
+        .map(m => ({id:m.name.slice(7), label:m.displayName || m.name.slice(7)}))
         .filter(m => /gemini/i.test(m.id)).sort((x,y) => x.label.localeCompare(y.label));
       if (!models.length) throw new Error("Google returned no Gemini models supporting generateContent for this key.");
       select.replaceChildren(new Option("Select a model before chatting…", ""));
