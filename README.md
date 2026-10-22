@@ -7,7 +7,7 @@
 **Proposed plans:** https://seifhaytham275-star.github.io/E.V-MARK-X/pricing.html  
 **Source repository:** https://github.com/seifhaytham275-star/E.V-MARK-X
 
-E.V-MARK-XI Platinum is the refreshed workspace name for this E.V-MARK-X project: a responsive AI workspace with chat, study and writing workflows, a browser-based Studio, and a limited tool-using Agent. The web workspace uses the configured Gemini 3.5 Flash-Lite model. Google sign-in is not required for the GitHub Pages version.
+E.V-MARK-XI Platinum is the refreshed workspace name for this E.V-MARK-X project: a responsive AI workspace with chat, study and writing workflows, a browser-based Studio, and a limited tool-using Agent. The web workspace uses the configured Gemini 3.1 Flash-Lite model. Google sign-in is not required for the GitHub Pages version.
 
 ## Get the Android APK
 
@@ -22,7 +22,7 @@ The APK is an Android WebView wrapper around the same live `app.html` workspace.
 ## Web project
 
 - `index.html` — public landing page.
-- `app.html` — responsive AI workspace, fixed to Google Gemini 3.5 Flash-Lite.  
+- `app.html` — responsive AI workspace, fixed to Google Gemini 3.1 Flash-Lite.  
 - `data-lab.html` — local CSV/TSV/JSON data profiling, quality checks, statistics, category exploration, and report export; dataset contents stay in the browser.
 - `about.html` — project, privacy, and security notes.
 - `config.js` — optional public configuration; never place API secrets here.
