@@ -1,0 +1,12 @@
+name = "ev-mark-x-api"
+main = "src/index.js"
+compatibility_date = "2026-10-22"
+
+[vars]
+FRONTEND_ORIGIN = "https://seifhaytham275-star.github.io"
+GITHUB_REPOSITORY = "seifhaytham275-star/E.V-MARK-X"
+MODELS_CACHE_SECONDS = "300"
+
+# Configure these in Cloudflare Dashboard > Worker > Settings > Variables and Secrets.
+# Use Secret type for GITHUB_TOKEN, GITHUB_ALLOWED_EMAILS, and (optionally) GEMINI_API_KEY.
+# Set GOOGLE_CLIENT_ID as a variable on the Worker, and use the same client ID in public config.js.
