@@ -26,9 +26,10 @@ The APK is an Android WebView wrapper around the same live `app.html` workspace.
 - `data-lab.html` — local CSV/TSV/JSON data profiling, quality checks, statistics, category exploration, and report export; dataset contents stay in the browser.
 - `about.html` — project, privacy, and security notes.
 - `config.js` — optional public configuration; never place API secrets here.
-- `server/` — optional backend for Google credential verification, server-side Gemini requests, and the allowlisted GitHub Agent API.
-- `github-agent.html` — GitHub Agent console for reading files, creating `ev-agent/*` branches, committing edits, and monitoring Actions (requires backend setup).
-- `render.yaml` and `WEB_BACKEND_SETUP.md` — optional backend deployment setup.
+- `cloudflare-worker/` — Cloudflare Workers API implementation for Google credential verification, Gemini proxy requests, and the allowlisted GitHub Agent; see its README for deployment.
+- `server/` and `render.yaml` — original Node/Express backend alternative.
+- `github-agent.html` — GitHub Agent console for reading files, creating `ev-agent/*` branches, committing edits, and monitoring Actions (requires the backend to be deployed/configured).
+- `WEB_BACKEND_SETUP.md` — backend deployment, secrets, OAuth, and GitHub Agent setup (Cloudflare Worker instructions are recommended for the no-card setup goal).
 - `app/` — Android project source.
 - `.github/workflows/build-apk.yml` — Android debug APK build workflow.
 - `.github/workflows/deploy-pages.yml` — GitHub Pages deployment workflow.
@@ -37,7 +38,7 @@ The APK is an Android WebView wrapper around the same live `app.html` workspace.
 
 Open the website and choose **Open Workspace**. In **Settings**, enter your own Google Gemini API key to chat. Select a model in the workspace before sending your first message. Use **Refresh models** to fetch the Gemini models available to that API key. Use **Export chat PDF** to download the visible conversation as a PDF, or **Run code locally** to execute JavaScript in an isolated browser sandbox. This is not a full local operating-system terminal. In this static-browser configuration, the key is saved in local browser storage on that device and sent directly from the browser to Google Gemini Gemini; it is not committed to this repository or sent to the optional backend. Browser storage is not a secure vault: use a trusted personal device and remove the key before sharing that device. Never commit a Google Gemini API key or other secret.
 
-GitHub Pages serves static files only. The browser-based setup does not need Google OAuth or the Node.js backend. The Settings panel includes a Test connection action that checks the API using a tiny prompt; this confirms connectivity, not every tool or attachment feature. The optional `server/` backend and [WEB_BACKEND_SETUP.md](WEB_BACKEND_SETUP.md) are available for a server-backed configuration. To configure the GitHub Agent, follow section E of that guide; its UI is available at [GitHub Agent](https://seifhaytham275-star.github.io/E.V-MARK-X/github-agent.html). The UI does not receive the GitHub token; the backend enforces a Google-email allowlist and sends writes only to `ev-agent/*` branches.
+GitHub Pages serves static files only. The browser-based setup does not need Google OAuth or the Node.js backend. The Settings panel includes a Test connection action that checks the API using a tiny prompt; this confirms connectivity, not every tool or attachment feature. For a server-backed configuration, use the `cloudflare-worker/` deployment guide in [WEB_BACKEND_SETUP.md](WEB_BACKEND_SETUP.md). The original Node/Express backend remains in `server/` as an alternative. The GitHub Agent UI is available at [GitHub Agent](https://seifhaytham275-star.github.io/E.V-MARK-X/github-agent.html); it does not receive the GitHub token. The backend enforces a Google-email allowlist and sends writes only to `ev-agent/*` branches.
 
 ## Workspace features
 
@@ -63,7 +64,7 @@ GitHub Pages serves static files only. The browser-based setup does not need Goo
 Run the static regression tests locally with:
 
 ```sh
-node --test tests/web-smoke.test.cjs
+node --test tests/web-smoke.test.cjs cloudflare-worker/test/worker.test.mjs
 ```
 
 The same tests run in GitHub Actions. They do not replace testing with a real Google Gemini API key or testing the APK on a physical Android device.
