@@ -204,32 +204,7 @@
       panel.classList.remove("open");
       refreshAvailableModels(key);
       $("keyStatus").textContent = "API key saved in this browser.";
-      // Export the visible conversation to PDF in this browser.
-  $("exportPdfBtn").addEventListener("click", () => {
-    const transcript = Array.from($("chat").querySelectorAll(".message")).map(node => { const who=node.querySelector(".who"); const body=who&&who.nextElementSibling; return (who?who.textContent:"Message")+"\n"+(body?body.textContent:""); }).join("\n\n----------------------------------------\n\n");
-    if (!transcript.trim()) { $("attachmentStatus").textContent = "Start a conversation before exporting a PDF."; return; }
-    if (!window.jspdf || !window.jspdf.jsPDF) { $("attachmentStatus").textContent = "PDF library did not load. Check your internet connection and retry."; return; }
-    try { const pdf=new window.jspdf.jsPDF({unit:"pt",format:"a4"}); const margin=44; const pageHeight=pdf.internal.pageSize.getHeight(); const width=pdf.internal.pageSize.getWidth()-margin*2; let y=margin; pdf.setFont("helvetica","bold"); pdf.setFontSize(16); pdf.text("E.V-MARK-XI Platinum - Chat Export",margin,y); y+=26; pdf.setFont("helvetica","normal"); pdf.setFontSize(9); pdf.text("Generated locally: "+new Date().toLocaleString(),margin,y); y+=22; for(const block of transcript.split("\n")){const lines=pdf.splitTextToSize(block||" ",width);for(const line of lines){if(y>pageHeight-margin){pdf.addPage();y=margin;}pdf.text(line,margin,y);y+=13;}} pdf.save("ev-chat-"+new Date().toISOString().slice(0,10)+".pdf"); $("attachmentStatus").textContent="PDF generated in your browser."; } catch(error) { $("attachmentStatus").textContent="PDF export failed: "+(error.message||"unknown error"); }
-  });
-  const runnerModal=$("codeRunnerModal");
-  $("openRunnerBtn").addEventListener("click",()=>{runnerModal.classList.add("open");$("runnerCode").focus();});
-  $("closeRunnerBtn").addEventListener("click",()=>runnerModal.classList.remove("open"));
-  runnerModal.addEventListener("click",event=>{if(event.target===runnerModal)runnerModal.classList.remove("open");});
-  $("clearOutputBtn").addEventListener("click",()=>{$("runnerOutput").textContent="";$("runnerStatus").textContent="Output cleared";});
-  $("runCodeBtn").addEventListener("click",()=>{
-    const code=$("runnerCode").value, btn=$("runCodeBtn"), output=$("runnerOutput"), status=$("runnerStatus");
-    if(!code.trim()){status.textContent="Enter JavaScript code first.";return;}
-    btn.disabled=true;output.textContent="";status.textContent="Running in isolated browser sandbox…";
-    const frame=document.createElement("iframe");frame.setAttribute("sandbox","allow-scripts");frame.title="Isolated JavaScript execution";frame.style.cssText="position:absolute;width:1px;height:1px;left:-9999px;border:0";
-    const safeCode=code.replace(/<\/script/gi,"<\\/script");
-    frame.srcdoc="<!doctype html><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'unsafe-inline'; connect-src 'none'; img-src data: blob:; style-src 'unsafe-inline'\"><script>addEventListener('message',async function(e){if(e.source!==parent||e.data!=='run')return;const lines=[];const fmt=v=>{try{return typeof v==='string'?v:JSON.stringify(v)}catch(_){return String(v)}};for(const n of ['log','info','warn','error','debug'])console[n]=(...a)=>lines.push((n==='log'?'':n.toUpperCase()+': ')+a.map(fmt).join(' '));try{await(async()=>{"+safeCode+"})();parent.postMessage({type:'ev-output',lines:lines,ok:true},'*')}catch(err){lines.push((err&&err.stack)||String(err));parent.postMessage({type:'ev-output',lines:lines,ok:false},'*')}},false)" + "</scr" + "ipt>";
-    let finished=false;const cleanup=()=>{window.removeEventListener("message",onMessage);frame.remove();btn.disabled=false;};
-    const onMessage=e=>{if(e.source!==frame.contentWindow||e.data?.type!=="ev-output")return;finished=true;output.textContent=e.data.lines.join("\n")||"(Code completed with no console output.)";status.textContent=e.data.ok?"Finished locally":"Finished with an error";cleanup();};
-    window.addEventListener("message",onMessage);document.body.appendChild(frame);frame.addEventListener("load",()=>frame.contentWindow.postMessage("run","*"),{once:true});
-    setTimeout(()=>{if(!finished){output.textContent="Execution timed out. The isolated frame was stopped.";status.textContent="Timed out";cleanup();}},8000);
-  });
-  refreshKeyStatus();
-  if (savedKey()) refreshAvailableModels(savedKey());
+          refreshKeyStatus();
     } catch (_) {
       $("keyStatus").textContent = "This browser could not save the key. Enable site storage or try a normal browser tab.";
     }
@@ -738,7 +713,33 @@
   }
   $("newChat").addEventListener("click", newChat);
   $("mobileNewChat").addEventListener("click", newChat);
+  // Export the visible conversation to PDF in this browser.
+  $("exportPdfBtn").addEventListener("click", () => {
+    const transcript = Array.from($("chat").querySelectorAll(".message")).map(node => { const who=node.querySelector(".who"); const body=who&&who.nextElementSibling; return (who?who.textContent:"Message")+"\n"+(body?body.textContent:""); }).join("\n\n----------------------------------------\n\n");
+    if (!transcript.trim()) { $("attachmentStatus").textContent = "Start a conversation before exporting a PDF."; return; }
+    if (!window.jspdf || !window.jspdf.jsPDF) { $("attachmentStatus").textContent = "PDF library did not load. Check your internet connection and retry."; return; }
+    try { const pdf=new window.jspdf.jsPDF({unit:"pt",format:"a4"}); const margin=44; const pageHeight=pdf.internal.pageSize.getHeight(); const width=pdf.internal.pageSize.getWidth()-margin*2; let y=margin; pdf.setFont("helvetica","bold"); pdf.setFontSize(16); pdf.text("E.V-MARK-XI Platinum - Chat Export",margin,y); y+=26; pdf.setFont("helvetica","normal"); pdf.setFontSize(9); pdf.text("Generated locally: "+new Date().toLocaleString(),margin,y); y+=22; for(const block of transcript.split("\n")){const lines=pdf.splitTextToSize(block||" ",width);for(const line of lines){if(y>pageHeight-margin){pdf.addPage();y=margin;}pdf.text(line,margin,y);y+=13;}} pdf.save("ev-chat-"+new Date().toISOString().slice(0,10)+".pdf"); $("attachmentStatus").textContent="PDF generated in your browser."; } catch(error) { $("attachmentStatus").textContent="PDF export failed: "+(error.message||"unknown error"); }
+  });
+  const runnerModal=$("codeRunnerModal");
+  $("openRunnerBtn").addEventListener("click",()=>{runnerModal.classList.add("open");$("runnerCode").focus();});
+  $("closeRunnerBtn").addEventListener("click",()=>runnerModal.classList.remove("open"));
+  runnerModal.addEventListener("click",event=>{if(event.target===runnerModal)runnerModal.classList.remove("open");});
+  $("clearOutputBtn").addEventListener("click",()=>{$("runnerOutput").textContent="";$("runnerStatus").textContent="Output cleared";});
+  $("runCodeBtn").addEventListener("click",()=>{
+    const code=$("runnerCode").value, btn=$("runCodeBtn"), output=$("runnerOutput"), status=$("runnerStatus");
+    if(!code.trim()){status.textContent="Enter JavaScript code first.";return;}
+    btn.disabled=true;output.textContent="";status.textContent="Running in isolated browser sandbox…";
+    const frame=document.createElement("iframe");frame.setAttribute("sandbox","allow-scripts");frame.title="Isolated JavaScript execution";frame.style.cssText="position:absolute;width:1px;height:1px;left:-9999px;border:0";
+    const safeCode=code.replace(/<\/script/gi,"<\\/script");
+    frame.srcdoc="<!doctype html><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'unsafe-inline'; connect-src 'none'; img-src data: blob:; style-src 'unsafe-inline'\"><script>addEventListener('message',async function(e){if(e.source!==parent||e.data!=='run')return;const lines=[];const fmt=v=>{try{return typeof v==='string'?v:JSON.stringify(v)}catch(_){return String(v)}};for(const n of ['log','info','warn','error','debug'])console[n]=(...a)=>lines.push((n==='log'?'':n.toUpperCase()+': ')+a.map(fmt).join(' '));try{await(async()=>{"+safeCode+"})();parent.postMessage({type:'ev-output',lines:lines,ok:true},'*')}catch(err){lines.push((err&&err.stack)||String(err));parent.postMessage({type:'ev-output',lines:lines,ok:false},'*')}},false)" + "</scr" + "ipt>";
+    let finished=false;const cleanup=()=>{window.removeEventListener("message",onMessage);frame.remove();btn.disabled=false;};
+    const onMessage=e=>{if(e.source!==frame.contentWindow||e.data?.type!=="ev-output")return;finished=true;output.textContent=e.data.lines.join("\n")||"(Code completed with no console output.)";status.textContent=e.data.ok?"Finished locally":"Finished with an error";cleanup();};
+    window.addEventListener("message",onMessage);document.body.appendChild(frame);frame.addEventListener("load",()=>frame.contentWindow.postMessage("run","*"),{once:true});
+    setTimeout(()=>{if(!finished){output.textContent="Execution timed out. The isolated frame was stopped.";status.textContent="Timed out";cleanup();}},8000);
+  });
+
   refreshKeyStatus();
+  if (savedKey()) refreshAvailableModels(savedKey());
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
